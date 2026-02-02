@@ -8,11 +8,11 @@ function App() {
     <>
     <BrowserRouter>
     <Routes>
-    <Route path="/" element={<Login/>} />
+    <Route path="/login" element={<Login/>} />
     </Routes>
     </BrowserRouter>
     </>
   )
 }
 
-export default App
+export default Appn6
