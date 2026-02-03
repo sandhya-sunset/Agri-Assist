@@ -1,62 +1,56 @@
-const { body, validationResult } = require('express-validator');
+const { body, validationResult } = require("express-validator");
 
 const validateRegister = [
-  body('name')
+  body("name")
     .trim()
     .notEmpty()
-    .withMessage('Name is required')
+    .withMessage("Name is required")
     .isLength({ min: 2 })
-    .withMessage('Name must be at least 2 characters'),
-  
-  body('email')
+    .withMessage("Name must be at least 2 characters"),
+
+  body("email")
     .trim()
     .notEmpty()
-    .withMessage('Email is required')
+    .withMessage("Email is required")
     .isEmail()
-    .withMessage('Please provide a valid email'),
-  
-  body('password')
+    .withMessage("Please provide a valid email"),
+
+  body("password")
     .notEmpty()
-    .withMessage('Password is required')
+    .withMessage("Password is required")
     .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters'),
-  
-  body('confirmPassword')
+    .withMessage("Password must be at least 6 characters"),
+
+  body("confirmPassword")
     .notEmpty()
-    .withMessage('Please confirm your password')
+    .withMessage("Please confirm your password")
     .custom((value, { req }) => {
       if (value !== req.body.password) {
-        throw new Error('Passwords do not match');
+        throw new Error("Passwords do not match");
       }
       return true;
     }),
-  
-  body('phone')
+
+  body("phone").notEmpty().withMessage("Phone number is required"),
+
+  body("address").notEmpty().withMessage("Address is required"),
+
+  body("role")
     .notEmpty()
-    .withMessage('Phone number is required'),
-  
-  body('address')
-    .notEmpty()
-    .withMessage('Address is required'),
-  
-  body('role')
-    .notEmpty()
-    .withMessage('Role is required')
-    .isIn(['user', 'seller'])
-    .withMessage('Invalid role'),
+    .withMessage("Role is required")
+    .isIn(["user", "seller"])
+    .withMessage("Invalid role"),
 ];
 
 const validateLogin = [
-  body('email')
+  body("email")
     .trim()
     .notEmpty()
-    .withMessage('Email is required')
+    .withMessage("Email is required")
     .isEmail()
-    .withMessage('Please provide a valid email'),
-  
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required'),
+    .withMessage("Please provide a valid email"),
+
+  body("password").notEmpty().withMessage("Password is required"),
 ];
 
 const handleValidationErrors = (req, res, next) => {
@@ -64,7 +58,7 @@ const handleValidationErrors = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      errors: errors.array().map(err => ({
+      errors: errors.array().map((err) => ({
         field: err.path,
         message: err.msg,
       })),

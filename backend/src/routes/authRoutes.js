@@ -5,6 +5,9 @@ const {
   login,
   getProfile,
   updateProfile,
+  verifyOTP,
+  resendOTP,
+  updatePassword,
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
@@ -27,9 +30,12 @@ router.post(
 );
 
 router.post('/login', validateLogin, handleValidationErrors, login);
+router.post('/verify-otp', verifyOTP);
+router.post('/resend-otp', resendOTP);
 
 // Protected routes
 router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
+router.put('/update-password', protect, updatePassword);
 
 module.exports = router;
