@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import { useAuth } from "./AuthContext";
+import { API_BASE_URL } from "../config";
 
 const SocketContext = createContext();
 
@@ -16,31 +17,34 @@ export const SocketProvider = ({ children }) => {
       // Fetch existing notifications
       const fetchNotifications = async () => {
         try {
-          const response = await fetch('http://localhost:5000/api/notifications', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const response = await fetch(
+            "http://localhost:5000/api/notifications",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
           const data = await response.json();
           if (data.success) {
             setNotifications(data.data);
           }
         } catch (error) {
-          console.error('Error fetching notifications:', error);
+          console.error("Error fetching notifications:", error);
         }
       };
 
       fetchNotifications();
 
-      const newSocket = io('http://localhost:5000', {
-        auth: { token }
+      const newSocket = io(API_BASE_URL, {
+        auth: { token },
       });
 
       setSocket(newSocket);
 
-      newSocket.emit('join', user._id);
+      newSocket.emit("join", String(user._id));
 
-      newSocket.on('notification', (notification) => {
+      newSocket.on("notification", (notification) => {
         setNotifications((prev) => [notification, ...prev]);
-        console.log('New notification:', notification);
+        console.log("New notification:", notification);
       });
 
       return () => newSocket.close();
@@ -49,18 +53,20 @@ export const SocketProvider = ({ children }) => {
 
   const clearNotifications = async () => {
     try {
-      await fetch('http://localhost:5000/api/notifications', {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      await fetch(`${API_BASE_URL}/api/notifications`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications([]);
     } catch (error) {
-      console.error('Error clearing notifications:', error);
+      console.error("Error clearing notifications:", error);
     }
   };
 
   return (
-    <SocketContext.Provider value={{ socket, notifications, clearNotifications }}>
+    <SocketContext.Provider
+      value={{ socket, notifications, clearNotifications }}
+    >
       {children}
     </SocketContext.Provider>
   );

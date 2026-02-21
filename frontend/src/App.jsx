@@ -15,7 +15,7 @@ import DiseaseDetection from "./pages/DiseaseDetection";
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailurePage from "./pages/PaymentFailurePage";
-import MockEsewaPayment from "./pages/MockEsewaPayment";
+import MockEsewaPayment from "./pages/MockEsewaPayment.jsx";
 import AdminPanel from "./pages/AdminPanel";
 import { SocketProvider } from "./context/SocketContext";
 import NotificationPage from "./pages/NotificationPage";
@@ -31,7 +31,7 @@ const ProtectedRoute = ({ children, role }) => {
   return children;
 };
 
-import { ToastProvider } from "./components/Toast";
+import { ToastProvider } from "./Components/Toast.jsx";
 
 function App() {
   return (

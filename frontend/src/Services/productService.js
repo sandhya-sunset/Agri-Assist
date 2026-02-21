@@ -1,8 +1,8 @@
-import api from './api';
+import api from "./api";
 
 // Get all products (can filter by seller if backend supports it via query param)
 const getProducts = async (sellerId = null) => {
-  let url = '/products';
+  let url = "/products";
   if (sellerId) {
     url += `?seller=${sellerId}`;
   }
@@ -13,9 +13,9 @@ const getProducts = async (sellerId = null) => {
 // Create a new product
 const createProduct = async (productData) => {
   // productData should be FormData object
-  const response = await api.post('/products', productData, {
+  const response = await api.post("/products", productData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
   });
   return response.data;
@@ -26,7 +26,7 @@ const updateProduct = async (id, productData) => {
   // productData should be FormData object if image is updated, otherwise JSON is fine but endpoint handles FormData
   const response = await api.put(`/products/${id}`, productData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
   });
   return response.data;
@@ -40,7 +40,10 @@ const deleteProduct = async (id) => {
 
 // Reply to a review
 const replyToReview = async (productId, reviewId, text) => {
-  const response = await api.post(`/products/${productId}/reviews/${reviewId}/reply`, { text });
+  const response = await api.post(
+    `/products/${productId}/reviews/${reviewId}/reply`,
+    { text },
+  );
   return response.data;
 };
 

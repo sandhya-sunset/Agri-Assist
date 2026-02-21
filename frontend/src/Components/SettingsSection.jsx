@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Save, Upload, Bell, Lock, CreditCard, Store, Check, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import {
+  Save,
+  Upload,
+  Bell,
+  Lock,
+  CreditCard,
+  Store,
+  Check,
+  AlertCircle,
+} from "lucide-react";
+import axios from "axios";
 
 const SettingsSection = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,15 +20,15 @@ const SettingsSection = () => {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/auth/profile', {
-        headers: { Authorization: `Bearer ${token}` }
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:5000/api/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data.data);
       setLoading(false);
     } catch (err) {
       console.error(err);
-      setError('Failed to load profile');
+      setError("Failed to load profile");
       setLoading(false);
     }
   };
@@ -32,41 +41,46 @@ const SettingsSection = () => {
     try {
       setError(null);
       setSuccess(null);
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       // If we are uploading a file (storeImage), we might need FormData, but for now assuming JSON for text fields first
       // Or if updatedData is FormData, use it directly
-      
+
       let config = {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       };
 
       if (updatedData instanceof FormData) {
-        config.headers['Content-Type'] = 'multipart/form-data';
+        config.headers["Content-Type"] = "multipart/form-data";
       }
 
-      const res = await axios.put('http://localhost:5000/api/auth/profile', updatedData, config);
+      const res = await axios.put(
+        "http://localhost:5000/api/auth/profile",
+        updatedData,
+        config,
+      );
       setUser(res.data.data);
-      setSuccess('Settings saved successfully!');
-      
+      setSuccess("Settings saved successfully!");
+
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Failed to update settings');
+      setError(err.response?.data?.message || "Failed to update settings");
     }
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: Store },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'security', label: 'Security', icon: Lock },
-    { id: 'payment', label: 'Payment', icon: CreditCard }
+    { id: "profile", label: "Profile", icon: Store },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "security", label: "Security", icon: Lock },
+    { id: "payment", label: "Payment", icon: CreditCard },
   ];
 
-  if (loading) return <div className="p-8 text-center">Loading settings...</div>;
+  if (loading)
+    return <div className="p-8 text-center">Loading settings...</div>;
 
   return (
     <div className="space-y-6">
@@ -94,8 +108,8 @@ const SettingsSection = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'text-green-600 border-b-2 border-green-600'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? "text-green-600 border-b-2 border-green-600"
+                  : "text-gray-600 hover:text-gray-800"
               }`}
             >
               <tab.icon size={20} />
@@ -105,10 +119,16 @@ const SettingsSection = () => {
         </div>
 
         <div className="p-6">
-          {activeTab === 'profile' && <ProfileSettings user={user} onUpdate={handleUpdateProfile} />}
-          {activeTab === 'notifications' && <NotificationSettings user={user} onUpdate={handleUpdateProfile} />}
-          {activeTab === 'security' && <SecuritySettings />}
-          {activeTab === 'payment' && <PaymentSettings user={user} onUpdate={handleUpdateProfile} />}
+          {activeTab === "profile" && (
+            <ProfileSettings user={user} onUpdate={handleUpdateProfile} />
+          )}
+          {activeTab === "notifications" && (
+            <NotificationSettings user={user} onUpdate={handleUpdateProfile} />
+          )}
+          {activeTab === "security" && <SecuritySettings />}
+          {activeTab === "payment" && (
+            <PaymentSettings user={user} onUpdate={handleUpdateProfile} />
+          )}
         </div>
       </div>
     </div>
@@ -117,12 +137,12 @@ const SettingsSection = () => {
 
 const ProfileSettings = ({ user, onUpdate }) => {
   const [formData, setFormData] = useState({
-    name: user.name || '',
-    email: user.email || '',
-    phone: user.phone || '',
-    address: user.address || '',
-    businessType: user.businessType || 'Retailer',
-    storeDescription: user.storeDescription || '',
+    name: user.name || "",
+    email: user.email || "",
+    phone: user.phone || "",
+    address: user.address || "",
+    businessType: user.businessType || "Retailer",
+    storeDescription: user.storeDescription || "",
   });
 
   const handleChange = (e) => {
@@ -137,15 +157,19 @@ const ProfileSettings = ({ user, onUpdate }) => {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-4">Store Information</h3>
-        
+
         <div className="space-y-4">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
-             {user.storeImage ? (
-                <img src={`http://localhost:5000/${user.storeImage}`} alt="Store" className="w-full h-full object-cover" />
-             ) : (
+              {user.storeImage ? (
+                <img
+                  src={`http://localhost:5000/${user.storeImage}`}
+                  alt="Store"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
                 <Store size={40} className="text-green-600" />
-             )}
+              )}
             </div>
             {/* <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
               <Upload size={20} />
@@ -155,7 +179,9 @@ const ProfileSettings = ({ user, onUpdate }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">My Name / Store Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                My Name / Store Name
+              </label>
               <input
                 type="text"
                 name="name"
@@ -166,7 +192,9 @@ const ProfileSettings = ({ user, onUpdate }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email
+              </label>
               <input
                 type="email"
                 value={formData.email}
@@ -176,7 +204,9 @@ const ProfileSettings = ({ user, onUpdate }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Phone
+              </label>
               <input
                 type="tel"
                 name="phone"
@@ -187,8 +217,10 @@ const ProfileSettings = ({ user, onUpdate }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Business Type</label>
-              <select 
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Business Type
+              </label>
+              <select
                 name="businessType"
                 value={formData.businessType}
                 onChange={handleChange}
@@ -202,7 +234,9 @@ const ProfileSettings = ({ user, onUpdate }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Store Description</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Store Description
+            </label>
             <textarea
               rows="4"
               name="storeDescription"
@@ -213,7 +247,9 @@ const ProfileSettings = ({ user, onUpdate }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Address
+            </label>
             <input
               type="text"
               name="address"
@@ -226,7 +262,7 @@ const ProfileSettings = ({ user, onUpdate }) => {
       </div>
 
       <div className="flex justify-end">
-        <button 
+        <button
           onClick={handleSubmit}
           className="flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
         >
@@ -239,17 +275,19 @@ const ProfileSettings = ({ user, onUpdate }) => {
 };
 
 const NotificationSettings = ({ user, onUpdate }) => {
-  const [settings, setSettings] = useState(user.notificationPreferences || {
-    orderNotifications: true,
-    messageNotifications: true,
-    reviewNotifications: true,
-    inventoryAlerts: true,
-    marketingEmails: false,
-    weeklyReports: true
-  });
+  const [settings, setSettings] = useState(
+    user.notificationPreferences || {
+      orderNotifications: true,
+      messageNotifications: true,
+      reviewNotifications: true,
+      inventoryAlerts: true,
+      marketingEmails: false,
+      weeklyReports: true,
+    },
+  );
 
   const handleToggle = (key) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleSave = () => {
@@ -257,22 +295,49 @@ const NotificationSettings = ({ user, onUpdate }) => {
   };
 
   const notificationOptions = [
-    { key: 'orderNotifications', label: 'New Orders', description: 'Get notified when you receive new orders' },
-    { key: 'messageNotifications', label: 'Customer Messages', description: 'Get notified about new messages from customers' },
-    { key: 'reviewNotifications', label: 'Product Reviews', description: 'Get notified when customers leave reviews' },
-    { key: 'inventoryAlerts', label: 'Low Stock Alerts', description: 'Get notified when products are running low' },
-    { key: 'marketingEmails', label: 'Marketing Emails', description: 'Receive tips and promotional content' },
-    { key: 'weeklyReports', label: 'Weekly Reports', description: 'Receive weekly sales and analytics reports' }
+    {
+      key: "orderNotifications",
+      label: "New Orders",
+      description: "Get notified when you receive new orders",
+    },
+    {
+      key: "messageNotifications",
+      label: "Customer Messages",
+      description: "Get notified about new messages from customers",
+    },
+    {
+      key: "reviewNotifications",
+      label: "Product Reviews",
+      description: "Get notified when customers leave reviews",
+    },
+    {
+      key: "inventoryAlerts",
+      label: "Low Stock Alerts",
+      description: "Get notified when products are running low",
+    },
+    {
+      key: "marketingEmails",
+      label: "Marketing Emails",
+      description: "Receive tips and promotional content",
+    },
+    {
+      key: "weeklyReports",
+      label: "Weekly Reports",
+      description: "Receive weekly sales and analytics reports",
+    },
   ];
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-4">Notification Preferences</h3>
-        
+
         <div className="space-y-4">
           {notificationOptions.map((option) => (
-            <div key={option.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div
+              key={option.key}
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+            >
               <div>
                 <p className="font-semibold text-gray-800">{option.label}</p>
                 <p className="text-sm text-gray-500">{option.description}</p>
@@ -280,12 +345,12 @@ const NotificationSettings = ({ user, onUpdate }) => {
               <button
                 onClick={() => handleToggle(option.key)}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
-                  settings[option.key] ? 'bg-green-600' : 'bg-gray-300'
+                  settings[option.key] ? "bg-green-600" : "bg-gray-300"
                 }`}
               >
                 <span
                   className={`absolute w-5 h-5 bg-white rounded-full transition-transform top-0.5 ${
-                    settings[option.key] ? 'right-0.5' : 'left-0.5'
+                    settings[option.key] ? "right-0.5" : "left-0.5"
                   }`}
                 ></span>
               </button>
@@ -295,7 +360,7 @@ const NotificationSettings = ({ user, onUpdate }) => {
       </div>
 
       <div className="flex justify-end">
-        <button 
+        <button
           onClick={handleSave}
           className="flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
         >
@@ -308,46 +373,62 @@ const NotificationSettings = ({ user, onUpdate }) => {
 };
 
 const SecuritySettings = () => {
-    const [passwords, setPasswords] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-    const [msg, setMsg] = useState('');
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [msg, setMsg] = useState("");
 
-    const handleChange = (e) => {
-        setPasswords({...passwords, [e.target.name]: e.target.value});
-    }
+  const handleChange = (e) => {
+    setPasswords({ ...passwords, [e.target.name]: e.target.value });
+  };
 
-    const handleUpdate = async () => {
-        if(passwords.newPassword !== passwords.confirmPassword) {
-            setMsg('New passwords do not match');
-            return;
-        }
-        try {
-            const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/api/auth/update-password', {
-                currentPassword: passwords.currentPassword,
-                newPassword: passwords.newPassword
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setMsg('Password updated successfully');
-            setPasswords({ currentPassword: '', newPassword: '', confirmPassword: ''});
-        } catch (err) {
-            setMsg(err.response?.data?.message || 'Failed to update password');
-        }
+  const handleUpdate = async () => {
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      setMsg("New passwords do not match");
+      return;
     }
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        "http://localhost:5000/api/auth/update-password",
+        {
+          currentPassword: passwords.currentPassword,
+          newPassword: passwords.newPassword,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      setMsg("Password updated successfully");
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      setMsg(err.response?.data?.message || "Failed to update password");
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-4">Change Password</h3>
-        {msg && <p className={`mb-4 ${msg.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{msg}</p>}
-        
+        {msg && (
+          <p
+            className={`mb-4 ${msg.includes("success") ? "text-green-600" : "text-red-600"}`}
+          >
+            {msg}
+          </p>
+        )}
+
         <div className="space-y-4 max-w-md">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Current Password
+            </label>
             <input
               type="password"
               name="currentPassword"
@@ -358,7 +439,9 @@ const SecuritySettings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              New Password
+            </label>
             <input
               type="password"
               name="newPassword"
@@ -369,9 +452,11 @@ const SecuritySettings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Confirm New Password
+            </label>
             <input
-               type="password"
+              type="password"
               name="confirmPassword"
               value={passwords.confirmPassword}
               onChange={handleChange}
@@ -379,7 +464,7 @@ const SecuritySettings = () => {
             />
           </div>
 
-          <button 
+          <button
             onClick={handleUpdate}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
           >
@@ -387,37 +472,40 @@ const SecuritySettings = () => {
           </button>
         </div>
       </div>
-
     </div>
   );
 };
 
 const PaymentSettings = ({ user, onUpdate }) => {
-    const [payment, setPayment] = useState(user.paymentDetails || {
-        accountName: '',
-        bankName: '',
-        accountNumber: '',
-        routingNumber: '',
-        payoutSchedule: 'Weekly'
-    });
+  const [payment, setPayment] = useState(
+    user.paymentDetails || {
+      accountName: "",
+      bankName: "",
+      accountNumber: "",
+      routingNumber: "",
+      payoutSchedule: "Weekly",
+    },
+  );
 
-    const handleChange = (e) => {
-        setPayment({ ...payment, [e.target.name]: e.target.value });
-    }
+  const handleChange = (e) => {
+    setPayment({ ...payment, [e.target.name]: e.target.value });
+  };
 
-    const handleSave = () => {
-        onUpdate({ paymentDetails: payment });
-    }
+  const handleSave = () => {
+    onUpdate({ paymentDetails: payment });
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-4">Bank Account Details</h3>
-        
+
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Account Holder Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Account Holder Name
+              </label>
               <input
                 type="text"
                 name="accountName"
@@ -428,7 +516,9 @@ const PaymentSettings = ({ user, onUpdate }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Bank Name
+              </label>
               <input
                 type="text"
                 name="bankName"
@@ -439,7 +529,9 @@ const PaymentSettings = ({ user, onUpdate }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Account Number
+              </label>
               <input
                 type="text"
                 name="accountNumber"
@@ -450,7 +542,9 @@ const PaymentSettings = ({ user, onUpdate }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Routing Number</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Routing Number
+              </label>
               <input
                 type="text"
                 name="routingNumber"
@@ -466,7 +560,7 @@ const PaymentSettings = ({ user, onUpdate }) => {
       <div className="border-t pt-6">
         <h3 className="text-lg font-semibold mb-4">Payout Schedule</h3>
         <div className="max-w-md">
-          <select 
+          <select
             name="payoutSchedule"
             value={payment.payoutSchedule}
             onChange={handleChange}
@@ -476,14 +570,16 @@ const PaymentSettings = ({ user, onUpdate }) => {
             <option value="Weekly">Weekly</option>
             <option value="Monthly">Monthly</option>
           </select>
-          <p className="text-sm text-gray-500 mt-2">Choose how frequently you want to receive payouts</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Choose how frequently you want to receive payouts
+          </p>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <button 
-           onClick={handleSave}
-           className="flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+        <button
+          onClick={handleSave}
+          className="flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
         >
           <Save size={20} />
           Save Payment Details

@@ -1,13 +1,14 @@
-import React from 'react';
+import React from "react";
 
 const QuickStat = ({ label, value, total, color }) => {
-  const percentage = typeof value === 'string' ? parseFloat(value) : (value / total) * 100;
-  
+  const percentage =
+    typeof value === "string" ? parseFloat(value) : (value / total) * 100;
+
   const colorClasses = {
-    green: 'bg-green-500',
-    yellow: 'bg-yellow-500',
-    blue: 'bg-blue-500',
-    purple: 'bg-purple-500',
+    green: "bg-green-500",
+    yellow: "bg-yellow-500",
+    blue: "bg-blue-500",
+    purple: "bg-purple-500",
   };
 
   return (
@@ -17,7 +18,7 @@ const QuickStat = ({ label, value, total, color }) => {
         <span className="text-sm font-bold text-gray-900">{value}</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
-        <div 
+        <div
           className={`h-2 rounded-full ${colorClasses[color]} transition-all duration-500`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
         ></div>

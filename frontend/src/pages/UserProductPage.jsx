@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Package, Plus, Search, Filter, Edit, Trash2, 
-  MoreVertical, AlertCircle, Loader2, Star, TrendingUp
-} from 'lucide-react';
-import Navbar from '../components/Navbar';
-import productService from '../services/productService';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import {
+  Package,
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  MoreVertical,
+  AlertCircle,
+  Loader2,
+  Star,
+  TrendingUp,
+} from "lucide-react";
+import Navbar from "../components/Navbar";
+import productService from "../services/productService";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const UserProductPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("all");
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -23,29 +32,30 @@ const UserProductPage = () => {
   const fetchUserProducts = async () => {
     try {
       setLoading(true);
-      const data = await productService.getProducts(user?._id); 
-      setProducts(data.data || []); 
+      const data = await productService.getProducts(user?._id);
+      setProducts(data.data || []);
     } catch (error) {
-      console.error('Error fetching user products:', error);
+      console.error("Error fetching user products:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         await productService.deleteProduct(productId);
-        setProducts(products.filter(p => p._id !== productId));
+        setProducts(products.filter((p) => p._id !== productId));
       } catch (error) {
-        console.error('Error deleting product:', error);
+        console.error("Error deleting product:", error);
       }
     }
   };
 
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -57,10 +67,14 @@ const UserProductPage = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Products</h1>
-            <p className="text-gray-600 mt-1">Manage your product listings and inventory</p>
+            <p className="text-gray-600 mt-1">
+              Manage your product listings and inventory
+            </p>
           </div>
-          <button 
-            onClick={() => {/* Navigate to add product page if it exists or open modal */}}
+          <button
+            onClick={() => {
+              /* Navigate to add product page if it exists or open modal */
+            }}
             className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
           >
             <Plus size={20} />
@@ -75,20 +89,30 @@ const UserProductPage = () => {
               <div className="p-3 bg-green-50 rounded-xl">
                 <Package className="text-green-600" size={24} />
               </div>
-              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                +12%
+              </span>
             </div>
-            <h3 className="text-gray-500 text-sm font-medium">Total Products</h3>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{products.length}</p>
+            <h3 className="text-gray-500 text-sm font-medium">
+              Total Products
+            </h3>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {products.length}
+            </p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-blue-50 rounded-xl">
                 <Star className="text-blue-600" size={24} />
               </div>
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">4.8 avg</span>
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                4.8 avg
+              </span>
             </div>
-            <h3 className="text-gray-500 text-sm font-medium">Average Rating</h3>
+            <h3 className="text-gray-500 text-sm font-medium">
+              Average Rating
+            </h3>
             <p className="text-2xl font-bold text-gray-900 mt-1">4.5</p>
           </div>
 
@@ -106,7 +130,10 @@ const UserProductPage = () => {
         {/* Search and Filter Bar */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-8 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               placeholder="Search your products..."
@@ -131,22 +158,29 @@ const UserProductPage = () => {
         ) : filteredProducts.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <div key={product._id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+              <div
+                key={product._id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group"
+              >
                 <div className="relative h-48 overflow-hidden bg-gray-50">
-                  <img 
-                    src={product.image?.startsWith('http') ? product.image : `http://localhost:5000/${product.image?.replace(/\\/g, '/')}`}
+                  <img
+                    src={
+                      product.image?.startsWith("http")
+                        ? product.image
+                        : `http://localhost:5000/${product.image?.replace(/\\/g, "/")}`
+                    }
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={() => navigate(`/product/edit/${product._id}`)}
                         className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-blue-50 text-blue-600 shadow-sm"
                       >
                         <Edit size={16} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteProduct(product._id)}
                         className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-red-50 text-red-600 shadow-sm"
                       >
@@ -154,9 +188,12 @@ const UserProductPage = () => {
                       </button>
                     </div>
                   </div>
-                   <div className="absolute bottom-2 left-2 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-gray-700 shadow-sm">
-                   Rs. {product.discount > 0 
-                      ? (product.price * (1 - product.discount / 100)).toFixed(2) 
+                  <div className="absolute bottom-2 left-2 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-gray-700 shadow-sm">
+                    Rs.{" "}
+                    {product.discount > 0
+                      ? (product.price * (1 - product.discount / 100)).toFixed(
+                          2,
+                        )
                       : Number(product.price).toFixed(2)}
                   </div>
                   {product.discount > 0 && (
@@ -168,16 +205,23 @@ const UserProductPage = () => {
 
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-bold text-gray-900 line-clamp-1">{product.name}</h3>
+                    <h3 className="font-bold text-gray-900 line-clamp-1">
+                      {product.name}
+                    </h3>
                     <button className="text-gray-400 hover:text-gray-600">
                       <MoreVertical size={16} />
                     </button>
                   </div>
-                  <p className="text-sm text-gray-500 line-clamp-2 mb-3">{product.description}</p>
-                  
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                    {product.description}
+                  </p>
+
                   <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
                     <span className="flex items-center gap-1">
-                      <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                      <Star
+                        size={12}
+                        className="text-yellow-400 fill-yellow-400"
+                      />
                       {product.rating || 0}
                     </span>
                     <span>{product.stock} in stock</span>
@@ -191,9 +235,12 @@ const UserProductPage = () => {
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Package size={40} className="text-gray-300" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No Products Found</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              No Products Found
+            </h3>
             <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-              You haven't listed any products yet. Start selling by adding your first product.
+              You haven't listed any products yet. Start selling by adding your
+              first product.
             </p>
             <button className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 inline-flex items-center gap-2">
               <Plus size={20} />
