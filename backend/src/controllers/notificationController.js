@@ -1,20 +1,22 @@
-const Notification = require('../models/Notification');
+const Notification = require("../models/Notification");
 
 // @desc    Get all notifications for current user
 // @route   GET /api/notifications
 // @access  Private
 exports.getNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({ user: req.user._id }).sort('-createdAt');
+    const notifications = await Notification.find({ user: req.user._id }).sort(
+      "-createdAt",
+    );
 
     res.status(200).json({
       success: true,
-      data: notifications
+      data: notifications,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -29,7 +31,7 @@ exports.markAsRead = async (req, res) => {
     if (!notification) {
       return res.status(404).json({
         success: false,
-        message: 'Notification not found'
+        message: "Notification not found",
       });
     }
 
@@ -37,7 +39,7 @@ exports.markAsRead = async (req, res) => {
     if (notification.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({
         success: false,
-        message: 'Not authorized'
+        message: "Not authorized",
       });
     }
 
@@ -46,12 +48,12 @@ exports.markAsRead = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: notification
+      data: notification,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -65,12 +67,12 @@ exports.clearNotifications = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Notifications cleared'
+      message: "Notifications cleared",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };

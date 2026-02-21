@@ -1,23 +1,25 @@
-const Testimonial = require('../models/Testimonial');
+const Testimonial = require("../models/Testimonial");
 
 // @desc    Get all active testimonials
 // @route   GET /api/testimonials
 // @access  Public
 exports.getTestimonials = async (req, res) => {
   try {
-    const testimonials = await Testimonial.find({ active: true })
-      .sort({ order: 1, createdAt: -1 });
-    
+    const testimonials = await Testimonial.find({ active: true }).sort({
+      order: 1,
+      createdAt: -1,
+    });
+
     res.status(200).json({
       success: true,
-      data: testimonials
+      data: testimonials,
     });
   } catch (error) {
-    console.error('Error fetching testimonials:', error);
+    console.error("Error fetching testimonials:", error);
     res.status(500).json({
       success: false,
-      message: 'Server Error',
-      error: error.message
+      message: "Server Error",
+      error: error.message,
     });
   }
 };
@@ -28,17 +30,17 @@ exports.getTestimonials = async (req, res) => {
 exports.createTestimonial = async (req, res) => {
   try {
     const testimonial = await Testimonial.create(req.body);
-    
+
     res.status(201).json({
       success: true,
-      data: testimonial
+      data: testimonial,
     });
   } catch (error) {
-    console.error('Error creating testimonial:', error);
+    console.error("Error creating testimonial:", error);
     res.status(500).json({
       success: false,
-      message: 'Server Error',
-      error: error.message
+      message: "Server Error",
+      error: error.message,
     });
   }
 };

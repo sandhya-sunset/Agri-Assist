@@ -1,7 +1,7 @@
-const User = require('../models/User');
-const Order = require('../models/Order');
-const Product = require('../models/Product');
-const mongoose = require('mongoose');
+const User = require("../models/User");
+const Order = require("../models/Order");
+const Product = require("../models/Product");
+const mongoose = require("mongoose");
 
 // @desc    Get admin dashboard statistics
 // @route   GET /api/admin/stats
@@ -10,25 +10,39 @@ exports.getDashboardStats = async (req, res) => {
   try {
     // Get total revenue from completed orders
     const revenueStats = await Order.aggregate([
-      { $match: { paymentStatus: 'Completed' } },
-      { $group: {
+      { $match: { paymentStatus: "Completed" } },
+      {
+        $group: {
           _id: null,
-          totalRevenue: { $sum: '$totalAmount' },
-          totalOrders: { $sum: 1 }
-      }}
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+        },
+      },
     ]);
 
-    const totalRevenue = revenueStats.length > 0 ? revenueStats[0].totalRevenue : 0;
-    const totalOrders = revenueStats.length > 0 ? revenueStats[0].totalOrders : 0;
+    const totalRevenue =
+      revenueStats.length > 0 ? revenueStats[0].totalRevenue : 0;
+    const totalOrders =
+      revenueStats.length > 0 ? revenueStats[0].totalOrders : 0;
 
     // Calculate commission (10% of revenue)
-    const commissionRate = 0.10;
+    const commissionRate = 0.1;
     const commissionEarned = totalRevenue * commissionRate;
 
     // Get user counts
-    const activeUsers = await User.countDocuments({ role: 'user', isActive: true });
-    const activeSellers = await User.countDocuments({ role: 'seller', isVerified: true, isActive: true });
-    const pendingSellers = await User.countDocuments({ role: 'seller', isVerified: false });
+    const activeUsers = await User.countDocuments({
+      role: "user",
+      isActive: true,
+    });
+    const activeSellers = await User.countDocuments({
+      role: "seller",
+      isVerified: true,
+      isActive: true,
+    });
+    const pendingSellers = await User.countDocuments({
+      role: "seller",
+      isVerified: false,
+    });
 
     // Get total products
     const totalProducts = await Product.countDocuments();
@@ -36,21 +50,27 @@ exports.getDashboardStats = async (req, res) => {
     // Calculate monthly growth (compare current month to previous month)
     const now = new Date();
     const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const startOfPreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1,
+    );
 
     const currentMonthOrders = await Order.countDocuments({
       createdAt: { $gte: startOfCurrentMonth },
-      paymentStatus: 'Completed'
+      paymentStatus: "Completed",
     });
 
     const previousMonthOrders = await Order.countDocuments({
       createdAt: { $gte: startOfPreviousMonth, $lt: startOfCurrentMonth },
-      paymentStatus: 'Completed'
+      paymentStatus: "Completed",
     });
 
-    const monthlyGrowth = previousMonthOrders > 0 
-      ? ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) * 100 
-      : 0;
+    const monthlyGrowth =
+      previousMonthOrders > 0
+        ? ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) *
+          100
+        : 0;
 
     res.status(200).json({
       success: true,
@@ -62,14 +82,14 @@ exports.getDashboardStats = async (req, res) => {
         activeSellers,
         pendingSellers,
         totalProducts,
-        monthlyGrowth: parseFloat(monthlyGrowth.toFixed(1))
-      }
+        monthlyGrowth: parseFloat(monthlyGrowth.toFixed(1)),
+      },
     });
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
+    console.error("Error fetching dashboard stats:", error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: "Server Error",
     });
   }
 };
@@ -84,32 +104,34 @@ exports.getOrders = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const orders = await Order.find()
-      .populate('user', 'name email')
+      .populate("user", "name email")
       .populate({
-        path: 'items.product',
-        select: 'name seller',
+        path: "items.product",
+        select: "name seller",
         populate: {
-          path: 'seller',
-          select: 'name'
-        }
+          path: "seller",
+          select: "name",
+        },
       })
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip);
 
-    const formattedOrders = orders.map(order => {
+    const formattedOrders = orders.map((order) => {
       const firstItem = order.items[0];
       const product = firstItem?.product;
-      
+
       return {
         id: order._id,
-        buyer: order.user?.name || 'Unknown',
-        seller: product?.seller?.name || 'Unknown',
-        product: product?.name || 'Unknown Product',
+        buyer: order.user?.name || "Unknown",
+        seller: product?.seller?.name || "Unknown",
+        product: product?.name || "Unknown Product",
         amount: order.totalAmount,
-        commission: Math.round(order.totalAmount * 0.10), // 10% commission
-        status: order.paymentStatus === 'Completed' ? 'completed' : 'pending',
-        date: order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : 'N/A'
+        commission: Math.round(order.totalAmount * 0.1), // 10% commission
+        status: order.paymentStatus === "Completed" ? "completed" : "pending",
+        date: order.createdAt
+          ? new Date(order.createdAt).toISOString().split("T")[0]
+          : "N/A",
       };
     });
 
@@ -121,14 +143,14 @@ exports.getOrders = async (req, res) => {
       pagination: {
         total,
         page,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
-    console.error('Error fetching orders:', error);
+    console.error("Error fetching orders:", error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: "Server Error",
     });
   }
 };
@@ -145,18 +167,18 @@ exports.getCommissionSettings = async (req, res) => {
       fertilizers: 12,
       pesticides: 18,
       seeds: 10,
-      equipment: 20
+      equipment: 20,
     };
 
     res.status(200).json({
       success: true,
-      data: settings
+      data: settings,
     });
   } catch (error) {
-    console.error('Error fetching commission settings:', error);
+    console.error("Error fetching commission settings:", error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: "Server Error",
     });
   }
 };
@@ -170,17 +192,17 @@ exports.updateCommissionSettings = async (req, res) => {
 
     // In production, save to Settings collection
     // For now, just return the updated settings
-    
+
     res.status(200).json({
       success: true,
-      message: 'Commission settings updated successfully',
-      data: settings
+      message: "Commission settings updated successfully",
+      data: settings,
     });
   } catch (error) {
-    console.error('Error updating commission settings:', error);
+    console.error("Error updating commission settings:", error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: "Server Error",
     });
   }
 };
