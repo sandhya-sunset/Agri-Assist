@@ -15,6 +15,8 @@ import DiseaseDetection from "./pages/DiseaseDetection";
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailurePage from "./pages/PaymentFailurePage";
+import KhaltiPaymentCallbackPage from "./pages/KhaltiPaymentCallbackPage";
+
 import AdminPanel from "./pages/AdminPanel";
 import { SocketProvider } from "./context/SocketContext";
 import NotificationPage from "./pages/NotificationPage";
@@ -30,7 +32,7 @@ const ProtectedRoute = ({ children, role }) => {
   return children;
 };
 
-import { ToastProvider } from "./Components/Toast.jsx";
+import { ToastProvider } from "./components/Toast";
 
 function App() {
   return (
@@ -86,6 +88,15 @@ function App() {
               />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/failure" element={<PaymentFailurePage />} />
+              <Route
+                path="/payment/khalti/callback/:id"
+                element={
+                  <ProtectedRoute role="user">
+                    <KhaltiPaymentCallbackPage />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="/profile"
                 element={

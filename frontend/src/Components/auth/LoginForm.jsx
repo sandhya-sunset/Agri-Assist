@@ -1,5 +1,5 @@
-import React from 'react';
-import { Mail, Lock } from 'lucide-react';
+import React from "react";
+import { Mail, Lock } from "lucide-react";
 
 const LoginForm = ({ formData, handleChange, loading, handleSubmit }) => {
   return (
@@ -36,7 +36,7 @@ const LoginForm = ({ formData, handleChange, loading, handleSubmit }) => {
             className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
             placeholder="••••••••"
             disabled={loading}
-            onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+            onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
           />
         </div>
       </div>

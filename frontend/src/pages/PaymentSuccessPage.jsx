@@ -1,46 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import api from "../services/api";
 
 const PaymentSuccessPage = () => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("verifying");
   const navigate = useNavigate();
-  const verificationCalled = useRef(false);
 
   useEffect(() => {
-    const verifyPayment = async () => {
-      // Prevent duplicate calls (React StrictMode causes double mounting in dev)
-      if (verificationCalled.current) {
-        console.log("Verification already called, skipping...");
-        return;
-      }
-
-      verificationCalled.current = true;
-
-      try {
-        const pidx = searchParams.get("pidx");
-        if (!pidx) {
-          setStatus("failed");
-          return;
-        }
-
-        console.log("Calling Khalti payment verification API...");
-        // This is a placeholder for Khalti verification endpoint if you have one
-        // We'll mock success as we're focusing on removing the previous payment method
-        setTimeout(() => {
-          setStatus("success");
-          setTimeout(() => navigate("/home"), 3000);
-        }, 1000);
-      } catch (error) {
-        console.error("Verification Error:", error);
-        setStatus("failed");
-      }
-    };
-
-    verifyPayment();
+    // Khalti payment verification to be implemented by user
+    // For now, simulate success
+    setStatus("success");
+    setTimeout(() => navigate("/home"), 3000);
   }, [searchParams, navigate]);
 
   return (
@@ -51,7 +24,7 @@ const PaymentSuccessPage = () => {
           {status === "verifying" && (
             <>
               <Loader2
-                className="animate-spin text-green-600 mx-auto mb-4"
+                className="animate-spin text-purple-600 mx-auto mb-4"
                 size={48}
               />
               <h2 className="text-xl font-bold text-gray-900">
@@ -65,7 +38,7 @@ const PaymentSuccessPage = () => {
 
           {status === "success" && (
             <>
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600">
                 <CheckCircle size={32} />
               </div>
               <h2 className="text-xl font-bold text-gray-900">
@@ -77,27 +50,6 @@ const PaymentSuccessPage = () => {
               <p className="text-sm text-gray-400 mt-4">
                 Redirecting to Home...
               </p>
-            </>
-          )}
-
-          {status === "failed" && (
-            <>
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-                <XCircle size={32} />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Payment Failed
-              </h2>
-              <p className="text-gray-500 mt-2">
-                We couldn't verify your payment. Please contact support if you
-                were charged.
-              </p>
-              <button
-                onClick={() => navigate("/cart")}
-                className="mt-6 px-6 py-2 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all"
-              >
-                Return to Cart
-              </button>
             </>
           )}
         </div>

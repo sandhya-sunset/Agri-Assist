@@ -1,14 +1,14 @@
-import React from 'react';
-import { User, Mail, Phone, Lock, MapPin, Upload } from 'lucide-react';
-import LocationPicker from './LocationPicker';
+import React from "react";
+import { User, Mail, Phone, Lock, MapPin, Upload } from "lucide-react";
+import LocationPicker from "./LocationPicker";
 
-const RegisterForm = ({ 
-  formData, 
-  handleChange, 
-  loading, 
-  handleFileChange, 
-  setFormData, 
-  userLocation 
+const RegisterForm = ({
+  formData,
+  handleChange,
+  loading,
+  handleFileChange,
+  setFormData,
+  userLocation,
 }) => {
   return (
     <div className="max-h-[500px] overflow-y-auto pr-2 space-y-5 custom-scrollbar">
@@ -136,7 +136,7 @@ const RegisterForm = ({
         </div>
       </div>
 
-      {formData.role === 'seller' && (
+      {formData.role === "seller" && (
         <>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -146,7 +146,7 @@ const RegisterForm = ({
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleFileChange(e, 'citizenshipFront')}
+                onChange={(e) => handleFileChange(e, "citizenshipFront")}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 disabled={loading}
               />
@@ -154,9 +154,9 @@ const RegisterForm = ({
                 <Upload className="w-5 h-5 text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-700">
-                    {formData.citizenshipFront 
-                      ? formData.citizenshipFront.name 
-                      : 'Upload citizenship front'}
+                    {formData.citizenshipFront
+                      ? formData.citizenshipFront.name
+                      : "Upload citizenship front"}
                   </p>
                   <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
                 </div>
@@ -172,7 +172,7 @@ const RegisterForm = ({
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleFileChange(e, 'citizenshipBack')}
+                onChange={(e) => handleFileChange(e, "citizenshipBack")}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 disabled={loading}
               />
@@ -180,9 +180,9 @@ const RegisterForm = ({
                 <Upload className="w-5 h-5 text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-700">
-                    {formData.citizenshipBack 
-                      ? formData.citizenshipBack.name 
-                      : 'Upload citizenship back'}
+                    {formData.citizenshipBack
+                      ? formData.citizenshipBack.name
+                      : "Upload citizenship back"}
                   </p>
                   <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
                 </div>
@@ -192,14 +192,20 @@ const RegisterForm = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Pin Your Location {userLocation && <span className="text-green-600 text-xs">(Auto-detected)</span>}
+              Pin Your Location{" "}
+              {userLocation && (
+                <span className="text-green-600 text-xs">(Auto-detected)</span>
+              )}
             </label>
-            <LocationPicker 
-              position={formData.location} 
-              setPosition={(pos) => setFormData(prev => ({ ...prev, location: pos }))}
+            <LocationPicker
+              position={formData.location}
+              setPosition={(pos) =>
+                setFormData((prev) => ({ ...prev, location: pos }))
+              }
             />
             <p className="text-xs text-gray-500 mt-2">
-              Click on the map to set your shop location or we'll use your current location
+              Click on the map to set your shop location or we'll use your
+              current location
             </p>
           </div>
         </>

@@ -184,17 +184,13 @@ const CartPage = () => {
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
-                    <span className="text-green-600 font-bold">Free</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Tax (18%)</span>
-                    <span className="font-bold">
-                      Rs. {Math.round(cart.totalAmount * 0.18)}
+                    <span className="text-gray-500 italic">
+                      Calculated at checkout
                     </span>
                   </div>
                   <div className="border-t border-gray-100 pt-4 flex justify-between text-lg font-bold text-gray-900">
-                    <span>Total</span>
-                    <span>Rs. {Math.round(cart.totalAmount * 1.18)}</span>
+                    <span>Total (excluding shipping)</span>
+                    <span>Rs. {cart.totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
 

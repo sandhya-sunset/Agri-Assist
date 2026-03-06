@@ -139,7 +139,7 @@ const UserProfilePage = () => {
       }
     } catch (error) {
       console.error("Error changing password:", error);
-      alert("Failed to change password");
+      alert(error.response?.data?.message || "Failed to change password");
     } finally {
       setLoading(false);
     }

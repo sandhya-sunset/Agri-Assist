@@ -289,6 +289,23 @@ const UserOrderDetailPage = () => {
                     {order.paymentStatus}
                   </span>
                 </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-medium text-gray-900">
+                    Rs.{" "}
+                    {(order.totalAmount - (order.shippingFee || 0)).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Shipping Fee</span>
+                  <span className="font-medium text-gray-900">
+                    {order.shippingFee === 0 ? (
+                      <span className="text-green-600">Free</span>
+                    ) : (
+                      `Rs. ${order.shippingFee.toFixed(2)}`
+                    )}
+                  </span>
+                </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
                   <span className="font-semibold text-gray-900">
                     Total Amount
