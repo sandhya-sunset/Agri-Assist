@@ -4,13 +4,15 @@ const crypto = require("crypto");
 const User = require("../models/User");
 
 // Configure nodemailer transporter
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || "gmail", // e.g., 'gmail', 'outlook'
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const getTransporter = () => {
+  return nodemailer.createTransport({
+    service: process.env.SMTP_SERVICE || process.env.EMAIL_SERVICE || "gmail",
+    auth: {
+      user: process.env.SMTP_EMAIL || process.env.EMAIL_USER,
+      pass: process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD,
+    },
+  });
+};
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -27,7 +29,7 @@ const generateOTP = () => {
 // Send OTP Email
 const sendOTPEmail = async (email, otp, name) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: process.env.SMTP_EMAIL || process.env.EMAIL_USER,
     to: email,
     subject: "Email Verification - OTP",
     html: `
@@ -43,6 +45,7 @@ const sendOTPEmail = async (email, otp, name) => {
     `,
   };
 
+  const transporter = getTransporter();
   await transporter.sendMail(mailOptions);
 };
 
@@ -123,7 +126,13 @@ const register = async (req, res) => {
 
     // Send OTP email for regular users
     if (role !== "seller") {
-      await sendOTPEmail(user.email, userData.otp, user.name);
+      try {
+        await sendOTPEmail(user.email, userData.otp, user.name);
+      } catch (emailError) {
+        console.error("OTP Email sending failed:", emailError);
+        // We still return 201 so the user can be routed to the OTP screen
+        // They can use a "resend OTP" feature if available
+      }
     }
 
     res.status(201).json({
@@ -179,7 +188,8 @@ const verifyOTP = async (req, res) => {
     }
 
     // Check OTP
-    if (user.otp !== otp) {
+    console.log("OTP comparison - DB:", JSON.stringify(user.otp), "Request:", JSON.stringify(otp), "Match:", user.otp === otp, "Trimmed match:", String(user.otp).trim() === String(otp).trim());
+    if (String(user.otp).trim() !== String(otp).trim()) {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP",
@@ -261,7 +271,11 @@ const resendOTP = async (req, res) => {
     await user.save();
 
     // Send OTP email
-    await sendOTPEmail(user.email, otp, user.name);
+    try {
+      await sendOTPEmail(user.email, otp, user.name);
+    } catch (emailError) {
+      console.error("OTP Email sending failed:", emailError);
+    }
 
     res.status(200).json({
       success: true,

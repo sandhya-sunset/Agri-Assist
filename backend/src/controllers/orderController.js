@@ -1,13 +1,14 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const { initiateKhaltiPayment, lookupKhaltiPayment } = require("../utils/payment");
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
 exports.createOrder = async (req, res) => {
   try {
-    const { paymentMethod } = req.body;
+    const { paymentMethod, shippingAddress, shippingFee, location } = req.body;
 
     // Get user cart
     const cart = await Cart.findOne({ user: req.user._id }).populate(
@@ -44,6 +45,8 @@ exports.createOrder = async (req, res) => {
       }
     }
 
+    const totalAmount = cart.totalAmount + (shippingFee || 0);
+
     const order = await Order.create({
       user: req.user._id,
       items: cart.items.map((item) => ({
@@ -51,9 +54,12 @@ exports.createOrder = async (req, res) => {
         quantity: item.quantity,
         price: item.price,
       })),
-      totalAmount: cart.totalAmount,
-        paymentMethod: paymentMethod || "Khalti",
-      paymentStatus: "Completed", // Mock successful payment for now
+      totalAmount,
+      paymentMethod: paymentMethod || "Khalti",
+      paymentStatus: "Pending",
+      shippingAddress: shippingAddress || "Kathmandu, Nepal",
+      shippingFee: shippingFee || 0,
+      location: location || undefined,
     });
 
     // Clear cart (keep the cart document but empty items)
@@ -72,6 +78,103 @@ exports.createOrder = async (req, res) => {
       success: false,
       message: "Server Error",
       error: error.message,
+    });
+  }
+};
+
+// @desc    Initiate Khalti e-Payment for an order
+// @route   POST /api/orders/:id/payment/khalti/initiate
+// @access  Private
+exports.initiateKhaltiOrderPayment = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
+
+    if (order.paymentStatus === "Completed") {
+      return res.status(400).json({ success: false, message: "Order is already paid" });
+    }
+
+    const khaltiData = await initiateKhaltiPayment({
+      orderId: order._id.toString(),
+      amount: Math.round(order.totalAmount * 100), // Convert to paisa
+      customerName: req.user.name,
+      customerEmail: req.user.email,
+      customerPhone: req.user.phone,
+    });
+
+    // Store the pidx on the order
+    order.khaltiPidx = khaltiData.pidx;
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      data: khaltiData,
+    });
+  } catch (error) {
+    console.error("Khalti initiate error:", error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to initiate Khalti payment",
+    });
+  }
+};
+
+// @desc    Confirm/verify Khalti payment for an order
+// @route   PUT /api/orders/:id/payment/khalti/confirm
+// @access  Private
+exports.confirmKhaltiOrderPayment = async (req, res) => {
+  try {
+    const { pidx } = req.body;
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
+
+    if (order.paymentStatus === "Completed") {
+      return res.status(200).json({ success: true, message: "Payment already confirmed" });
+    }
+
+    const lookupData = await lookupKhaltiPayment(pidx);
+
+    if (lookupData.status === "Completed") {
+      order.paymentStatus = "Completed";
+      order.transactionUuid = lookupData.transaction_id;
+      order.khaltiPidx = pidx;
+      await order.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Payment confirmed successfully",
+        data: order,
+      });
+    } else {
+      order.paymentStatus = "Failed";
+      await order.save();
+
+      return res.status(400).json({
+        success: false,
+        message: `Payment not completed. Khalti status: ${lookupData.status}`,
+      });
+    }
+  } catch (error) {
+    console.error("Khalti confirm error:", error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to confirm Khalti payment",
     });
   }
 };

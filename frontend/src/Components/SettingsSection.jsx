@@ -18,23 +18,22 @@ const SettingsSection = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  const fetchProfile = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/auth/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(res.data.data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load profile");
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchProfile();
+    const loadProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(res.data.data);
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load profile");
+        setLoading(false);
+      }
+    };
+    loadProfile();
   }, []);
 
   const handleUpdateProfile = async (updatedData) => {

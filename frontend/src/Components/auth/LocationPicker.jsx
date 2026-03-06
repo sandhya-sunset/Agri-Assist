@@ -38,7 +38,7 @@ function LocationPicker({ position, setPosition }) {
         <MapEvents />
         {position && <Marker position={position} />}
       </MapContainer>
-      <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded-lg shadow-md z-[1000] text-xs">
+      <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded-lg shadow-md z-1000 text-xs">
         <span className="text-gray-600">
           Lat: {position[0].toFixed(4)}, Lng: {position[1].toFixed(4)}
         </span>

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { CheckCircle, Loader2 } from "lucide-react";
-import api from "../services/api";
 
 const PaymentSuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -12,8 +11,11 @@ const PaymentSuccessPage = () => {
   useEffect(() => {
     // Khalti payment verification to be implemented by user
     // For now, simulate success
-    setStatus("success");
-    setTimeout(() => navigate("/home"), 3000);
+    const timer = setTimeout(() => {
+      setStatus("success");
+      setTimeout(() => navigate("/home"), 3000);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [searchParams, navigate]);
 
   return (

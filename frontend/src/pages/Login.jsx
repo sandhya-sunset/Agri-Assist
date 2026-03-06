@@ -308,7 +308,7 @@ export default function Login() {
 
   if (showOtpVerification) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
           <OTPVerification
             email={registeredEmail}
@@ -325,7 +325,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-5xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -344,7 +344,7 @@ export default function Login() {
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           <div className="grid md:grid-cols-5">
             {/* Side Panel */}
-            <div className="md:col-span-2 bg-gradient-to-br from-green-600 to-emerald-700 p-8 text-white flex flex-col justify-center">
+            <div className="md:col-span-2 bg-linear-to-br from-green-600 to-emerald-700 p-8 text-white flex flex-col justify-center">
               <h2 className="text-3xl font-bold mb-4">
                 {isLogin ? "Welcome Back!" : "Join AgriAssist"}
               </h2>
@@ -457,7 +457,7 @@ export default function Login() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                  className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>

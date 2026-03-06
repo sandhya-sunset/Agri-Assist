@@ -12,7 +12,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import ProductsSection from "../components/ProductsSection";
 import OrdersSection from "../components/OrdersSection";
@@ -23,16 +23,13 @@ import SellerNavbar from "../components/SellerNavbar"; // Import the new Navbar
 
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
-import { useSocket } from "../context/SocketContext";
 
 const SellerDashboard = () => {
   const { user } = useAuth();
-  const { notifications, clearNotifications } = useSocket();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   // Removed sidebar state
   // const [showNotifications, setShowNotifications] = useState(false); // Managed in Navbar now
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
 
   const [sellerData, setSellerData] = useState({
     name: user?.name || "Seller",

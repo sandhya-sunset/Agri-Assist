@@ -8,7 +8,7 @@ import { useToast } from "../components/Toast";
 
 const NotificationPage = () => {
   const { notifications, clearNotifications } = useSocket();
-  const { user, token } = useAuth(); // Needed for manual delete if implemented
+  const { token } = useAuth(); // Needed for manual delete if implemented
   const navigate = useNavigate();
   const { addToast } = useToast();
 

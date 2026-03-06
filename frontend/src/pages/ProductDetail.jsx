@@ -42,6 +42,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     fetchProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchProduct = async () => {
@@ -448,7 +449,7 @@ const ProductDetail = () => {
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
                       placeholder="Type your question or review here..."
-                      className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none min-h-[120px] transition-all"
+                      className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none min-h-30 transition-all"
                     ></textarea>
                     <button
                       type="submit"
@@ -518,7 +519,7 @@ const ProductDetail = () => {
                                     );
                                     fetchProduct();
                                     addToast("Review deleted", "success");
-                                  } catch (err) {
+                                  } catch {
                                     addToast(
                                       "Failed to delete review",
                                       "error",

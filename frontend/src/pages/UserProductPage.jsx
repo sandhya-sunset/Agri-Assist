@@ -21,12 +21,14 @@ const UserProductPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [filter, setFilter] = useState("all");
   const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUserProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchUserProducts = async () => {

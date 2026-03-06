@@ -38,6 +38,10 @@ const orderSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
+  khaltiPidx: {
+    type: String,
+    sparse: true
+  },
   paymentStatus: {
     type: String,
     enum: ['Pending', 'Completed', 'Failed'],
@@ -51,6 +55,10 @@ const orderSchema = new mongoose.Schema({
   shippingAddress: {
     type: String,
     default: 'Kathmandu, Nepal'
+  },
+  shippingFee: {
+    type: Number,
+    default: 0
   },
   location: {
     type: {

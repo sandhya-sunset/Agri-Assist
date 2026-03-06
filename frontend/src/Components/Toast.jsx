@@ -28,7 +28,7 @@ export const ToastProvider = ({ children }) => {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`min-w-[300px] p-4 rounded-xl shadow-lg border flex items-center justify-between gap-3 animate-in slide-in-from-right fade-in duration-300 ${
+            className={`min-w-75 p-4 rounded-xl shadow-lg border flex items-center justify-between gap-3 animate-in slide-in-from-right fade-in duration-300 ${
               toast.type === "success"
                 ? "bg-white border-green-100 text-gray-800"
                 : toast.type === "error"

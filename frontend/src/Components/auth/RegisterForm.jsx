@@ -11,7 +11,7 @@ const RegisterForm = ({
   userLocation,
 }) => {
   return (
-    <div className="max-h-[500px] overflow-y-auto pr-2 space-y-5 custom-scrollbar">
+    <div className="max-h-125 overflow-y-auto pr-2 space-y-5 custom-scrollbar">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Full Name

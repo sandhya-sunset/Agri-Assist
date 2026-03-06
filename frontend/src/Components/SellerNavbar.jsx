@@ -15,15 +15,14 @@ import {
   BarChart3,
   Store,
 } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 
 const SellerNavbar = ({ activeTab, onTabChange }) => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout } = useAuth();
   const { notifications, clearNotifications } = useSocket();
   const navigate = useNavigate();
-  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -65,11 +64,11 @@ const SellerNavbar = ({ activeTab, onTabChange }) => {
             to="/seller-dashboard"
             className="flex items-center gap-2 cursor-pointer group"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-green-200">
+            <div className="w-10 h-10 bg-linear-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-green-200">
               <Store className="text-white" size={24} />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent tracking-tight">
+              <h1 className="text-2xl font-bold bg-linear-to-r from-green-600 to-green-800 bg-clip-text text-transparent tracking-tight">
                 Seller Hub
               </h1>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold -mt-0.5">
@@ -241,7 +240,7 @@ const SellerNavbar = ({ activeTab, onTabChange }) => {
       {/* Mobile Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${
-          isMobileMenuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          isMobileMenuOpen ? "max-h-125 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="px-4 pt-2 pb-6 bg-white border-t border-gray-100 space-y-2 shadow-2xl">

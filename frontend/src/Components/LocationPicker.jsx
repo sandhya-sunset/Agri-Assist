@@ -65,6 +65,12 @@ const LocationPicker = ({ onLocationSelect }) => {
       setLocationError("");
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`,
+        {
+          headers: {
+            "User-Agent": "AgriAssist/1.0",
+            "Accept-Language": "en",
+          },
+        },
       );
       const data = await response.json();
 
@@ -205,7 +211,7 @@ const LocationPicker = ({ onLocationSelect }) => {
       )}
 
       {/* Map */}
-      <div className="h-[300px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-inner relative z-0">
+      <div className="h-75 w-full rounded-2xl overflow-hidden border border-gray-200 shadow-inner relative z-0">
         <MapContainer
           center={center}
           zoom={13}
@@ -223,7 +229,7 @@ const LocationPicker = ({ onLocationSelect }) => {
             setPosition={setPosition}
           />
         </MapContainer>
-        <div className="absolute bottom-2 left-2 bg-white/90 p-2 rounded-lg text-xs font-bold shadow-md z-[401]">
+        <div className="absolute bottom-2 left-2 bg-white/90 p-2 rounded-lg text-xs font-bold shadow-md z-401">
           Click to pin or use search/locate
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from "react";
 
+// eslint-disable-next-line no-unused-vars
 const StatCard = ({ title, value, icon: Icon, color, growth }) => {
   const colorClasses = {
     blue: "from-blue-500 to-blue-600",
@@ -12,7 +13,7 @@ const StatCard = ({ title, value, icon: Icon, color, growth }) => {
     <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div
-          className={`w-12 h-12 bg-gradient-to-br ${colorClasses[color]} rounded-xl flex items-center justify-center`}
+          className={`w-12 h-12 bg-linear-to-br ${colorClasses[color]} rounded-xl flex items-center justify-center`}
         >
           <Icon className="text-white" size={24} />
         </div>

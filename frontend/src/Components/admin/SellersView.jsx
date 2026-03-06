@@ -66,7 +66,7 @@ const SellersView = ({
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-12 h-12 bg-linear-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
                       {seller.name.charAt(0)}
                     </div>
                     <div>
@@ -186,7 +186,7 @@ const SellersView = ({
             <div className="p-6 space-y-6">
               {/* Header Info */}
               <div className="flex gap-6 items-start">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold shadow-lg shrink-0">
+                <div className="w-24 h-24 bg-linear-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold shadow-lg shrink-0">
                   {selectedSeller.name.charAt(0)}
                 </div>
                 <div className="space-y-2">

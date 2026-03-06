@@ -51,7 +51,7 @@ const UserProfilePage = () => {
 
   const [originalData, setOriginalData] = useState({});
 
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   useEffect(() => {
     fetchUserProfile();
@@ -203,7 +203,7 @@ const UserProfilePage = () => {
 
       <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 mb-8 text-white shadow-xl">
+        <div className="bg-linear-to-r from-green-600 to-blue-600 rounded-2xl p-8 mb-8 text-white shadow-xl">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
               <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl">
@@ -457,7 +457,7 @@ const UserProfilePage = () => {
                         className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                       >
                         <div
-                          className={`w-10 h-10 bg-${activity.color}-100 rounded-lg flex items-center justify-center flex-shrink-0`}
+                          className={`w-10 h-10 bg-${activity.color}-100 rounded-lg flex items-center justify-center shrink-0`}
                         >
                           <Package
                             className={`text-${activity.color}-600`}

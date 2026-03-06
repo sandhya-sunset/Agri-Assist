@@ -55,7 +55,7 @@ const DashboardView = ({ stats, orders }) => {
             {[40, 65, 45, 80, 55, 90, 70].map((height, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-2">
                 <div
-                  className="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg hover:from-green-600 hover:to-green-500 transition-all cursor-pointer"
+                  className="w-full bg-linear-to-t from-green-500 to-green-400 rounded-t-lg hover:from-green-600 hover:to-green-500 transition-all cursor-pointer"
                   style={{ height: `${height}%` }}
                 ></div>
                 <span className="text-xs text-gray-500 font-medium">

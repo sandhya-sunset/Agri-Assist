@@ -1,0 +1,23 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Agri",
+    "Khalti",
+    "khalti",
+    "pidx",
+    "latlng",
+    "conv",
+    "convs",
+    "Convs",
+    "Conv",
+    "Rajesh",
+    "Kumar",
+    "esewa"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build"
+  ]
+}

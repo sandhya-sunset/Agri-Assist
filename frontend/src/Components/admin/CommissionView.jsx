@@ -60,7 +60,7 @@ const CommissionView = ({
             Commission Overview
           </h3>
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+            <div className="p-4 bg-linear-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
               <p className="text-sm text-green-700 font-medium mb-1">
                 Total Commission Earned
               </p>
@@ -72,7 +72,7 @@ const CommissionView = ({
               </p>
             </div>
 
-            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+            <div className="p-4 bg-linear-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
               <p className="text-sm text-blue-700 font-medium mb-1">
                 This Month
               </p>
@@ -84,7 +84,7 @@ const CommissionView = ({
               </p>
             </div>
 
-            <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+            <div className="p-4 bg-linear-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
               <p className="text-sm text-purple-700 font-medium mb-1">
                 Average Commission Rate
               </p>

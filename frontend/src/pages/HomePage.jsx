@@ -50,7 +50,7 @@ const HomePage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
 
   // Dynamic data state
@@ -58,7 +58,7 @@ const HomePage = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [blogPosts, setBlogPosts] = useState([]);
   const [deals, setDeals] = useState([]);
-  const [loadingDynamic, setLoadingDynamic] = useState(true);
+  const [, setLoadingDynamic] = useState(true);
 
   // Farmer To-Do list state
   const [tasks, setTasks] = useState([]);
@@ -82,6 +82,7 @@ const HomePage = () => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-rotate testimonials
@@ -117,7 +118,7 @@ const HomePage = () => {
           shownNotificationIds.current.add(n._id);
           addToast(n.message || n.title, "info", 6000);
         }
-      } catch (err) {
+      } catch {
         // ignore
       }
     };
@@ -417,6 +418,7 @@ const HomePage = () => {
   const displayTestimonials =
     testimonials.length > 0 ? testimonials : staticTestimonials;
   const displayDeals = deals.length > 0 ? deals : staticDeals;
+  // eslint-disable-next-line no-unused-vars
   const displayBlogPosts = blogPosts.length > 0 ? blogPosts : staticBlogPosts;
 
   return (
@@ -425,7 +427,7 @@ const HomePage = () => {
 
       {/* Hero Carousel */}
       <section className="relative pt-16 md:pt-20">
-        <div className="relative h-[500px] md:h-[600px] overflow-hidden">
+        <div className="relative h-125 md:h-150 overflow-hidden">
           {heroSlides.map((slide, index) => (
             <div
               key={index}
@@ -439,7 +441,7 @@ const HomePage = () => {
                   alt={slide.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent"></div>
               </div>
 
               <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
@@ -517,7 +519,7 @@ const HomePage = () => {
       </section>
 
       {/* Features Bar */}
-      <section className="py-8 bg-gradient-to-r from-green-50 to-blue-50 border-y border-gray-200">
+      <section className="py-8 bg-linear-to-r from-green-50 to-blue-50 border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {features.map((feature, idx) => (
@@ -526,7 +528,7 @@ const HomePage = () => {
                 className="flex items-center gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-xl"
               >
                 <div
-                  className={`w-12 h-12 bg-${feature.color}-100 rounded-lg flex items-center justify-center flex-shrink-0`}
+                  className={`w-12 h-12 bg-${feature.color}-100 rounded-lg flex items-center justify-center shrink-0`}
                 >
                   <feature.icon
                     className={`text-${feature.color}-600`}
@@ -603,7 +605,7 @@ const HomePage = () => {
                     <div className="flex-1 flex items-center gap-2 px-3 py-2.5 bg-white border border-gray-300 rounded-xl">
                       <Calendar
                         size={16}
-                        className="text-gray-500 flex-shrink-0"
+                        className="text-gray-500 shrink-0"
                       />
                       <input
                         type="date"
@@ -679,7 +681,7 @@ const HomePage = () => {
                         onClick={() =>
                           handleToggleTask(task._id, task.isCompleted)
                         }
-                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                           task.isCompleted
                             ? "bg-green-600 border-green-600 text-white"
                             : "border-gray-300 hover:border-green-500"
@@ -713,7 +715,7 @@ const HomePage = () => {
                       <button
                         type="button"
                         onClick={() => handleDeleteTask(task._id)}
-                        className="flex-shrink-0 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="shrink-0 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete task"
                       >
                         <Trash2 size={18} />
@@ -742,7 +744,7 @@ const HomePage = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div
-                  className={`absolute inset-0 bg-gradient-to-r ${deal.color} opacity-80`}
+                  className={`absolute inset-0 bg-linear-to-r ${deal.color} opacity-80`}
                 ></div>
                 <div className="absolute inset-0 p-8 flex flex-col justify-between">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full self-start">
@@ -770,7 +772,7 @@ const HomePage = () => {
       </section>
 
       {/* AI Features */}
-      <section className="py-16 bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      <section className="py-16 bg-linear-to-br from-purple-50 via-white to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-full mb-4">
@@ -791,7 +793,7 @@ const HomePage = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {aiFeatures.map((feature, idx) => (
               <div key={idx} className="group relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-blue-500 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-all duration-500"></div>
+                <div className="absolute -inset-1 bg-linear-to-r from-green-400 to-blue-500 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-all duration-500"></div>
                 <div className="relative p-8 bg-white rounded-2xl border-2 border-gray-100 hover:border-transparent transition-all duration-300">
                   <div
                     className={`w-16 h-16 bg-${feature.color}-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
@@ -821,7 +823,7 @@ const HomePage = () => {
           </div>
 
           <div className="mt-12 text-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl font-bold shadow-2xl hover:shadow-green-500/50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2">
+            <button className="px-8 py-4 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl font-bold shadow-2xl hover:shadow-green-500/50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2">
               <Sparkles size={20} />
               Try AI Assistant Free
             </button>
@@ -914,7 +916,7 @@ const HomePage = () => {
                   <div className="p-5">
                     <h3
                       onClick={() => navigate(`/product/${product._id}`)}
-                      className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors min-h-[3rem] cursor-pointer"
+                      className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors min-h-12 cursor-pointer"
                     >
                       {product.name}
                     </h3>
@@ -1000,7 +1002,7 @@ const HomePage = () => {
       )}
 
       {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-br from-green-600 to-blue-600">
+      <section className="py-16 bg-linear-to-br from-green-600 to-blue-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {displayStats.map((stat, idx) => (
@@ -1180,7 +1182,7 @@ const HomePage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-green-600 via-green-700 to-blue-600">
+      <section className="py-20 bg-linear-to-br from-green-600 via-green-700 to-blue-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
             <Sparkles size={16} className="text-white" />

@@ -14,20 +14,19 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
-import { useAuth } from "../context/AuthContext";
 
 const OrdersSection = ({ searchQuery }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   // const [searchQuery, setSearchQuery] = useState(''); // REPLACED BY PROP for global search
 
-  const { token } = useAuth();
   const { addToast } = useToast();
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchOrders = async () => {
@@ -51,7 +50,6 @@ const OrdersSection = ({ searchQuery }) => {
         status: newStatus,
       });
       if (response.data.success) {
-        const updatedOrder = response.data.data;
         setOrders(
           orders.map((order) =>
             order.id === orderId ? { ...order, status: newStatus } : order,

@@ -40,6 +40,7 @@ const ChatWindow = ({
     return () => {
       if (socket) socket.off("receive_message");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receiverId, socket]);
 
   useEffect(() => {
@@ -98,7 +99,7 @@ const ChatWindow = ({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-[100] overflow-hidden animate-slideUp">
+    <div className="fixed bottom-4 right-4 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-100 overflow-hidden animate-slideUp">
       {/* Header */}
       <div className="bg-green-600 p-4 flex items-center justify-between text-white">
         <div className="flex items-center gap-3">

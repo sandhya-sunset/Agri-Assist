@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import {
   Send,
   Search,
@@ -33,6 +33,7 @@ const UserMessagesPage = () => {
     if (user?._id) {
       fetchConversations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchConversations = async () => {
@@ -225,8 +226,8 @@ const UserMessagesPage = () => {
                       } ${conv.unread > 0 ? "bg-blue-50" : ""}`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="relative flex-shrink-0">
-                          <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                        <div className="relative shrink-0">
+                          <div className="w-12 h-12 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
                             <span className="text-white font-semibold text-sm">
                               {conv.avatar}
                             </span>
@@ -244,7 +245,7 @@ const UserMessagesPage = () => {
                               {conv.sellerName}
                             </p>
                             {conv.unread > 0 && (
-                              <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full ml-2 flex-shrink-0 font-semibold">
+                              <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full ml-2 shrink-0 font-semibold">
                                 {conv.unread}
                               </span>
                             )}
@@ -253,7 +254,7 @@ const UserMessagesPage = () => {
                           <div className="flex items-center gap-1.5 mb-1">
                             <Package
                               size={12}
-                              className="text-green-600 flex-shrink-0"
+                              className="text-green-600 shrink-0"
                             />
                             <p className="text-xs text-green-600 font-medium truncate">
                               {conv.productName}
@@ -285,7 +286,7 @@ const UserMessagesPage = () => {
             </div>
 
             {/* Message Area */}
-            <div className="flex-1 flex flex-col hidden sm:flex bg-white">
+            <div className="flex-1 flex flex-col sm:flex bg-white">
               {selectedConversation ? (
                 <>
                   {/* Chat Header */}
@@ -293,7 +294,7 @@ const UserMessagesPage = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                          <div className="w-10 h-10 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
                             <span className="text-white font-semibold text-sm">
                               {selectedConversation.avatar}
                             </span>
@@ -353,7 +354,7 @@ const UserMessagesPage = () => {
                   </div>
 
                   {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white flex flex-col-reverse">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-linear-to-b from-gray-50 to-white flex flex-col-reverse">
                     <div ref={messagesEndRef} />
                     {selectedConversation.messages.map((msg) => (
                       <div
@@ -370,7 +371,7 @@ const UserMessagesPage = () => {
                                 : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
                             }`}
                           >
-                            <p className="break-words leading-relaxed">
+                            <p className="wrap-break-word leading-relaxed">
                               {msg.text}
                             </p>
                           </div>
@@ -380,7 +381,7 @@ const UserMessagesPage = () => {
                             <p className="text-xs text-gray-500">{msg.time}</p>
                             {msg.sender === "user" && (
                               <span className="text-xs text-gray-500">
-                                {msg.read ? "✓✓" : "✓"}
+                                {msg.read ? "âœ“âœ“" : "âœ“"}
                               </span>
                             )}
                           </div>
@@ -393,19 +394,19 @@ const UserMessagesPage = () => {
                   <div className="p-4 border-t border-gray-200 bg-white">
                     <div className="flex items-end gap-2">
                       <button
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 flex-shrink-0"
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 shrink-0"
                         title="Attach File"
                       >
                         <Paperclip size={20} />
                       </button>
                       <button
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 flex-shrink-0"
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 shrink-0"
                         title="Send Image"
                       >
                         <ImageIcon size={20} />
                       </button>
                       <button
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 flex-shrink-0"
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 shrink-0"
                         title="Emoji"
                       >
                         <Smile size={20} />
@@ -424,7 +425,7 @@ const UserMessagesPage = () => {
                       <button
                         onClick={handleSendMessage}
                         disabled={!messageText.trim()}
-                        className={`p-3 rounded-xl transition-all flex-shrink-0 ${
+                        className={`p-3 rounded-xl transition-all shrink-0 ${
                           messageText.trim()
                             ? "bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg"
                             : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -442,7 +443,7 @@ const UserMessagesPage = () => {
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="flex-1 flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
                   <div className="text-center">
                     <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <Send size={36} className="text-green-600" />
@@ -467,20 +468,20 @@ const UserMessagesPage = () => {
               label: "Active Chats",
               value: conversations.length,
               color: "blue",
-              icon: "💬",
+              icon: "ðŸ’¬",
             },
-            { label: "Unread", value: totalUnread, color: "red", icon: "🔔" },
+            { label: "Unread", value: totalUnread, color: "red", icon: "ðŸ””" },
             {
               label: "Products Inquired",
               value: new Set(conversations.map((c) => c.productName)).size,
               color: "green",
-              icon: "📦",
+              icon: "ðŸ“¦",
             },
             {
               label: "Avg Response",
               value: "< 2h",
               color: "purple",
-              icon: "⚡",
+              icon: "âš¡",
             },
           ].map((stat, idx) => (
             <div

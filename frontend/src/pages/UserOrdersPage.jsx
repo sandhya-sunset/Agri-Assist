@@ -11,14 +11,12 @@ import {
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
-import { useAuth } from "../context/AuthContext"; // Assuming you have an AuthContext
 
 const UserOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { user } = useAuth();
 
   useEffect(() => {
     fetchOrders();

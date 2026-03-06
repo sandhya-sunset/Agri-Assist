@@ -211,7 +211,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <Loader className="animate-spin text-green-600" size={48} />
       </div>
     );
@@ -219,7 +219,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-xl shadow-lg border border-red-100 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <X className="text-red-600" size={32} />
@@ -246,7 +246,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -266,8 +266,8 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
         {/* Filters */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
+              <div className="flex-1 min-w-50">
                 {/* Global search is now in the header */}
                 <p className="text-sm text-gray-500 py-2">
                   Use the top bar to search products.

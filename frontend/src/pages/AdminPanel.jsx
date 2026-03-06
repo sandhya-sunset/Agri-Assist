@@ -47,22 +47,93 @@ const AdminPanel = () => {
 
   // Fetch notifications
   useEffect(() => {
-    fetchNotifications();
+    const loadNotifications = async () => {
+      try {
+        const response = await api.get("/notifications");
+        if (response.data.success) {
+          setNotifications(response.data.data.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+    loadNotifications();
   }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await api.get("/notifications");
-      if (response.data.success) {
-        setNotifications(response.data.data.slice(0, 5)); // Get latest 5
-      }
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  };
+  const [sellers, setSellers] = useState([]);
+
+  const [orders, setOrders] = useState([]);
+
+  const [commissionSettings, setCommissionSettings] = useState({
+    defaultRate: 15,
+    fertilizers: 12,
+    pesticides: 18,
+    seeds: 10,
+    equipment: 20,
+  });
 
   // Fetch data based on active tab
   useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await api.get("/admin/stats");
+        if (response.data.success) {
+          setStats(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+        toast.error("Failed to load dashboard statistics");
+      }
+    };
+
+    const fetchOrders = async () => {
+      try {
+        const response = await api.get("/admin/orders?limit=10");
+        if (response.data.success) {
+          setOrders(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("Failed to load orders");
+      }
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get("/users");
+        if (response.data.success) {
+          setUsers(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Failed to load users");
+      }
+    };
+
+    const fetchSellers = async () => {
+      try {
+        const response = await api.get("/users/sellers");
+        if (response.data.success) {
+          setSellers(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching sellers:", error);
+        toast.error("Failed to load sellers");
+      }
+    };
+
+    const fetchCommissionSettings = async () => {
+      try {
+        const response = await api.get("/admin/commission");
+        if (response.data.success) {
+          setCommissionSettings(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching commission settings:", error);
+        toast.error("Failed to load commission settings");
+      }
+    };
+
     if (activeTab === "dashboard") {
       fetchDashboardStats();
       fetchOrders();
@@ -76,42 +147,6 @@ const AdminPanel = () => {
       fetchOrders();
     }
   }, [activeTab]);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await api.get("/users");
-      if (response.data.success) {
-        setUsers(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      toast.error("Failed to load users");
-    }
-  };
-
-  const [sellers, setSellers] = useState([]);
-
-  const fetchSellers = async () => {
-    try {
-      const response = await api.get("/users/sellers");
-      if (response.data.success) {
-        setSellers(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching sellers:", error);
-      toast.error("Failed to load sellers");
-    }
-  };
-
-  const [orders, setOrders] = useState([]);
-
-  const [commissionSettings, setCommissionSettings] = useState({
-    defaultRate: 15,
-    fertilizers: 12,
-    pesticides: 18,
-    seeds: 10,
-    equipment: 20,
-  });
 
   // Navigation items
   const navItems = [
@@ -169,42 +204,6 @@ const AdminPanel = () => {
     }
   };
 
-  const fetchDashboardStats = async () => {
-    try {
-      const response = await api.get("/admin/stats");
-      if (response.data.success) {
-        setStats(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
-      toast.error("Failed to load dashboard statistics");
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const response = await api.get("/admin/orders?limit=10");
-      if (response.data.success) {
-        setOrders(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Failed to load orders");
-    }
-  };
-
-  const fetchCommissionSettings = async () => {
-    try {
-      const response = await api.get("/admin/commission");
-      if (response.data.success) {
-        setCommissionSettings(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching commission settings:", error);
-      toast.error("Failed to load commission settings");
-    }
-  };
-
   const updateCommissionRate = async (category, rate) => {
     const updatedSettings = {
       ...commissionSettings,
@@ -221,8 +220,15 @@ const AdminPanel = () => {
     } catch (error) {
       console.error("Error updating commission rate:", error);
       toast.error("Failed to update commission rate");
-      // Revert on error
-      fetchCommissionSettings();
+      // Revert on error - refetch commission settings
+      try {
+        const res = await api.get("/admin/commission");
+        if (res.data.success) {
+          setCommissionSettings(res.data.data);
+        }
+      } catch {
+        // ignore refetch error
+      }
     }
   };
 
@@ -241,11 +247,11 @@ const AdminPanel = () => {
               <Menu size={24} />
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-linear-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center">
                 <Leaf className="text-white" size={24} />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-linear-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
                   AgriAssist Admin
                 </h1>
               </div>
@@ -293,7 +299,7 @@ const AdminPanel = () => {
                         >
                           <div className="flex items-start gap-2">
                             {!notification.isRead && (
-                              <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 shrink-0"></div>
                             )}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-gray-900 truncate">
@@ -336,7 +342,7 @@ const AdminPanel = () => {
                 className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-8 h-8 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                   A
                 </div>
                 <div className="hidden sm:block">

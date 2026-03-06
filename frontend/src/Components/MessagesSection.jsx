@@ -20,7 +20,7 @@ const MessagesSection = () => {
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [conversations, setConversations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const { token, user } = useAuth();
   const { socket } = useSocket();
   const messagesEndRef = useRef(null);
@@ -100,6 +100,7 @@ const MessagesSection = () => {
     return () => {
       if (socket) socket.off("receive_message");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   const fetchConversations = async () => {
@@ -266,8 +267,8 @@ const MessagesSection = () => {
                     } ${conv.unread > 0 ? "bg-blue-50" : ""}`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="relative flex-shrink-0">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                      <div className="relative shrink-0">
+                        <div className="w-12 h-12 bg-linear-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
                           <span className="text-white font-semibold text-sm">
                             {conv.avatar}
                           </span>
@@ -285,7 +286,7 @@ const MessagesSection = () => {
                             {conv.customer}
                           </p>
                           {conv.unread > 0 && (
-                            <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full ml-2 flex-shrink-0 font-semibold">
+                            <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full ml-2 shrink-0 font-semibold">
                               {conv.unread}
                             </span>
                           )}
@@ -316,7 +317,7 @@ const MessagesSection = () => {
           </div>
 
           {/* Message Area */}
-          <div className="flex-1 flex flex-col hidden sm:flex bg-white">
+          <div className="flex-1 flex flex-col sm:flex bg-white">
             {selectedConversation ? (
               <>
                 {/* Chat Header */}
@@ -324,7 +325,7 @@ const MessagesSection = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-linear-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
                           <span className="text-white font-semibold text-sm">
                             {selectedConversation.avatar}
                           </span>
@@ -394,7 +395,7 @@ const MessagesSection = () => {
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white flex flex-col-reverse">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-linear-to-b from-gray-50 to-white flex flex-col-reverse">
                   <div ref={messagesEndRef} />
                   {selectedConversation.messages.map((msg) => (
                     <div
@@ -411,7 +412,7 @@ const MessagesSection = () => {
                               : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
                           }`}
                         >
-                          <p className="break-words leading-relaxed">
+                          <p className="wrap-break-word leading-relaxed">
                             {msg.text}
                           </p>
                         </div>
@@ -434,19 +435,19 @@ const MessagesSection = () => {
                 <div className="p-4 border-t border-gray-200 bg-white">
                   <div className="flex items-end gap-2">
                     <button
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 flex-shrink-0"
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 shrink-0"
                       title="Attach File"
                     >
                       <Paperclip size={20} />
                     </button>
                     <button
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 flex-shrink-0"
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 shrink-0"
                       title="Send Image"
                     >
                       <ImageIcon size={20} />
                     </button>
                     <button
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 flex-shrink-0"
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 shrink-0"
                       title="Emoji"
                     >
                       <Smile size={20} />
@@ -465,7 +466,7 @@ const MessagesSection = () => {
                     <button
                       onClick={handleSendMessage}
                       disabled={!messageText.trim()}
-                      className={`p-3 rounded-lg transition-colors flex-shrink-0 ${
+                      className={`p-3 rounded-lg transition-colors shrink-0 ${
                         messageText.trim()
                           ? "bg-green-600 text-white hover:bg-green-700 shadow-md"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -483,7 +484,7 @@ const MessagesSection = () => {
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+              <div className="flex-1 flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
                 <div className="text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <Send size={36} className="text-green-600" />

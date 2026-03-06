@@ -6,7 +6,7 @@ import Alert from "./Alert";
 // Best practice: Import from config or const file. For now, duplication or props is fine.
 const API_BASE_URL = "http://localhost:5000/api";
 
-function OTPVerification({ email, onVerified, onBack, userRole }) {
+function OTPVerification({ email, onVerified, onBack }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
@@ -199,7 +199,7 @@ function OTPVerification({ email, onVerified, onBack, userRole }) {
         <button
           onClick={handleVerify}
           disabled={loading || otp.join("").length !== 6}
-          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+          className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

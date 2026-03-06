@@ -89,11 +89,11 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       <Navbar />
       {/* Hero Section */}
       <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-blue-50 opacity-60"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-green-50 via-white to-blue-50 opacity-60"></div>
         <div className="absolute top-20 right-10 w-72 h-72 bg-green-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-blue-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
 
@@ -109,7 +109,7 @@ const LandingPage = () => {
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 Grow Smarter with
-                <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   {" "}
                   AgriAssist
                 </span>
@@ -161,13 +161,13 @@ const LandingPage = () => {
             </div>
 
             <div className="relative hidden lg:block">
-              <div className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative w-full h-125 rounded-2xl overflow-hidden shadow-2xl">
                 <img
                   src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800&h=800&fit=crop"
                   alt="Smart Farming"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent"></div>
               </div>
               <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl">
                 <div className="flex items-center gap-3">
@@ -208,7 +208,7 @@ const LandingPage = () => {
             {aiFeatures.map((feature, idx) => (
               <div
                 key={idx}
-                className="group p-8 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-xl transition-all duration-300"
+                className="group p-8 bg-linear-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-xl transition-all duration-300"
               >
                 <div
                   className={`w-14 h-14 bg-${feature.color}-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
@@ -354,7 +354,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-green-600 to-green-800">
+      <section className="py-20 bg-linear-to-br from-green-600 to-green-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">

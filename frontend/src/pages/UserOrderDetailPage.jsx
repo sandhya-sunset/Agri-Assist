@@ -15,7 +15,6 @@ import {
 import { useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
-import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 
 const UserOrderDetailPage = () => {
@@ -28,6 +27,7 @@ const UserOrderDetailPage = () => {
 
   useEffect(() => {
     fetchOrderDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchOrderDetails = async () => {
@@ -175,7 +175,7 @@ const UserOrderDetailPage = () => {
                     </div>
                     {idx < 2 && (
                       <div
-                        className={`w-12 h-0.5 ${getStepStatus(step) === "green" && getStepStatus(["Processing", "Shipped", "Delivered"][idx + 1]) === "green" ? "bg-green-600" : "bg-gray-300"} mt-[-20px]`}
+                        className={`w-12 h-0.5 ${getStepStatus(step) === "green" && getStepStatus(["Processing", "Shipped", "Delivered"][idx + 1]) === "green" ? "bg-green-600" : "bg-gray-300"} -mt-5`}
                       ></div>
                     )}
                   </React.Fragment>

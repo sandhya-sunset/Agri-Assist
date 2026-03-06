@@ -17,6 +17,7 @@ import {
   Download,
   Share2,
   Trash2,
+  Shield,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
@@ -161,6 +162,7 @@ const DiseaseDetection = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const getSeverityColor = (confidence) => {
     if (confidence >= 90) return "text-red-600 bg-red-50 border-red-200";
     if (confidence >= 70)
@@ -175,7 +177,7 @@ const DiseaseDetection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-green-50 via-white to-blue-50">
       <Navbar />
       <div className="pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -205,7 +207,7 @@ const DiseaseDetection = () => {
                   className="border-3 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-green-400 transition-all duration-300 cursor-pointer bg-gray-50 hover:bg-green-50"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
+                  <div className="w-20 h-20 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
                     <Camera className="text-white" size={32} />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -242,7 +244,7 @@ const DiseaseDetection = () => {
                   <button
                     onClick={handleAnalyze}
                     disabled={isAnalyzing}
-                    className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-4 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isAnalyzing ? (
                       <>
@@ -262,7 +264,7 @@ const DiseaseDetection = () => {
               {error && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
                   <AlertCircle
-                    className="text-red-600 flex-shrink-0 mt-0.5"
+                    className="text-red-600 shrink-0 mt-0.5"
                     size={20}
                   />
                   <div>
@@ -294,7 +296,7 @@ const DiseaseDetection = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="p-6 bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl border border-green-100">
+                  <div className="p-6 bg-linear-to-br from-green-50 to-blue-50 rounded-2xl border border-green-100">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-sm font-bold text-gray-600 mb-1">
@@ -326,77 +328,110 @@ const DiseaseDetection = () => {
                   </div>
 
                   {result.recommendations && (
-                    <div className="space-y-4">
-                      <h4 className="font-bold text-gray-900 flex items-center gap-2">
-                        <Info size={18} className="text-blue-600" />
-                        Recommended Treatments
-                      </h4>
+                    <div className="space-y-6">
+                      {/* Description Highlight */}
+                      {result.recommendations.description && (
+                        <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
+                          <p className="text-sm text-gray-700">
+                            {result.recommendations.description}
+                          </p>
+                        </div>
+                      )}
 
-                      {result.recommendations.fertilizers &&
-                        result.recommendations.fertilizers.length > 0 && (
-                          <div className="space-y-3">
-                            <p className="text-sm font-bold text-gray-700">
-                              Fertilizers:
-                            </p>
-                            {result.recommendations.fertilizers
-                              .slice(0, 2)
-                              .map((item, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-4 bg-blue-50 border border-blue-100 rounded-xl"
-                                >
-                                  <h5 className="font-bold text-gray-900 mb-1">
-                                    {item.name}
-                                  </h5>
-                                  <p className="text-sm text-gray-600 mb-2">
-                                    {item.description}
-                                  </p>
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-blue-600">
-                                      Dosage: {item.dosage}
-                                    </span>
-                                    <button className="text-xs font-bold text-green-600 hover:text-green-700 flex items-center gap-1">
-                                      <ShoppingCart size={14} />
-                                      Buy Now
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                      {/* Symptoms */}
+                      {result.recommendations.symptoms && result.recommendations.symptoms.length > 0 && (
+                        <div>
+                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-2">
+                            <AlertCircle size={18} className="text-red-500" />
+                            Symptoms
+                          </h4>
+                          <ul className="list-disc list-inside text-sm text-gray-600 ml-1 space-y-1">
+                            {result.recommendations.symptoms.map((sym, i) => (
+                              <li key={i}>{sym}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
-                      {result.recommendations.pesticides &&
-                        result.recommendations.pesticides.length > 0 && (
+                      {/* Treatment Steps */}
+                      {result.recommendations.treatments && result.recommendations.treatments.length > 0 && (
+                        <div>
+                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+                            <Info size={18} className="text-blue-600" />
+                            Treatment Instructions
+                          </h4>
                           <div className="space-y-3">
-                            <p className="text-sm font-bold text-gray-700">
-                              Pesticides:
-                            </p>
-                            {result.recommendations.pesticides
-                              .slice(0, 2)
-                              .map((item, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-4 bg-orange-50 border border-orange-100 rounded-xl"
-                                >
-                                  <h5 className="font-bold text-gray-900 mb-1">
-                                    {item.name}
-                                  </h5>
-                                  <p className="text-sm text-gray-600 mb-2">
-                                    {item.description}
-                                  </p>
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-orange-600">
-                                      Dosage: {item.dosage}
-                                    </span>
-                                    <button className="text-xs font-bold text-green-600 hover:text-green-700 flex items-center gap-1">
-                                      <ShoppingCart size={14} />
-                                      Buy Now
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
+                            {result.recommendations.treatments.map((treat, idx) => (
+                              <div key={idx} className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+                                <h5 className="font-bold text-blue-900 mb-2">{treat.name}</h5>
+                                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                  {treat.steps.map((step, i) => (
+                                    <li key={i}>{step}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
                           </div>
-                        )}
+                        </div>
+                      )}
+
+                      {/* Recommended Products (Fertilizers & Pesticides) */}
+                      {(result.recommendations.fertilizers?.length > 0 || result.recommendations.pesticides?.length > 0) && (
+                        <div>
+                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+                            <ShoppingCart size={18} className="text-green-600" />
+                            Recommended Products
+                          </h4>
+                          <div className="space-y-4">
+                            {result.recommendations.fertilizers?.length > 0 && (
+                              <div className="space-y-3">
+                                <p className="text-sm font-bold text-gray-700">Fertilizers:</p>
+                                {result.recommendations.fertilizers.slice(0, 2).map((item, idx) => (
+                                  <div key={idx} className="p-4 bg-white border border-green-200 rounded-xl shadow-sm">
+                                    <h5 className="font-bold text-gray-900 mb-1">{item.name}</h5>
+                                    <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">Dosage: {item.dosage}</span>
+                                      <button className="text-xs font-bold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition">Buy Now</button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {result.recommendations.pesticides?.length > 0 && (
+                              <div className="space-y-3">
+                                <p className="text-sm font-bold text-gray-700">Pesticides:</p>
+                                {result.recommendations.pesticides.slice(0, 2).map((item, idx) => (
+                                  <div key={idx} className="p-4 bg-white border border-orange-200 rounded-xl shadow-sm">
+                                    <h5 className="font-bold text-gray-900 mb-1">{item.name}</h5>
+                                    <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-1 rounded">Dosage: {item.dosage}</span>
+                                      <button className="text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 px-3 py-1.5 rounded-lg transition">Buy Now</button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Prevention Tips */}
+                      {result.recommendations.preventionTips && result.recommendations.preventionTips.length > 0 && (
+                        <div className="pt-2">
+                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-2">
+                            <Shield size={18} className="text-green-600" />
+                            Prevention Tips
+                          </h4>
+                          <ul className="list-disc list-inside text-sm text-gray-600 ml-1 space-y-1">
+                            {result.recommendations.preventionTips.map((tip, i) => (
+                              <li key={i}>{tip}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -445,7 +480,7 @@ const DiseaseDetection = () => {
                       <Trash2 size={16} />
                     </button>
                     <div className="flex items-start gap-3">
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                         <img
                           src={`http://localhost:5000/${detection.imagePath}`}
                           alt="Detection"
@@ -479,7 +514,7 @@ const DiseaseDetection = () => {
           )}
 
           <div className="mt-12 grid md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200">
+            <div className="bg-linear-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200">
               <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-4">
                 <Sparkles className="text-white" size={24} />
               </div>
@@ -490,7 +525,7 @@ const DiseaseDetection = () => {
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl border border-green-200">
+            <div className="bg-linear-to-br from-green-50 to-green-100 p-6 rounded-2xl border border-green-200">
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-4">
                 <CheckCircle className="text-white" size={24} />
               </div>
@@ -500,7 +535,7 @@ const DiseaseDetection = () => {
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl border border-purple-200">
+            <div className="bg-linear-to-br from-purple-50 to-purple-100 p-6 rounded-2xl border border-purple-200">
               <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-4">
                 <Leaf className="text-white" size={24} />
               </div>

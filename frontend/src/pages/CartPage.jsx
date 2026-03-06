@@ -101,7 +101,7 @@ const CartPage = () => {
                   key={item._id}
                   className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center gap-6 transition-all duration-300 hover:shadow-md"
                 >
-                  <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-xl overflow-hidden shrink-0">
                     <img
                       src={
                         item.product?.image?.startsWith("http")
