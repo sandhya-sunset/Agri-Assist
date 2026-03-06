@@ -52,7 +52,7 @@ exports.createOrder = async (req, res) => {
         price: item.price,
       })),
       totalAmount: cart.totalAmount,
-      paymentMethod: paymentMethod || "eSewa",
+        paymentMethod: paymentMethod || "Khalti",
       paymentStatus: "Completed", // Mock successful payment for now
     });
 

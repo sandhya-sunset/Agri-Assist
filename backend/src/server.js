@@ -32,7 +32,6 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
-app.use("/api/esewa", require("./routes/esewaRoutes"));
 app.use("/api/detection", require("./routes/detection"));
 app.use("/api/seller", require("./routes/sellerRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));

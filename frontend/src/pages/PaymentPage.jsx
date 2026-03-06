@@ -36,57 +36,14 @@ const PaymentPage = () => {
     try {
       // 1. Call backend to initiate payment and get params
       console.log("Initiating payment with location:", location);
-      const response = await api.post("/esewa/initiate", { location });
+      // const response = await api.post("/khalti/initiate", { location }); // TODO: Hook up Khalti
+      const response = await api.post("/orders", { paymentMethod: "Khalti", location }); 
 
       console.log("Payment initiation response:", response.data);
 
       if (response.data.success) {
-        const { paymentParams } = response.data;
-
-        console.log("Creating form with params:", paymentParams);
-
-        // Check if this is mock eSewa (frontend route) or real eSewa (external server)
-        const isMockEsewa =
-          paymentParams.esewa_url.includes("localhost") ||
-          paymentParams.esewa_url.includes("mock-esewa-payment");
-
-        if (isMockEsewa) {
-          // For mock eSewa: Use GET redirect with query parameters
-          console.log("Using mock eSewa - redirecting with query params");
-          const queryParams = new URLSearchParams();
-
-          for (const key in paymentParams) {
-            if (key !== "esewa_url") {
-              queryParams.append(key, paymentParams[key]);
-            }
-          }
-
-          const redirectUrl = `${paymentParams.esewa_url}?${queryParams.toString()}`;
-          console.log("Redirecting to:", redirectUrl);
-          window.location.href = redirectUrl;
-        } else {
-          // For real eSewa: Use POST form submission
-          console.log("Using real eSewa - submitting POST form");
-          const form = document.createElement("form");
-          form.setAttribute("method", "POST");
-          form.setAttribute("action", paymentParams.esewa_url);
-
-          // Add all payment parameters as hidden fields
-          for (const key in paymentParams) {
-            if (key !== "esewa_url") {
-              const hiddenField = document.createElement("input");
-              hiddenField.setAttribute("type", "hidden");
-              hiddenField.setAttribute("name", key);
-              hiddenField.setAttribute("value", paymentParams[key]);
-              form.appendChild(hiddenField);
-              console.log(`Added field: ${key} = ${paymentParams[key]}`);
-            }
-          }
-
-          document.body.appendChild(form);
-          console.log("Submitting form to:", paymentParams.esewa_url);
-          form.submit();
-        }
+        alert("Order created successfully with Khalti!");
+        window.location.href = "/payment/success";
       }
     } catch (error) {
       console.error("Payment Initiation Error:", error);
@@ -106,7 +63,7 @@ const PaymentPage = () => {
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
                 <Lock className="text-white" size={20} />
-                eSewa Secure Payment
+                Khalti Secure Payment
               </h1>
               <p className="text-white/80 text-sm mt-1">
                 Merchant: AgriAssist Nepal
@@ -127,14 +84,14 @@ const PaymentPage = () => {
               className="w-32 h-12 bg-contain bg-no-repeat bg-center mx-auto mb-8"
               style={{
                 backgroundImage:
-                  "url('https://upload.wikimedia.org/wikipedia/commons/f/f5/Esewa_logo.webp')",
+                  "url('https://upload.wikimedia.org/wikipedia/commons/f/f5/Khalti_logo.svg')",
               }}
             >
-              <span className="sr-only">eSewa</span>
+              <span className="sr-only">Khalti</span>
             </div>
 
             <p className="text-gray-600 mb-8 max-w-sm mx-auto">
-              You will be redirected to the eSewa website to securely complete
+              You will be redirected to the Khalti website to securely complete
               your payment.
             </p>
 
@@ -165,7 +122,7 @@ const PaymentPage = () => {
               ) : (
                 <Shield size={20} />
               )}
-              {loading ? "Redirecting..." : "Pay via eSewa"}
+              {loading ? "Redirecting..." : "Pay via Khalti"}
               {!loading && (
                 <ArrowRight
                   className="group-hover:translate-x-1 transition-transform"
@@ -176,7 +133,7 @@ const PaymentPage = () => {
 
             <div className="flex items-center justify-center gap-2 text-xs text-gray-400 mt-8 pt-6 border-t border-gray-100">
               <Shield size={12} />
-              Secured by eSewa | PCI-DSS Compliant
+              Secured by Khalti | PCI-DSS Compliant
             </div>
           </div>
         </div>

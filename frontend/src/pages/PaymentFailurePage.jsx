@@ -12,15 +12,10 @@ const PaymentFailurePage = () => {
     console.log('=== Payment Failure Page ===');
     console.log('All query params:', Object.fromEntries(searchParams.entries()));
     
-    // Check if eSewa returned any data
-    const data = searchParams.get('data');
-    if (data) {
-      try {
-        const decoded = JSON.parse(atob(data));
-        console.log('Decoded eSewa data:', decoded);
-      } catch (e) {
-        console.log('Could not decode data:', e);
-      }
+    // Check if Khalti returned any data
+    const pidx = searchParams.get('pidx');
+    if (pidx) {
+      console.log('Khalti payment failure for pidx:', pidx);
     }
   }, [searchParams]);
 
