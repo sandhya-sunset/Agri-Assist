@@ -329,51 +329,7 @@ const DiseaseDetection = () => {
 
                   {result.recommendations && (
                     <div className="space-y-6">
-                      {/* Description Highlight */}
-                      {result.recommendations.description && (
-                        <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
-                          <p className="text-sm text-gray-700">
-                            {result.recommendations.description}
-                          </p>
-                        </div>
-                      )}
 
-                      {/* Symptoms */}
-                      {result.recommendations.symptoms && result.recommendations.symptoms.length > 0 && (
-                        <div>
-                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-2">
-                            <AlertCircle size={18} className="text-red-500" />
-                            Symptoms
-                          </h4>
-                          <ul className="list-disc list-inside text-sm text-gray-600 ml-1 space-y-1">
-                            {result.recommendations.symptoms.map((sym, i) => (
-                              <li key={i}>{sym}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Treatment Steps */}
-                      {result.recommendations.treatments && result.recommendations.treatments.length > 0 && (
-                        <div>
-                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
-                            <Info size={18} className="text-blue-600" />
-                            Treatment Instructions
-                          </h4>
-                          <div className="space-y-3">
-                            {result.recommendations.treatments.map((treat, idx) => (
-                              <div key={idx} className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
-                                <h5 className="font-bold text-blue-900 mb-2">{treat.name}</h5>
-                                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                                  {treat.steps.map((step, i) => (
-                                    <li key={i}>{step}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
 
                       {/* Recommended Products (Fertilizers & Pesticides) */}
                       {(result.recommendations.fertilizers?.length > 0 || result.recommendations.pesticides?.length > 0) && (
@@ -418,20 +374,7 @@ const DiseaseDetection = () => {
                         </div>
                       )}
 
-                      {/* Prevention Tips */}
-                      {result.recommendations.preventionTips && result.recommendations.preventionTips.length > 0 && (
-                        <div className="pt-2">
-                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-2">
-                            <Shield size={18} className="text-green-600" />
-                            Prevention Tips
-                          </h4>
-                          <ul className="list-disc list-inside text-sm text-gray-600 ml-1 space-y-1">
-                            {result.recommendations.preventionTips.map((tip, i) => (
-                              <li key={i}>{tip}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+
                     </div>
                   )}
 

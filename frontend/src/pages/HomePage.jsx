@@ -34,6 +34,15 @@ import {
   Trash2,
   Calendar,
   Check,
+  Cloud,
+  Sun,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  Wind,
+  MapPin,
+  Thermometer,
+  Droplets,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import productService from "../services/productService";
@@ -72,6 +81,12 @@ const HomePage = () => {
   const [testReminderLoading, setTestReminderLoading] = useState(false);
   const shownNotificationIds = useRef(new Set());
 
+  // Weather state
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherError, setWeatherError] = useState(null);
+  const [locationName, setLocationName] = useState("Local Area");
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -99,7 +114,61 @@ const HomePage = () => {
     fetchProducts();
     fetchHomePageData();
     fetchTasks();
+    fetchWeather();
   }, []);
+
+  // Weather fetching logic using Open-Meteo (Free, no API key needed)
+  const fetchWeather = () => {
+    setWeatherLoading(true);
+    if (!navigator.geolocation) {
+      setWeatherError("Geolocation not supported");
+      setWeatherLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+
+          // Reverse geocoding for City using Open-Meteo Geocoding
+          try {
+            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&format=json`);
+            if (geoRes.ok) {
+              const geoData = await geoRes.json();
+              if (geoData.results && geoData.results.length > 0) {
+                // Determine best location name (City or state)
+                setLocationName(geoData.results[0].name || geoData.results[0].admin1 || "Local Area");
+              }
+            }
+          } catch (e) {
+            console.warn("Reverse geocode failed", e);
+          }
+
+          // Fetch Weather
+          const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=auto`;
+          const res = await fetch(weatherUrl);
+
+          if (!res.ok) throw new Error("Weather fetch failed");
+
+          const data = await res.json();
+          setWeather(data.current);
+          setWeatherError(null);
+        } catch (err) {
+          console.error("Error fetching weather:", err);
+          setWeatherError("Failed to fetch weather data");
+        } finally {
+          setWeatherLoading(false);
+        }
+      },
+      (err) => {
+        console.warn("Geolocation blocked or failed:", err.message);
+        setWeatherError("Location access denied");
+        setWeatherLoading(false);
+      },
+      { timeout: 10000 }
+    );
+  };
 
   // Polling fallback: check for new task reminders every 20s (works even if socket doesn't deliver)
   useEffect(() => {
@@ -404,22 +473,36 @@ const HomePage = () => {
   // Use dynamic data if available, fallback to static
   const displayStats = stats
     ? [
-        { icon: Users, value: stats.totalUsers, label: "Happy Farmers" },
-        { icon: Package, value: stats.totalOrders, label: "Orders Delivered" },
-        { icon: Award, value: stats.avgRating, label: "Customer Rating" },
-        {
-          icon: BarChart3,
-          value: stats.yieldIncrease,
-          label: "Avg. Yield Increase",
-        },
-      ]
+      { icon: Users, value: stats.totalUsers, label: "Happy Farmers" },
+      { icon: Package, value: stats.totalOrders, label: "Orders Delivered" },
+      { icon: Award, value: stats.avgRating, label: "Customer Rating" },
+      {
+        icon: BarChart3,
+        value: stats.yieldIncrease,
+        label: "Avg. Yield Increase",
+      },
+    ]
     : staticStats;
 
   const displayTestimonials =
     testimonials.length > 0 ? testimonials : staticTestimonials;
   const displayDeals = deals.length > 0 ? deals : staticDeals;
-  // eslint-disable-next-line no-unused-vars
   const displayBlogPosts = blogPosts.length > 0 ? blogPosts : staticBlogPosts;
+
+  // Helper function to map Open-Meteo WMO weather codes to generic icons and descriptions
+  const getWeatherDetails = (code, isDay) => {
+    if (code === undefined) return { icon: Cloud, description: "Unknown" };
+    // Map WMO codes: https://open-meteo.com/en/docs
+    if (code === 0) return { icon: isDay ? Sun : Cloud, description: "Clear sky" };
+    if ([1, 2, 3].includes(code)) return { icon: isDay ? Sun : Cloud, description: "Partly cloudy" };
+    if ([45, 48].includes(code)) return { icon: Cloud, description: "Foggy" };
+    if ([51, 53, 55, 56, 57].includes(code)) return { icon: CloudRain, description: "Drizzle" };
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { icon: CloudRain, description: "Rain" };
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return { icon: CloudSnow, description: "Snow" };
+    if ([95, 96, 99].includes(code)) return { icon: CloudLightning, description: "Thunderstorm" };
+
+    return { icon: Cloud, description: "Cloudy" };
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -431,9 +514,8 @@ const HomePage = () => {
           {heroSlides.map((slide, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                currentSlide === index ? "opacity-100" : "opacity-0"
-              }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ${currentSlide === index ? "opacity-100" : "opacity-0"
+                }`}
             >
               <div className="absolute inset-0">
                 <img
@@ -476,6 +558,65 @@ const HomePage = () => {
                     {slide.cta}
                     <ArrowRight size={20} />
                   </button>
+
+                  {/* Weather Widget */}
+                  <div className="mt-8 pt-6 border-t border-white/20 w-full max-w-sm">
+                    {weatherLoading ? (
+                      <div className="flex items-center gap-3 text-white/80 animate-pulse">
+                        <Loader2 className="animate-spin" size={20} />
+                        <span className="text-sm">Fetching local weather...</span>
+                      </div>
+                    ) : weatherError ? (
+                      <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg w-fit backdrop-blur-md border border-white/10">
+                        <Cloud className="text-gray-300" size={20} />
+                        <span className="text-sm font-medium">{weatherError}</span>
+                      </div>
+                    ) : weather && (
+                      <div className="bg-black/30 backdrop-blur-md border border-white/20 p-5 rounded-2xl text-white shadow-xl hover:bg-black/40 transition-colors cursor-default">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="text-green-400" size={18} />
+                            <span className="font-semibold">{locationName}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full">
+                            {React.createElement(getWeatherDetails(weather.weather_code, weather.is_day === 1).icon, { size: 14, className: "text-blue-300" })}
+                            <span className="text-xs font-medium">
+                              {getWeatherDetails(weather.weather_code, weather.is_day === 1).description}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-end gap-4">
+                          <div className="flex items-start gap-1">
+                            <span className="text-5xl font-bold tracking-tighter">
+                              {Math.round(weather.temperature_2m)}
+                            </span>
+                            <span className="text-2xl text-white/70 mt-1">°C</span>
+                          </div>
+
+                          <div className="h-10 w-px bg-white/20 mx-2"></div>
+
+                          <div className="flex flex-col gap-1.5 pb-1 flex-1">
+                            <div className="flex justify-between items-center w-full">
+                              <div className="flex items-center gap-1.5 text-white/80">
+                                <Droplets size={14} className="text-blue-400" />
+                                <span className="text-xs">Humidity</span>
+                              </div>
+                              <span className="text-sm font-semibold">{weather.relative_humidity_2m}%</span>
+                            </div>
+
+                            <div className="flex justify-between items-center w-full">
+                              <div className="flex items-center gap-1.5 text-white/80">
+                                <Wind size={14} className="text-gray-300" />
+                                <span className="text-xs">Wind</span>
+                              </div>
+                              <span className="text-sm font-semibold">{weather.wind_speed_10m} <span className="text-[10px] text-white/60">km/h</span></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -487,11 +628,10 @@ const HomePage = () => {
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  currentSlide === index
-                    ? "w-12 bg-green-500"
-                    : "w-2 bg-white/50"
-                }`}
+                className={`h-2 rounded-full transition-all duration-300 ${currentSlide === index
+                  ? "w-12 bg-green-500"
+                  : "w-2 bg-white/50"
+                  }`}
               />
             ))}
           </div>
@@ -672,20 +812,18 @@ const HomePage = () => {
                   {tasks.map((task) => (
                     <div
                       key={task._id}
-                      className={`flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors ${
-                        task.isCompleted ? "bg-green-50/50" : ""
-                      }`}
+                      className={`flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors ${task.isCompleted ? "bg-green-50/50" : ""
+                        }`}
                     >
                       <button
                         type="button"
                         onClick={() =>
                           handleToggleTask(task._id, task.isCompleted)
                         }
-                        className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                          task.isCompleted
-                            ? "bg-green-600 border-green-600 text-white"
-                            : "border-gray-300 hover:border-green-500"
-                        }`}
+                        className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${task.isCompleted
+                          ? "bg-green-600 border-green-600 text-white"
+                          : "border-gray-300 hover:border-green-500"
+                          }`}
                       >
                         {task.isCompleted && (
                           <Check size={14} strokeWidth={3} />
@@ -693,9 +831,8 @@ const HomePage = () => {
                       </button>
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`font-medium text-gray-900 truncate ${
-                            task.isCompleted ? "line-through text-gray-500" : ""
-                          }`}
+                          className={`font-medium text-gray-900 truncate ${task.isCompleted ? "line-through text-gray-500" : ""
+                            }`}
                         >
                           {task.title}
                         </p>
@@ -857,11 +994,10 @@ const HomePage = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  selectedCategory === cat.id
-                    ? "bg-green-600 text-white shadow-lg shadow-green-200 scale-105"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${selectedCategory === cat.id
+                  ? "bg-green-600 text-white shadow-lg shadow-green-200 scale-105"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
               >
                 <cat.icon size={18} />
                 {cat.name}
@@ -1037,11 +1173,10 @@ const HomePage = () => {
               {displayTestimonials.map((testimonial, index) => (
                 <div
                   key={index}
-                  className={`transition-opacity duration-500 ${
-                    currentTestimonial === index
-                      ? "opacity-100"
-                      : "opacity-0 absolute inset-0"
-                  }`}
+                  className={`transition-opacity duration-500 ${currentTestimonial === index
+                    ? "opacity-100"
+                    : "opacity-0 absolute inset-0"
+                    }`}
                 >
                   <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
                     <Quote className="text-green-200 mb-6" size={48} />
@@ -1087,11 +1222,10 @@ const HomePage = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    currentTestimonial === index
-                      ? "w-12 bg-green-600"
-                      : "w-2 bg-gray-300"
-                  }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${currentTestimonial === index
+                    ? "w-12 bg-green-600"
+                    : "w-2 bg-gray-300"
+                    }`}
                 />
               ))}
             </div>
