@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Lock, Shield, Loader2, ArrowRight } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import api from "../services/api";
 import LocationPicker from "../components/LocationPicker";
 import { MapPin } from "lucide-react";

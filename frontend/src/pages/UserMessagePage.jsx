@@ -15,7 +15,7 @@ import {
   ShoppingBag,
   Loader2,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 

@@ -9,7 +9,7 @@ import {
   Truck,
   Package,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 

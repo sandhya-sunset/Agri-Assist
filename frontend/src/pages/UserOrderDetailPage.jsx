@@ -13,7 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Upload,
   Camera,
@@ -18,29 +19,58 @@ import {
   Share2,
   Trash2,
   Shield,
+  MessageCircle,
+  Eye,
+  MessageSquare,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 
 const DiseaseDetection = () => {
+  const apiBaseUrl = "http://localhost:5000";
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [detectionHistory, setDetectionHistory] = useState([]);
+  const [selectedRecentResult, setSelectedRecentResult] = useState(null);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isHistoryDetailLoading, setIsHistoryDetailLoading] = useState(false);
+  const [activeHistoryId, setActiveHistoryId] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
+  const [forumPosts, setForumPosts] = useState([]);
+  const [forumLoading, setForumLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchDetectionHistory();
+    fetchRecentForumPosts();
   }, []);
+
+  const fetchRecentForumPosts = async () => {
+    try {
+      setForumLoading(true);
+      const response = await fetch(
+        "http://localhost:5000/api/forum?sortBy=latest"
+      );
+      const data = await response.json();
+      if (data.success) {
+        setForumPosts(data.data.slice(0, 3));
+      }
+    } catch (err) {
+      console.error("Error fetching forum posts:", err);
+    } finally {
+      setForumLoading(false);
+    }
+  };
 
   const fetchDetectionHistory = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:5000/api/detection/history",
+        `${apiBaseUrl}/api/detection/history`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -49,10 +79,94 @@ const DiseaseDetection = () => {
       );
       const data = await response.json();
       if (data.success) {
-        setDetectionHistory(data.data.slice(0, 5));
+        setDetectionHistory(data.data);
+        if (data.data.length > 0 && !activeHistoryId) {
+          const latestDetection = data.data[0];
+          setActiveHistoryId(latestDetection._id);
+          setSelectedRecentResult(buildResultFromDetection(latestDetection));
+        }
       }
     } catch (err) {
       console.error("Error fetching history:", err);
+    }
+  };
+
+  const buildResultFromDetection = (detection) => ({
+    detectionId: detection._id,
+    disease: detection.diseaseDetected,
+    confidence: Number(detection.confidence).toFixed(2),
+    recommendations: groupRecommendationDetails(detection),
+    imagePath: detection.imagePath,
+  });
+
+  const groupRecommendationDetails = (detection) => {
+    if (detection.recommendationDetails) {
+      return detection.recommendationDetails;
+    }
+
+    const groupedRecommendations = {
+      fertilizers: [],
+      boosters: [],
+      pesticides: [],
+      treatments: [],
+    };
+
+    (detection.recommendations || []).forEach((item) => {
+      if (item.type === "fertilizer") groupedRecommendations.fertilizers.push(item);
+      if (item.type === "booster") groupedRecommendations.boosters.push(item);
+      if (item.type === "pesticide") groupedRecommendations.pesticides.push(item);
+      if (item.type === "treatment") groupedRecommendations.treatments.push(item);
+    });
+
+    return {
+      diseaseName: detection.diseaseDetected,
+      plantType: detection.plantType,
+      description:
+        detection.plantType
+          ? `Saved detection for ${detection.plantType}. Review the recommended care products and next steps below.`
+          : "Saved detection record. Review the recommended care products and next steps below.",
+      preventionTips: [],
+      symptoms: [],
+      ...groupedRecommendations,
+    };
+  };
+
+  const loadDetectionDetails = async (detectionId, shouldCloseModal = false) => {
+    try {
+      setIsHistoryDetailLoading(true);
+      setActiveHistoryId(detectionId);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${apiBaseUrl}/api/detection/${detectionId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (!data.success) {
+        setError(data.message || "Failed to load detection details");
+        return;
+      }
+
+      const detection = data.data;
+      const nextResult = buildResultFromDetection(detection);
+
+      setSelectedImage(null);
+      setPreviewUrl(`${apiBaseUrl}/${detection.imagePath}`);
+      setResult(nextResult);
+      setSelectedRecentResult(nextResult);
+      setError(null);
+
+      if (shouldCloseModal) {
+        setIsHistoryModalOpen(false);
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      console.error("Error loading detection details:", err);
+      setError("Failed to load detection details. Please try again.");
+    } finally {
+      setIsHistoryDetailLoading(false);
     }
   };
 
@@ -68,7 +182,7 @@ const DiseaseDetection = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5000/api/detection/${recordToDelete}`,
+        `${apiBaseUrl}/api/detection/${recordToDelete}`,
         {
           method: "DELETE",
           headers: {
@@ -81,6 +195,18 @@ const DiseaseDetection = () => {
         setDetectionHistory((prev) =>
           prev.filter((item) => item._id !== recordToDelete),
         );
+        if (activeHistoryId === recordToDelete) {
+          setActiveHistoryId(null);
+          const nextDetection = detectionHistory.find(
+            (item) => item._id !== recordToDelete,
+          );
+          setSelectedRecentResult(
+            nextDetection ? buildResultFromDetection(nextDetection) : null,
+          );
+        }
+        if (result?.detectionId === recordToDelete) {
+          resetAnalysis();
+        }
         setDeleteModalOpen(false);
         setRecordToDelete(null);
       } else {
@@ -123,7 +249,7 @@ const DiseaseDetection = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:5000/api/detection/upload",
+        `${apiBaseUrl}/api/detection/upload`,
         {
           method: "POST",
           headers: {
@@ -139,7 +265,10 @@ const DiseaseDetection = () => {
       console.log("Recommendations received:", data.data?.recommendations);
 
       if (data.success) {
+        setPreviewUrl(`${apiBaseUrl}/${data.data.imagePath}`);
         setResult(data.data);
+        setSelectedRecentResult(data.data);
+        setActiveHistoryId(data.data.detectionId);
         fetchDetectionHistory();
       } else {
         setError(data.message || "Analysis failed");
@@ -162,6 +291,8 @@ const DiseaseDetection = () => {
     }
   };
 
+  const recentDetections = detectionHistory.slice(0, 5);
+
   // eslint-disable-next-line no-unused-vars
   const getSeverityColor = (confidence) => {
     if (confidence >= 90) return "text-red-600 bg-red-50 border-red-200";
@@ -174,6 +305,235 @@ const DiseaseDetection = () => {
     if (confidence >= 90) return "bg-green-500";
     if (confidence >= 70) return "bg-yellow-500";
     return "bg-orange-500";
+  };
+
+  const formatDiseaseLabel = (value) => {
+    if (!value) return "Unknown Disease";
+
+    return value
+      .replace(/___/g, " - ")
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
+  const handleBuyNow = (productName, productType = "Fertilizer") => {
+    // First, try to extract meaningful keywords from the recommendation name
+    const commonSuffixes = ["Spray", "Booster", "Soap", "Oil", "Fertilizer", "Powder", "Liquid", "Solution", "Mix", "Treatment"];
+    const words = productName.split(" ").filter(word => word.length > 0);
+    
+    // Remove common disease/plant prefixes and suffixes
+    let filteredWords = words.filter(word => {
+      const lowerWord = word.toLowerCase();
+      return !commonSuffixes.includes(word) && 
+             !["recovery", "protection", "cure", "control", "preventive"].includes(lowerWord) &&
+             word.length > 2; // Only keep meaningful words (3+ characters)
+    });
+    
+    // If we filtered too much, keep at least the first 2 original words
+    if (filteredWords.length === 0) {
+      filteredWords = words.slice(0, 2);
+    }
+    
+    // Build search query from filtered words
+    let searchQuery = filteredWords.slice(0, 3).join(" ").trim();
+    
+    // If search query is empty or very short, use the product type as fallback
+    if (!searchQuery || searchQuery.length < 3) {
+      searchQuery = productType; // Search by category like "Fertilizer" or "Pesticide"
+    }
+    
+    navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+  };
+
+  const renderDetectionSummary = (detectionResult) => {
+    if (!detectionResult?.recommendations) {
+      return null;
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="p-6 bg-linear-to-br from-green-50 to-blue-50 rounded-2xl border border-green-100">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="text-sm font-bold text-gray-600 mb-1">
+                Detected Disease
+              </p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {formatDiseaseLabel(detectionResult.disease)}
+              </h3>
+            </div>
+            <CheckCircle className="text-green-600" size={32} />
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-gray-700">
+                Confidence Level
+              </span>
+              <span className="text-sm font-bold text-gray-900">
+                {detectionResult.confidence}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${getConfidenceColor(parseFloat(detectionResult.confidence))}`}
+                style={{ width: `${detectionResult.confidence}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="p-4 rounded-2xl border border-green-100 bg-green-50/70">
+            <p className="text-xs font-bold uppercase tracking-wide text-green-700 mb-2">
+              Care Summary
+            </p>
+            <p className="text-sm text-gray-700 leading-6">
+              {detectionResult.recommendations.description}
+            </p>
+          </div>
+          {detectionResult.recommendations.preventionTips?.length > 0 && (
+            <div className="p-4 rounded-2xl border border-blue-100 bg-blue-50/70">
+              <p className="text-xs font-bold uppercase tracking-wide text-blue-700 mb-2">
+                Prevention Tips
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                {detectionResult.recommendations.preventionTips.slice(0, 3).map((tip, idx) => (
+                  <li key={idx} className="flex gap-2">
+                    <Shield size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {(detectionResult.recommendations.fertilizers?.length > 0 || detectionResult.recommendations.boosters?.length > 0 || detectionResult.recommendations.pesticides?.length > 0) && (
+          <div>
+            <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+              <ShoppingCart size={18} className="text-green-600" />
+              Recommended Care Products
+            </h4>
+            <div className="space-y-4">
+              {detectionResult.recommendations.fertilizers?.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-sm font-bold text-gray-700">Fertilizers</p>
+                  {detectionResult.recommendations.fertilizers.slice(0, 2).map((item, idx) => (
+                    <div key={idx} className="p-4 bg-white border border-green-200 rounded-xl shadow-sm">
+                      <div className="flex items-start justify-between gap-3 mb-1">
+                        <h5 className="font-bold text-gray-900">{item.name}</h5>
+                        <button
+                          onClick={() => handleBuyNow(item.name, "Fertilizer")}
+                          className="text-xs font-bold text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded whitespace-nowrap transition-colors"
+                        >
+                          Buy Now
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 justify-between">
+                        <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">Dosage: {item.dosage}</span>
+                        <span className="text-xs text-gray-500">{item.applicationMethod}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {detectionResult.recommendations.boosters?.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-sm font-bold text-gray-700">Plant Boosters</p>
+                  {detectionResult.recommendations.boosters.slice(0, 2).map((item, idx) => (
+                    <div key={idx} className="p-4 bg-white border border-emerald-200 rounded-xl shadow-sm">
+                      <div className="flex items-center justify-between gap-3 mb-1">
+                        <div className="flex items-center gap-2">
+                          <h5 className="font-bold text-gray-900">{item.name}</h5>
+                          <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                            Booster
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleBuyNow(item.name, "Booster")}
+                          className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1 rounded whitespace-nowrap transition-colors"
+                        >
+                          Buy Now
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 justify-between">
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded">Dosage: {item.dosage}</span>
+                        <span className="text-xs text-gray-500">{item.applicationMethod}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {detectionResult.recommendations.pesticides?.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-sm font-bold text-gray-700">Nature-Friendly Pesticides</p>
+                  {detectionResult.recommendations.pesticides.slice(0, 2).map((item, idx) => (
+                    <div key={idx} className="p-4 bg-white border border-orange-200 rounded-xl shadow-sm">
+                      <div className="flex items-center justify-between gap-3 mb-1">
+                        <div className="flex items-center gap-2">
+                          <h5 className="font-bold text-gray-900">{item.name}</h5>
+                          <span className="text-[11px] font-bold uppercase tracking-wide text-orange-700 bg-orange-100 px-2 py-1 rounded-full">
+                            Eco Care
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleBuyNow(item.name, "Pesticide")}
+                          className="text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded whitespace-nowrap transition-colors"
+                        >
+                          Buy Now
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 justify-between">
+                        <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-1 rounded">Dosage: {item.dosage}</span>
+                        <span className="text-xs text-gray-500">{item.applicationMethod}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {detectionResult.recommendations.treatments?.length > 0 && (
+          <div>
+            <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+              <Info size={18} className="text-blue-600" />
+              What To Do Next
+            </h4>
+            <div className="space-y-3">
+              {detectionResult.recommendations.treatments.slice(0, 1).map((treatment, idx) => (
+                <div key={idx} className="p-4 bg-white border border-blue-200 rounded-xl shadow-sm">
+                  <h5 className="font-bold text-gray-900 mb-2">{treatment.name}</h5>
+                  {treatment.description && (
+                    <p className="text-sm text-gray-600 mb-3">{treatment.description}</p>
+                  )}
+                  {treatment.steps?.length > 0 && (
+                    <ul className="space-y-2 text-sm text-gray-700">
+                      {treatment.steps.slice(0, 4).map((step, stepIdx) => (
+                        <li key={stepIdx} className="flex gap-2">
+                          <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                            {stepIdx + 1}
+                          </span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -241,23 +601,29 @@ const DiseaseDetection = () => {
                     </button>
                   </div>
 
-                  <button
-                    onClick={handleAnalyze}
-                    disabled={isAnalyzing}
-                    className="w-full py-4 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="animate-spin" size={20} />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles size={20} />
-                        Analyze Disease
-                      </>
-                    )}
-                  </button>
+                  {selectedImage ? (
+                    <button
+                      onClick={handleAnalyze}
+                      disabled={isAnalyzing}
+                      className="w-full py-4 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="animate-spin" size={20} />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={20} />
+                          Analyze Disease
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-800">
+                      Viewing a saved detection. Use New Scan to upload another image.
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -296,87 +662,7 @@ const DiseaseDetection = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="p-6 bg-linear-to-br from-green-50 to-blue-50 rounded-2xl border border-green-100">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <p className="text-sm font-bold text-gray-600 mb-1">
-                          Detected Disease
-                        </p>
-                        <h3 className="text-2xl font-bold text-gray-900">
-                          {result.disease}
-                        </h3>
-                      </div>
-                      <CheckCircle className="text-green-600" size={32} />
-                    </div>
-
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-bold text-gray-700">
-                          Confidence Level
-                        </span>
-                        <span className="text-sm font-bold text-gray-900">
-                          {result.confidence}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-1000 ${getConfidenceColor(parseFloat(result.confidence))}`}
-                          style={{ width: `${result.confidence}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {result.recommendations && (
-                    <div className="space-y-6">
-
-
-                      {/* Recommended Products (Fertilizers & Pesticides) */}
-                      {(result.recommendations.fertilizers?.length > 0 || result.recommendations.pesticides?.length > 0) && (
-                        <div>
-                          <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
-                            <ShoppingCart size={18} className="text-green-600" />
-                            Recommended Products
-                          </h4>
-                          <div className="space-y-4">
-                            {result.recommendations.fertilizers?.length > 0 && (
-                              <div className="space-y-3">
-                                <p className="text-sm font-bold text-gray-700">Fertilizers:</p>
-                                {result.recommendations.fertilizers.slice(0, 2).map((item, idx) => (
-                                  <div key={idx} className="p-4 bg-white border border-green-200 rounded-xl shadow-sm">
-                                    <h5 className="font-bold text-gray-900 mb-1">{item.name}</h5>
-                                    <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">Dosage: {item.dosage}</span>
-                                      <button className="text-xs font-bold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition">Buy Now</button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {result.recommendations.pesticides?.length > 0 && (
-                              <div className="space-y-3">
-                                <p className="text-sm font-bold text-gray-700">Pesticides:</p>
-                                {result.recommendations.pesticides.slice(0, 2).map((item, idx) => (
-                                  <div key={idx} className="p-4 bg-white border border-orange-200 rounded-xl shadow-sm">
-                                    <h5 className="font-bold text-gray-900 mb-1">{item.name}</h5>
-                                    <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-1 rounded">Dosage: {item.dosage}</span>
-                                      <button className="text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 px-3 py-1.5 rounded-lg transition">Buy Now</button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-
-                    </div>
-                  )}
+                  {renderDetectionSummary(result)}
 
                   <div className="flex gap-3">
                     <button
@@ -403,17 +689,21 @@ const DiseaseDetection = () => {
                   <History className="text-green-600" size={24} />
                   Recent Detections
                 </h2>
-                <button className="text-sm font-bold text-green-600 hover:text-green-700 flex items-center gap-1">
+                <button
+                  onClick={() => setIsHistoryModalOpen(true)}
+                  className="text-sm font-bold text-green-600 hover:text-green-700 flex items-center gap-1"
+                >
                   View All
                   <ArrowRight size={16} />
                 </button>
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {detectionHistory.map((detection) => (
+                {recentDetections.map((detection) => (
                   <div
                     key={detection._id}
-                    className="p-4 border border-gray-100 rounded-xl hover:shadow-lg transition-all duration-300 cursor-pointer group relative"
+                    onClick={() => loadDetectionDetails(detection._id)}
+                    className={`p-4 border rounded-xl hover:shadow-lg transition-all duration-300 cursor-pointer group relative ${activeHistoryId === detection._id ? "border-green-300 bg-green-50/60" : "border-gray-100"}`}
                   >
                     <button
                       onClick={(e) => handleDelete(e, detection._id)}
@@ -425,7 +715,7 @@ const DiseaseDetection = () => {
                     <div className="flex items-start gap-3">
                       <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                         <img
-                          src={`http://localhost:5000/${detection.imagePath}`}
+                          src={`${apiBaseUrl}/${detection.imagePath}`}
                           alt="Detection"
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
@@ -453,8 +743,113 @@ const DiseaseDetection = () => {
                   </div>
                 ))}
               </div>
+
+              {selectedRecentResult && (
+                <div className="mt-8 border-t border-gray-100 pt-8">
+                  <div className="flex items-center justify-between gap-3 mb-6">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">
+                        Saved Detection Summary
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Full details for the selected previous detection.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => loadDetectionDetails(selectedRecentResult.detectionId)}
+                      className="text-sm font-bold text-green-600 hover:text-green-700"
+                    >
+                      Open In Main Result
+                    </button>
+                  </div>
+                  {renderDetectionSummary(selectedRecentResult)}
+                </div>
+              )}
             </div>
           )}
+
+          {/* Community Forum Section */}
+          <div className="mt-12 bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 mb-2">
+                  <MessageCircle className="text-green-600" size={28} />
+                  Community Forum
+                </h2>
+                <p className="text-gray-600">
+                  Share knowledge with other farmers and get answers from agricultural experts
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/forum")}
+                className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg shadow-green-200 transition-all whitespace-nowrap"
+              >
+                <MessageSquare size={18} />
+                View All
+              </button>
+            </div>
+
+            {forumLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="animate-spin text-green-600" size={24} />
+                <span className="ml-2 text-gray-600">Loading discussions...</span>
+              </div>
+            ) : forumPosts.length > 0 ? (
+              <div className="space-y-4">
+                {forumPosts.map((post) => (
+                  <div
+                    key={post._id}
+                    onClick={() => navigate(`/forum/${post._id}`)}
+                    className="p-5 border border-gray-200 rounded-xl hover:shadow-md hover:border-green-300 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900 group-hover:text-green-600 transition-colors">
+                          {post.title}
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          by <span className="font-semibold">{post.userName}</span> • {new Date(post.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className="text-xs font-bold px-3 py-1 bg-green-100 text-green-700 rounded-full whitespace-nowrap">
+                        {post.category}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+                      {post.description}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Eye size={14} />
+                        {post.views} views
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle size={14} />
+                        {post.replies?.length || 0} replies
+                      </span>
+                      {post.status === "answered" && (
+                        <span className="flex items-center gap-1 text-green-600 font-semibold">
+                          <CheckCircle size={14} />
+                          Answered
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">No discussions yet. Be the first to start one!</p>
+                <button
+                  onClick={() => navigate("/forum/create")}
+                  className="mt-4 text-green-600 font-bold hover:underline"
+                >
+                  Ask a Question
+                </button>
+              </div>
+            )}
+          </div>
 
           <div className="mt-12 grid md:grid-cols-3 gap-6">
             <div className="bg-linear-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200">
@@ -518,6 +913,93 @@ const DiseaseDetection = () => {
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isHistoryModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 p-4 md:p-6">
+          <div className="mx-auto flex h-full max-w-6xl items-start justify-center">
+            <div className="flex h-[90vh] w-full flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Detection History</h3>
+                  <p className="text-sm text-gray-500">
+                    Open any saved scan to restore its details on this page.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsHistoryModalOpen(false)}
+                  className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="grid flex-1 overflow-hidden lg:grid-cols-[380px_1fr]">
+                <div className="overflow-y-auto border-b border-gray-100 p-4 lg:border-b-0 lg:border-r">
+                  <div className="space-y-3">
+                    {detectionHistory.map((detection) => (
+                      <button
+                        key={detection._id}
+                        onClick={() => loadDetectionDetails(detection._id, true)}
+                        className={`w-full rounded-2xl border p-4 text-left transition-all ${activeHistoryId === detection._id ? "border-green-300 bg-green-50 shadow-sm" : "border-gray-100 bg-white hover:border-green-200 hover:bg-green-50/40"}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                            <img
+                              src={`${apiBaseUrl}/${detection.imagePath}`}
+                              alt="Detection"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-bold text-gray-900">
+                              {formatDiseaseLabel(detection.diseaseDetected)}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-500">
+                              {new Date(detection.createdAt).toLocaleString()}
+                            </p>
+                            <div className="mt-3 flex items-center gap-2">
+                              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-200">
+                                <div
+                                  className={`h-full rounded-full ${getConfidenceColor(detection.confidence)}`}
+                                  style={{ width: `${detection.confidence}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-bold text-gray-700">
+                                {Number(detection.confidence).toFixed(0)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center overflow-y-auto bg-gray-50/60 p-6">
+                  <div className="w-full max-w-2xl rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                    {isHistoryDetailLoading ? (
+                      <div className="flex min-h-64 flex-col items-center justify-center gap-3 text-center text-gray-500">
+                        <Loader2 className="animate-spin text-green-600" size={28} />
+                        <p className="text-sm font-medium">Loading saved detection details...</p>
+                      </div>
+                    ) : (
+                      <div className="flex min-h-64 flex-col items-center justify-center text-center">
+                        <div className="mb-4 rounded-full bg-green-100 p-4 text-green-700">
+                          <History size={28} />
+                        </div>
+                        <h4 className="text-xl font-bold text-gray-900">Open a saved detection</h4>
+                        <p className="mt-2 max-w-md text-sm text-gray-500">
+                          Choose any record from the left and its image, disease result, and saved care recommendations will be restored on this page.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

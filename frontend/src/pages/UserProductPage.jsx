@@ -12,7 +12,7 @@ import {
   Star,
   TrendingUp,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import productService from "../services/productService";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";

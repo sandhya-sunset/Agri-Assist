@@ -22,6 +22,10 @@ import { SocketProvider } from "./context/SocketContext";
 import NotificationPage from "./pages/NotificationPage";
 import UserOrdersPage from "./pages/UserOrdersPage";
 import UserOrderDetailPage from "./pages/UserOrderDetailPage";
+import CommunityForum from "./pages/CommunityForum";
+import ForumPostDetail from "./pages/ForumPostDetail";
+import CreateForumPost from "./pages/CreateForumPost";
+
 const ProtectedRoute = ({ children, role }) => {
   const { user, isAuthenticated, loading } = useAuth();
 
@@ -145,6 +149,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/forum" element={<CommunityForum />} />
+              <Route
+                path="/forum/create"
+                element={
+                  <ProtectedRoute role="user">
+                    <CreateForumPost />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/forum/:id" element={<ForumPostDetail />} />
             </Routes>
           </BrowserRouter>
         </ToastProvider>

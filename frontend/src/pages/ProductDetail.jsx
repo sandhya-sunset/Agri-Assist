@@ -20,7 +20,7 @@ import {
   Loader2,
   User,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import ChatWindow from "../components/ChatWindow";
 import api from "../services/api";

@@ -7,7 +7,7 @@ import {
   Heart,
   Loader2,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -63,11 +63,25 @@ const ProductListPage = () => {
   ];
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
+    // Search in product name, description, and category
+    const searchLower = searchTerm.toLowerCase();
+    const nameMatch = product.name.toLowerCase().includes(searchLower);
+    const descriptionMatch = product.description?.toLowerCase().includes(searchLower) || false;
+    const categoryMatch = product.category.toLowerCase().includes(searchLower);
+    
+    // Also check if any keyword from searchTerm matches
+    const keywords = searchLower.split(" ").filter(k => k.length > 0);
+    const keywordMatch = keywords.some(keyword => 
+      keyword.length > 2 && (
+        product.name.toLowerCase().includes(keyword) ||
+        product.description?.toLowerCase().includes(keyword) ||
+        product.category.toLowerCase().includes(keyword)
+      )
+    );
+    
+    const matchesSearch = nameMatch || descriptionMatch || categoryMatch || keywordMatch;
+    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+    
     return matchesSearch && matchesCategory;
   });
 

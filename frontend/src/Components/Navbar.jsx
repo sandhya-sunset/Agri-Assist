@@ -359,15 +359,15 @@ const Navbar = () => {
       >
         <div className="px-4 pt-2 pb-6 bg-white border-t border-gray-100 space-y-2 shadow-2xl">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.href}
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3.5 text-gray-600 hover:bg-green-50 hover:text-green-600 rounded-xl font-semibold transition-all duration-200"
             >
               {link.icon && <link.icon size={20} className="text-green-500" />}
               {link.name}
-            </a>
+            </Link>
           ))}
           <div className="grid grid-cols-2 gap-3 pt-4 px-2">
             {isAuthenticated ? (

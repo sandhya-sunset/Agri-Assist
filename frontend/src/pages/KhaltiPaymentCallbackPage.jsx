@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import { CheckCircle, XCircle, Loader2, ShoppingBag } from "lucide-react";
 import api from "../services/api";
 

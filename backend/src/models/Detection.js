@@ -22,13 +22,43 @@ const detectionSchema = new mongoose.Schema({
   recommendations: [{
     type: {
       type: String,
-      enum: ['fertilizer', 'pesticide', 'treatment']
+      enum: ['fertilizer', 'booster', 'pesticide', 'treatment']
     },
     name: String,
     description: String,
     dosage: String,
     applicationMethod: String
   }],
+  recommendationDetails: {
+    diseaseName: String,
+    plantType: String,
+    description: String,
+    symptoms: [String],
+    preventionTips: [String],
+    fertilizers: [{
+      name: String,
+      description: String,
+      dosage: String,
+      applicationMethod: String
+    }],
+    boosters: [{
+      name: String,
+      description: String,
+      dosage: String,
+      applicationMethod: String
+    }],
+    pesticides: [{
+      name: String,
+      description: String,
+      dosage: String,
+      applicationMethod: String
+    }],
+    treatments: [{
+      name: String,
+      description: String,
+      steps: [String]
+    }]
+  },
   createdAt: {
     type: Date,
     default: Date.now

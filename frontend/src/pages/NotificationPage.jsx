@@ -1,6 +1,6 @@
 import React from "react";
 import { useSocket } from "../context/SocketContext";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import { Bell, MessageSquare, Trash2, CheckCircle, Info } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";

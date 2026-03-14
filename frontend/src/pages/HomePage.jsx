@@ -44,7 +44,7 @@ import {
   Thermometer,
   Droplets,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../Components/Navbar";
 import productService from "../services/productService";
 import api from "../services/api";
 import { API_BASE_URL } from "../config";
@@ -545,10 +545,8 @@ const HomePage = () => {
 
                   <button
                     onClick={() => {
-                      if (slide.cta === "Open AI Assistant") {
-                        navigate("/detection");
-                      } else if (slide.cta === "Shop Now") {
-                        navigate("/products");
+                      if (currentSlide === 0) {
+                        navigate("/disease-detection");
                       } else {
                         navigate("/products");
                       }
@@ -960,7 +958,7 @@ const HomePage = () => {
           </div>
 
           <div className="mt-12 text-center">
-            <button className="px-8 py-4 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl font-bold shadow-2xl hover:shadow-green-500/50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2">
+            <button onClick={() => navigate("/disease-detection")} className="px-8 py-4 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl font-bold shadow-2xl hover:shadow-green-500/50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2">
               <Sparkles size={20} />
               Try AI Assistant Free
             </button>

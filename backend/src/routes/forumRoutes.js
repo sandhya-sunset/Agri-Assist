@@ -1,0 +1,346 @@
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middlewares/authMiddleware');
+const ForumPost = require('../models/ForumPost');
+
+// Get all forum posts with filters
+router.get('/', async (req, res) => {
+  try {
+    const { category, status, search, sortBy } = req.query;
+    let query = {};
+
+    if (category && category !== 'All') {
+      query.category = category;
+    }
+    if (status) {
+      query.status = status;
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    let sortOption = { createdAt: -1 };
+    if (sortBy === 'views') {
+      sortOption = { views: -1 };
+    } else if (sortBy === 'latest') {
+      sortOption = { createdAt: -1 };
+    } else if (sortBy === 'most-replies') {
+      sortOption = { 'replies': -1 };
+    }
+
+    const posts = await ForumPost.find(query)
+      .sort(sortOption)
+      .limit(50)
+      .select('-replies');
+
+    res.json({
+      success: true,
+      count: posts.length,
+      data: posts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching posts',
+      error: error.message,
+    });
+  }
+});
+
+// Get single post with all replies
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await ForumPost.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    // Increment view count
+    post.views += 1;
+    await post.save();
+
+    res.json({
+      success: true,
+      data: post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching post',
+      error: error.message,
+    });
+  }
+});
+
+// Create new forum post
+router.post('/', protect, async (req, res) => {
+  try {
+    const { title, description, category, tags, cropType, location } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title and description are required',
+      });
+    }
+
+    const newPost = await ForumPost.create({
+      title,
+      description,
+      category: category || 'General Query',
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: req.user.role,
+      userAvatar: req.user.avatar,
+      tags: tags || [],
+      cropType: cropType || '',
+      location: location || '',
+      replies: [],
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Post created successfully',
+      data: newPost,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error creating post',
+      error: error.message,
+    });
+  }
+});
+
+// Add reply to post
+router.post('/:id/replies', protect, async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Reply content is required',
+      });
+    }
+
+    const post = await ForumPost.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    const reply = {
+      _id: new require('mongoose').Types.ObjectId(),
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: req.user.role,
+      userAvatar: req.user.avatar,
+      content,
+      isAccepted: false,
+      likes: 0,
+      createdAt: new Date(),
+    };
+
+    post.replies.push(reply);
+    
+    // Update post status to answered if it was open
+    if (post.status === 'open' && req.user.role === 'expert') {
+      post.status = 'answered';
+    }
+
+    await post.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Reply added successfully',
+      data: post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error adding reply',
+      error: error.message,
+    });
+  }
+});
+
+// Mark reply as accepted answer
+router.put('/:postId/replies/:replyId/accept', protect, async (req, res) => {
+  try {
+    const post = await ForumPost.findById(req.params.postId);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    // Only post owner can accept answer
+    if (post.userId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only post owner can accept answers',
+      });
+    }
+
+    const reply = post.replies.id(req.params.replyId);
+
+    if (!reply) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reply not found',
+      });
+    }
+
+    // Remove accepted status from other replies
+    post.replies.forEach((r) => {
+      r.isAccepted = false;
+    });
+
+    // Mark this reply as accepted
+    reply.isAccepted = true;
+    post.status = 'answered';
+
+    await post.save();
+
+    res.json({
+      success: true,
+      message: 'Reply marked as accepted answer',
+      data: post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error accepting reply',
+      error: error.message,
+    });
+  }
+});
+
+// Update post status
+router.put('/:id/status', protect, async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const post = await ForumPost.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    // Only post owner or admin can update status
+    if (post.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this post',
+      });
+    }
+
+    post.status = status;
+    await post.save();
+
+    res.json({
+      success: true,
+      message: 'Post status updated',
+      data: post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating post status',
+      error: error.message,
+    });
+  }
+});
+
+// Delete post (only owner or admin)
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const post = await ForumPost.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    if (post.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this post',
+      });
+    }
+
+    await ForumPost.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: 'Post deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting post',
+      error: error.message,
+    });
+  }
+});
+
+// Like/Unlike reply
+router.put('/:postId/replies/:replyId/like', protect, async (req, res) => {
+  try {
+    const post = await ForumPost.findById(req.params.postId);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    const reply = post.replies.id(req.params.replyId);
+
+    if (!reply) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reply not found',
+      });
+    }
+
+    // Toggle like (simple increment for now, could be improved with tracking who liked it)
+    reply.likes += 1;
+
+    await post.save();
+
+    res.json({
+      success: true,
+      message: 'Reply liked successfully',
+      data: post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error liking reply',
+      error: error.message,
+    });
+  }
+});
+
+module.exports = router;
+
