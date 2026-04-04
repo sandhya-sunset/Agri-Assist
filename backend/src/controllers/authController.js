@@ -9,7 +9,7 @@ const getTransporter = () => {
     service: process.env.SMTP_SERVICE || process.env.EMAIL_SERVICE || "gmail",
     auth: {
       user: process.env.SMTP_EMAIL || process.env.EMAIL_USER,
-      pass: process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD,
+      pass: process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS,
     },
   });
 };
@@ -41,6 +41,29 @@ const sendOTPEmail = async (email, otp, name) => {
         </div>
         <p>This OTP will expire in 10 minutes.</p>
         <p>If you didn't request this, please ignore this email.</p>
+      </div>
+    `,
+  };
+
+  const transporter = getTransporter();
+  await transporter.sendMail(mailOptions);
+};
+
+// Send Password Reset OTP Email
+const sendPasswordResetEmail = async (email, otp, name) => {
+  const mailOptions = {
+    from: process.env.SMTP_EMAIL || process.env.EMAIL_USER,
+    to: email,
+    subject: "Password Reset - OTP",
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Hello ${name},</h2>
+        <p>You have requested to reset your password. Here is your OTP:</p>
+        <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
+        </div>
+        <p>This OTP will expire in 10 minutes.</p>
+        <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
       </div>
     `,
   };
@@ -129,9 +152,12 @@ const register = async (req, res) => {
       try {
         await sendOTPEmail(user.email, userData.otp, user.name);
       } catch (emailError) {
-        console.error("OTP Email sending failed:", emailError);
-        // We still return 201 so the user can be routed to the OTP screen
-        // They can use a "resend OTP" feature if available
+        console.error("OTP Email sending failed (Check .env configuration):", emailError.message);
+        // We log the OTP to the console for easy local testing
+        console.log(`\n=========================================`);
+        console.log(`🛠️ [DEV MODE] Email skipped.`);
+        console.log(`🔑 YOUR OTP IS: ${userData.otp}`);
+        console.log(`=========================================\n`);
       }
     }
 
@@ -274,7 +300,11 @@ const resendOTP = async (req, res) => {
     try {
       await sendOTPEmail(user.email, otp, user.name);
     } catch (emailError) {
-      console.error("OTP Email sending failed:", emailError);
+      console.error("OTP Email sending failed (Check .env configuration):", emailError.message);
+      console.log(`\n=========================================`);
+      console.log(`🛠️ [DEV MODE] Email skipped.`);
+      console.log(`🔑 YOUR NEW OTP IS: ${otp}`);
+      console.log(`=========================================\n`);
     }
 
     res.status(200).json({
@@ -478,6 +508,107 @@ const updatePassword = async (req, res) => {
   }
 };
 
+// @desc    Forgot password
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No user found with this email",
+      });
+    }
+
+    const otp = generateOTP();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.otp = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    try {
+      await sendPasswordResetEmail(user.email, otp, user.name);
+      res.status(200).json({
+        success: true,
+        message: "OTP sent to your email for password reset",
+      });
+    } catch (emailError) {
+      console.error("Forgot password email failed (Check .env config):", emailError.message);
+      
+      console.log(`\n=========================================`);
+      console.log(`🛠️ [DEV MODE] Reset Password Email skipped.`);
+      console.log(`🔑 YOUR RESET OTP IS: ${otp}`);
+      console.log(`=========================================\n`);
+      
+      // Even if email fails, return success so the frontend proceeds to step 2
+      // The user can read the OTP from this terminal console to test it!
+      res.status(200).json({
+        success: true,
+        message: "Email config incomplete. DEV MODE: Used console for OTP.",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Reset password using OTP
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email }).select("+otp +otpExpires");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No user found with this email",
+      });
+    }
+
+    if (String(user.otp).trim() !== String(otp).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    if (new Date() > user.otpExpires) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new one.",
+      });
+    }
+
+    user.password = newPassword;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully. You can now login.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -486,4 +617,6 @@ module.exports = {
   verifyOTP,
   resendOTP,
   updatePassword,
+  forgotPassword,
+  resetPassword,
 };

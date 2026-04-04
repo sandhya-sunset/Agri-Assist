@@ -183,7 +183,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
       });
     } catch (err) {
       console.error(err);
-      alert("Failed to create product");
+      alert(err.response?.data?.message || "Failed to create product");
     }
   };
 

@@ -8,6 +8,8 @@ const {
   verifyOTP,
   resendOTP,
   updatePassword,
+  forgotPassword,
+  resetPassword,
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
@@ -32,6 +34,8 @@ router.post(
 router.post('/login', validateLogin, handleValidationErrors, login);
 router.post('/verify-otp', verifyOTP);
 router.post('/resend-otp', resendOTP);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 // Protected routes
 router.get('/profile', protect, getProfile);

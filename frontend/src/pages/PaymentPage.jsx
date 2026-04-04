@@ -12,6 +12,7 @@ const PaymentPage = () => {
   const [hasSale, setHasSale] = useState(false);
   const [fetchingCart, setFetchingCart] = useState(true);
   const [location, setLocation] = useState(null);
+  const navigate = window.location; // Using window.location for redirect or we can import useNavigate
 
   const ORIGIN_LAT = 26.541;
   const ORIGIN_LNG = 87.2785;
@@ -114,8 +115,8 @@ const PaymentPage = () => {
           // 3. Redirect to Khalti hosted payment page
           window.location.href = initiateRes.data.data.payment_url;
         } else {
-          alert("Failed to initiate Khalti payment.");
-          setLoading(false);
+          alert("Order created successfully, but Khalti payment failed to initiate. Redirecting to your orders...");
+          window.location.href = "/my-orders";
         }
       } else {
         alert(orderRes.data.message || "Failed to place order.");

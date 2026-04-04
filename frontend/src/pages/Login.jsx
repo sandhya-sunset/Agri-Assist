@@ -6,6 +6,7 @@ import Alert from "../components/auth/Alert";
 import OTPVerification from "../components/auth/OTPVerification";
 import LoginForm from "../components/auth/LoginForm";
 import RegisterForm from "../components/auth/RegisterForm";
+import ForgotPassword from "../components/auth/ForgotPassword";
 import "leaflet/dist/leaflet.css";
 
 // API Configuration
@@ -14,6 +15,7 @@ const API_BASE_URL = "http://localhost:5000/api";
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [showOtpVerification, setShowOtpVerification] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [registeredRole, setRegisteredRole] = useState("");
   const [loading, setLoading] = useState(false);
@@ -324,6 +326,21 @@ export default function Login() {
     );
   }
 
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
+          <ForgotPassword
+            onBack={() => {
+              setShowForgotPassword(false);
+              setAlert(null);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-5xl">
@@ -440,6 +457,7 @@ export default function Login() {
                     handleChange={handleChange}
                     loading={loading}
                     handleSubmit={handleSubmit}
+                    onForgotPassword={() => setShowForgotPassword(true)}
                   />
                 ) : (
                   /* Register Form */

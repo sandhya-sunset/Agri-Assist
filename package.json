@@ -1,0 +1,30 @@
+{
+  "name": "agri-assist",
+  "version": "1.0.0",
+  "description": "Agri-Assist: Agricultural E-commerce Platform with ML Disease Detection",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build",
+    "backend:dev": "npm --prefix backend run dev",
+    "backend:start": "npm --prefix backend run start",
+    "lint": "npm run lint --workspaces"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=10.0.0"
+  },
+  "keywords": [
+    "agriculture",
+    "ecommerce",
+    "ml",
+    "nodejs",
+    "react"
+  ]
+}

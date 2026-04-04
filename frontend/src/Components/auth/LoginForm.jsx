@@ -1,7 +1,7 @@
 import React from "react";
 import { Mail, Lock } from "lucide-react";
 
-const LoginForm = ({ formData, handleChange, loading, handleSubmit }) => {
+const LoginForm = ({ formData, handleChange, loading, handleSubmit, onForgotPassword }) => {
   return (
     <>
       <div>
@@ -46,9 +46,9 @@ const LoginForm = ({ formData, handleChange, loading, handleSubmit }) => {
           <input type="checkbox" className="w-4 h-4 text-green-600 rounded" />
           <span className="text-gray-600">Remember me</span>
         </label>
-        <a href="#" className="text-green-600 hover:text-green-700 font-medium">
+        <button type="button" onClick={onForgotPassword} className="text-green-600 hover:text-green-700 font-medium">
           Forgot password?
-        </a>
+        </button>
       </div>
     </>
   );

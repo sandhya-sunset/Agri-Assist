@@ -8,11 +8,7 @@ const Detection = require('../models/Detection');
 const Recommendation = require('../models/Recommendation');
 const { protect } = require('../middlewares/authMiddleware');
 const { NodeFileSystem } = require('../utils/tfUtils');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
-
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -46,57 +42,13 @@ async function loadModel() {
     const mappingPath = path.join(__dirname, '../ml_model/class_mapping.json');
     const mappingData = require(mappingPath);
     classMapping = mappingData;
-    console.log('Local Model loaded successfully (though we now use Gemini instead)');
+    console.log('Local Offline Model loaded successfully');
   } catch (error) {
-    console.log('Local model not found, proceeding with Gemini API only.');
+    console.error('Failure to load local model:', error);
   }
 }
 
 loadModel();
-
-async function analyzeWithGemini(imagePath) {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    
-    // Read the image
-    const imageParts = [
-      {
-        inlineData: {
-          data: Buffer.from(fs.readFileSync(imagePath)).toString("base64"),
-          mimeType: "image/jpeg"
-        }
-      }
-    ];
-
-    const prompt = `You are an expert plant pathologist. Analyze this image of a plant leaf and identify the plant species and any disease present.
-      
-Respond ONLY with a JSON object in this exact format, with no markdown formatting:
-{
-  "plant": "Plant Name",
-  "disease": "Disease Name (or 'Healthy' if no disease)",
-  "confidence": <number between 85 and 99>
-}`;
-
-    const result = await model.generateContent([prompt, ...imageParts]);
-    const response = await result.response;
-    const text = response.text();
-    
-    // Parse the JSON output
-    const jsonStr = text.replace(/```json\n?|\n?```/g, '').trim();
-    const data = JSON.parse(jsonStr);
-    
-    const formattedDiseaseName = `${data.plant} - ${data.disease}`;
-    
-    return {
-      diseaseName: formattedDiseaseName,
-      confidence: data.confidence,
-      plantType: data.plant
-    };
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    return null;
-  }
-}
 
 async function preprocessImage(imagePath) {
   const imageBuffer = await sharp(imagePath)
@@ -106,8 +58,7 @@ async function preprocessImage(imagePath) {
     .toBuffer();
 
   const tensor = tf.tensor3d(new Uint8Array(imageBuffer), [224, 224, 3]);
-  const normalized = tensor.toFloat().div(tf.scalar(127.5)).sub(tf.scalar(1));
-  const batched = normalized.expandDims(0);
+  const batched = tensor.toFloat().div(tf.scalar(255)).expandDims(0);
 
   return batched;
 }
@@ -247,21 +198,54 @@ router.post('/upload', protect, upload.single('image'), async (req, res) => {
     }
 
     const imagePath = req.file.path;
-    
-    // Analyze with Gemini
-    const geminiResult = await analyzeWithGemini(imagePath);
-    
-    let diseaseName, confidence, plantType;
+    const targetPlantType = req.body.plantType || '';
+    let diseaseName = 'Unknown - Analysis Failed';
+    let confidence = 0;
+    let plantType = 'Unknown';
 
-    if (geminiResult) {
-      diseaseName = geminiResult.diseaseName;
-      confidence = geminiResult.confidence;
-      plantType = geminiResult.plantType;
+    if (model && classMapping) {
+      try {
+        const processedImage = await preprocessImage(imagePath);
+        const predictions = await model.predict(processedImage).data();
+        
+        const allowedIndices = [];
+        if (targetPlantType) {
+            for (const [index, className] of Object.entries(classMapping)) {
+                if (className.toLowerCase().includes(targetPlantType.toLowerCase())) {
+                    allowedIndices.push(parseInt(index));
+                }
+            }
+        }
+        if (allowedIndices.length === 0) {
+            // fallback if not provided or matched
+            allowedIndices.push(...Array.from({length: Object.keys(classMapping).length}, (_, i) => i));
+        }
+
+        let maxVal = -1;
+        let predictedClassIndex = -1;
+        let sumAllowed = 0;
+
+        for (let i = 0; i < predictions.length; i++) {
+            if (allowedIndices.includes(i)) {
+                sumAllowed += predictions[i];
+                if (predictions[i] > maxVal) {
+                    maxVal = predictions[i];
+                    predictedClassIndex = i;
+                }
+            }
+        }
+        
+        diseaseName = classMapping[predictedClassIndex];
+        confidence = sumAllowed > 0 ? (maxVal / sumAllowed) * 100 : maxVal * 100;
+        confidence = Math.min(confidence, 99.99); // Max out gracefully
+        
+        plantType = formatPlantType(diseaseName);
+        console.log(`Model predicted: ${diseaseName} (${confidence}%)`);
+      } catch (inferenceError) {
+        console.error('Inference error:', inferenceError);
+      }
     } else {
-      // Fallback if Gemini fails
-      diseaseName = 'Unknown - Analysis Failed';
-      confidence = 0;
-      plantType = 'Unknown';
+      console.error('Offline model is not loaded');
     }
 
     const recommendation = await findRecommendationByDisease(diseaseName);

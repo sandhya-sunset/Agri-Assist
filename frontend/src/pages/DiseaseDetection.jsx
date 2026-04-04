@@ -30,6 +30,12 @@ const DiseaseDetection = () => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [selectedPlant, setSelectedPlant] = useState("");
+  const plantOptions = [
+    "Apple", "Blueberry", "Cherry", "Corn", "Grape",
+    "Orange", "Peach", "Pepper", "Potato", "Raspberry",
+    "Soybean", "Squash", "Strawberry", "Tomato"
+  ];
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -229,6 +235,7 @@ const DiseaseDetection = () => {
       setResult(null);
       setError(null);
       setSelectedImage(file);
+      setSelectedPlant("");
       setPreviewUrl(URL.createObjectURL(file));
       console.log("New image selected:", file.name);
     }
@@ -240,11 +247,17 @@ const DiseaseDetection = () => {
       return;
     }
 
+    if (!selectedPlant) {
+      setError("Please select the plant type first");
+      return;
+    }
+
     setIsAnalyzing(true);
     setError(null);
 
     const formData = new FormData();
     formData.append("image", selectedImage);
+    formData.append("plantType", selectedPlant);
 
     try {
       const token = localStorage.getItem("token");
@@ -283,6 +296,7 @@ const DiseaseDetection = () => {
 
   const resetAnalysis = () => {
     setSelectedImage(null);
+    setSelectedPlant("");
     setPreviewUrl(null);
     setResult(null);
     setError(null);
@@ -321,28 +335,28 @@ const DiseaseDetection = () => {
     // First, try to extract meaningful keywords from the recommendation name
     const commonSuffixes = ["Spray", "Booster", "Soap", "Oil", "Fertilizer", "Powder", "Liquid", "Solution", "Mix", "Treatment"];
     const words = productName.split(" ").filter(word => word.length > 0);
-    
+
     // Remove common disease/plant prefixes and suffixes
     let filteredWords = words.filter(word => {
       const lowerWord = word.toLowerCase();
-      return !commonSuffixes.includes(word) && 
-             !["recovery", "protection", "cure", "control", "preventive"].includes(lowerWord) &&
-             word.length > 2; // Only keep meaningful words (3+ characters)
+      return !commonSuffixes.includes(word) &&
+        !["recovery", "protection", "cure", "control", "preventive"].includes(lowerWord) &&
+        word.length > 2; // Only keep meaningful words (3+ characters)
     });
-    
+
     // If we filtered too much, keep at least the first 2 original words
     if (filteredWords.length === 0) {
       filteredWords = words.slice(0, 2);
     }
-    
+
     // Build search query from filtered words
     let searchQuery = filteredWords.slice(0, 3).join(" ").trim();
-    
+
     // If search query is empty or very short, use the product type as fallback
     if (!searchQuery || searchQuery.length < 3) {
       searchQuery = productType; // Search by category like "Fertilizer" or "Pesticide"
     }
-    
+
     navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
   };
 
@@ -551,8 +565,27 @@ const DiseaseDetection = () => {
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Upload a photo of your plant leaf and get instant disease
-              detection with treatment recommendations
+              detection with treatment recommendations.
             </p>
+            <div className="mt-6">
+              <p className="text-sm font-semibold text-gray-500 mb-3">Currently Supporting 14 Plant Types:</p>
+              <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Apple</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Blueberry</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Cherry</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Corn</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Grape</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Orange</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Peach</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Pepper</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Potato</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Raspberry</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Soybean</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Squash</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Strawberry</span>
+                <span className="text-xs font-bold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">Tomato</span>
+              </div>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8 mb-12">
@@ -601,11 +634,27 @@ const DiseaseDetection = () => {
                     </button>
                   </div>
 
+                  <div className="mt-4">
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Select Plant Type</label>
+                    <select
+                      value={selectedPlant}
+                      onChange={(e) => setSelectedPlant(e.target.value)}
+                      className="w-full p-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                    >
+                      <option value="">-- Choose a Plant --</option>
+                      {plantOptions.map((plant) => (
+                        <option key={plant} value={plant}>
+                          {plant}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   {selectedImage ? (
                     <button
                       onClick={handleAnalyze}
-                      disabled={isAnalyzing}
-                      className="w-full py-4 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isAnalyzing || !selectedPlant}
+                      className="w-full py-4 mt-6 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isAnalyzing ? (
                         <>

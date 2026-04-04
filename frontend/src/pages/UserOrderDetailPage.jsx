@@ -23,6 +23,7 @@ const UserOrderDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [initiatingPayment, setInitiatingPayment] = useState(false);
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -64,6 +65,24 @@ const UserOrderDetailPage = () => {
       );
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleRetryPayment = async () => {
+    try {
+      setInitiatingPayment(true);
+      const initiateRes = await api.post(`/orders/${id}/payment/khalti/initiate`);
+      
+      if (initiateRes.data.success && initiateRes.data.data.payment_url) {
+        window.location.href = initiateRes.data.data.payment_url;
+      } else {
+        addToast("Failed to initiate payment. Please check your config.", "error");
+      }
+    } catch (error) {
+      console.error("Payment retry error:", error);
+      addToast(error.response?.data?.message || "Payment service unavailable.", "error");
+    } finally {
+      setInitiatingPayment(false);
     }
   };
 
@@ -183,15 +202,28 @@ const UserOrderDetailPage = () => {
               </div>
             )}
 
-            {/* Cancel Button */}
-            {(order.status === "Processing" || order.status === "Pending") && (
-              <button
-                onClick={() => setShowCancelConfirm(true)}
-                className="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 font-medium transition-colors"
-              >
-                Cancel Order
-              </button>
-            )}
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              {order.paymentMethod === "Khalti" && order.paymentStatus === "Pending" && order.status !== "Cancelled" && (
+                <button
+                  onClick={handleRetryPayment}
+                  disabled={initiatingPayment}
+                  className="px-4 py-2 bg-[#5C2D91] text-white rounded-lg hover:bg-[#4a2474] font-medium transition-colors flex items-center gap-2"
+                >
+                  {initiatingPayment && <Loader2 size={16} className="animate-spin" />}
+                  Pay via Khalti
+                </button>
+              )}
+              
+              {(order.status === "Processing" || order.status === "Pending") && (
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 font-medium transition-colors"
+                >
+                  Cancel Order
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
