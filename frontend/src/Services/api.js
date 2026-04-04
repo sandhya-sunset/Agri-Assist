@@ -15,6 +15,14 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // If sending FormData, remove Content-Type so the browser
+    // auto-sets it to multipart/form-data WITH the correct boundary.
+    // If we set it manually the boundary is missing and multer fails.
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
   (error) => {

@@ -24,7 +24,7 @@ import Navbar from "../Components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import ChatWindow from "../components/ChatWindow";
 import api from "../services/api";
-import { useToast } from "../components/Toast";
+import { useToast } from "../Components/Toast";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -33,6 +33,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState(null);
   const [activeTab, setActiveTab] = useState("description");
   const [showChat, setShowChat] = useState(false);
   const [question, setQuestion] = useState("");
@@ -44,6 +45,13 @@ const ProductDetail = () => {
     fetchProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // Auto-select the first size when product loads
+  useEffect(() => {
+    if (product?.sizes?.length > 0) {
+      setSelectedSize(product.sizes[0].size);
+    }
+  }, [product]);
 
   const fetchProduct = async () => {
     try {
@@ -94,15 +102,28 @@ const ProductDetail = () => {
     }
   };
 
+  const getDisplayPrice = () => {
+    if (selectedSize && product?.sizes?.length > 0) {
+      const sizeObj = product.sizes.find(s => s.size === selectedSize);
+      if (sizeObj) return sizeObj.price;
+    }
+    return product?.price || 0;
+  };
+
   const handleAddToCart = async () => {
     if (!token) {
       navigate("/login");
+      return;
+    }
+    if (product?.sizes?.length > 0 && !selectedSize) {
+      addToast("Please select a size first", "error");
       return;
     }
     try {
       await api.post("/cart", {
         productId: product._id,
         quantity: quantity,
+        size: selectedSize,
       });
       addToast("Product added to cart successfully!", "success");
     } catch (error) {
@@ -116,10 +137,15 @@ const ProductDetail = () => {
       navigate("/login");
       return;
     }
+    if (product?.sizes?.length > 0 && !selectedSize) {
+      addToast("Please select a size first", "error");
+      return;
+    }
     try {
       await api.post("/cart", {
         productId: product._id,
         quantity: quantity,
+        size: selectedSize,
       });
       navigate("/payment");
     } catch (error) {
@@ -252,12 +278,12 @@ const ProductDetail = () => {
                 <span className="text-4xl font-bold text-gray-900">
                   Rs.{" "}
                   {product.discount > 0
-                    ? (product.price * (1 - product.discount / 100)).toFixed(2)
-                    : Number(product.price).toFixed(2)}
+                    ? (getDisplayPrice() * (1 - product.discount / 100)).toFixed(2)
+                    : Number(getDisplayPrice()).toFixed(2)}
                 </span>
                 {product.discount > 0 && (
                   <span className="text-xl text-gray-400 line-through">
-                    Rs. {Number(product.price).toFixed(2)}
+                    Rs. {Number(getDisplayPrice()).toFixed(2)}
                   </span>
                 )}
               </div>
@@ -265,6 +291,28 @@ const ProductDetail = () => {
                 {product.description}
               </p>
             </div>
+
+            {/* Size Selector */}
+            {product.sizes && product.sizes.length > 0 && (
+              <div className="mb-6">
+                <p className="text-sm font-semibold text-gray-500 mb-3">Pack</p>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((s) => (
+                    <button
+                      key={s.size}
+                      onClick={() => setSelectedSize(s.size)}
+                      className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition-all duration-200 ${
+                        selectedSize === s.size
+                          ? "bg-gray-900 text-white border-gray-900"
+                          : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
+                      }`}
+                    >
+                      {s.size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-6 mb-8">
               <div className="flex items-center gap-4">

@@ -34,19 +34,19 @@ const CartPage = () => {
     }
   };
 
-  const updateQuantity = async (productId, newQuantity) => {
+  const updateQuantity = async (itemId, newQuantity) => {
     try {
       if (newQuantity < 1) return;
-      await api.put(`/cart/${productId}`, { quantity: newQuantity });
+      await api.put(`/cart/${itemId}`, { quantity: newQuantity });
       fetchCart();
     } catch (error) {
       console.error("Error updating quantity:", error);
     }
   };
 
-  const removeItem = async (productId) => {
+  const removeItem = async (itemId) => {
     try {
-      await api.delete(`/cart/${productId}`);
+      await api.delete(`/cart/${itemId}`);
       fetchCart();
     } catch (error) {
       console.error("Error removing item:", error);
@@ -117,24 +117,29 @@ const CartPage = () => {
                     <h3 className="font-bold text-gray-900 text-lg mb-1">
                       {item.product?.name || "Product Details Unavailable"}
                     </h3>
+                    {item.size && (
+                      <span className="inline-block text-xs font-semibold text-gray-600 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full mb-1">
+                        {item.size}
+                      </span>
+                    )}
                     <p className="text-green-600 font-bold mb-2">
                       Rs.{" "}
                       {item.product?.discount > 0
                         ? (
-                            item.product.price *
+                            item.price *
                             (1 - item.product.discount / 100)
                           ).toFixed(2)
                         : Number(item.price).toFixed(2)}
                     </p>
                     {item.product?.discount > 0 && (
                       <p className="text-xs text-gray-400 line-through">
-                        Rs. {Number(item.product.price).toFixed(2)}
+                        Rs. {Number(item.price).toFixed(2)}
                       </p>
                     )}
                     <div className="inline-flex items-center gap-1 bg-gray-50 rounded-lg p-1">
                       <button
                         onClick={() =>
-                          updateQuantity(item.product?._id, item.quantity - 1)
+                          updateQuantity(item._id, item.quantity - 1)
                         }
                         className="p-1 hover:bg-white rounded-md transition-colors"
                         disabled={item.quantity <= 1}
@@ -146,7 +151,7 @@ const CartPage = () => {
                       </span>
                       <button
                         onClick={() =>
-                          updateQuantity(item.product?._id, item.quantity + 1)
+                          updateQuantity(item._id, item.quantity + 1)
                         }
                         className="p-1 hover:bg-white rounded-md transition-colors"
                       >
@@ -160,7 +165,7 @@ const CartPage = () => {
                       Rs. {(item.price * item.quantity).toFixed(2)}
                     </p>
                     <button
-                      onClick={() => removeItem(item.product?._id)}
+                      onClick={() => removeItem(item._id)}
                       className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
                     >
                       <Trash2 size={20} />

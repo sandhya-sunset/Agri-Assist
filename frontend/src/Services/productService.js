@@ -12,23 +12,13 @@ const getProducts = async (sellerId = null) => {
 
 // Create a new product
 const createProduct = async (productData) => {
-  // productData should be FormData object
-  const response = await api.post("/products", productData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/products", productData);
   return response.data;
 };
 
 // Update a product
 const updateProduct = async (id, productData) => {
-  // productData should be FormData object if image is updated, otherwise JSON is fine but endpoint handles FormData
-  const response = await api.put(`/products/${id}`, productData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.put(`/products/${id}`, productData);
   return response.data;
 };
 

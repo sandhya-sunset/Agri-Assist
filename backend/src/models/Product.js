@@ -22,6 +22,12 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Please add a price']
     },
+    sizes: [
+      {
+        size: { type: String, required: true },
+        price: { type: Number, required: true }
+      }
+    ],
     stock: {
       type: Number,
       required: [true, 'Please add stock quantity'],

@@ -28,17 +28,18 @@ const createProduct = async (req, res) => {
     }
 
     const product = await Product.create({
-      seller: req.user._id, // Assumes auth middleware sets req.user
+      seller: req.user._id,
       name,
       category,
       price,
       stock,
       description,
-      sku: sku || undefined, // undefined to bypass unique index if empty
+      sku: sku || undefined,
       discount,
       offerText,
       status: status || 'active',
-      image: req.file.path // Store path
+      image: req.file.path,
+      sizes: req.body.sizes ? JSON.parse(req.body.sizes) : []
     });
 
     res.status(201).json({
@@ -122,11 +123,25 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    const fieldsToUpdate = { ...req.body };
+    // Build a safe, whitelisted update object (never spread entire req.body)
+    const fieldsToUpdate = {
+      name:        req.body.name,
+      category:    req.body.category,
+      price:       Number(req.body.price),
+      stock:       Number(req.body.stock),
+      description: req.body.description,
+      discount:    Number(req.body.discount) || 0,
+      offerText:   req.body.offerText || '',
+      status:      req.body.status,
+    };
+
+    // Only update sku if it has CHANGED (same sku triggers false duplicate-key error on self)
+    if (req.body.sku && req.body.sku !== product.sku) {
+      fieldsToUpdate.sku = req.body.sku;
+    }
 
     // Handle Image Update
     if (req.file) {
-      // Delete old image
       if (product.image) {
         fs.unlink(product.image, (err) => {
           if (err) console.error('Failed to delete old image:', err);
@@ -135,9 +150,21 @@ const updateProduct = async (req, res) => {
       fieldsToUpdate.image = req.file.path;
     }
 
-    product = await Product.findByIdAndUpdate(req.params.id, fieldsToUpdate, {
-      new: true,
-      runValidators: true
+    // Parse sizes JSON from FormData; always set (even empty) to allow clearing
+    if (req.body.sizes !== undefined) {
+      try {
+        const parsed = JSON.parse(req.body.sizes);
+        // Strip _id from subdocuments to avoid MongoDB update conflicts
+        fieldsToUpdate.sizes = parsed.map(({ size, price }) => ({ size, price: Number(price) }));
+      } catch (e) {
+        fieldsToUpdate.sizes = [];
+      }
+    }
+
+    product = await Product.findByIdAndUpdate(req.params.id, { $set: fieldsToUpdate }, {
+      new: true
+      // runValidators excluded: unique-index validators fire against all docs (incl. self)
+      // causing false duplicate-key errors on unchanged fields like SKU
     });
 
     res.status(200).json({

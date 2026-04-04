@@ -36,7 +36,10 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
     sku: "",
     discount: 0,
     offerText: "",
+    sizes: [],
   });
+  const [newSizeInput, setNewSizeInput] = useState({ size: "", price: "" });
+  const [editSizeInput, setEditSizeInput] = useState({ size: "", price: "" });
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,7 +112,8 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
 
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
-    setEditFormData({ ...product, imageFile: null }); // Reset image file
+    setEditFormData({ ...product, imageFile: null, sizes: product.sizes || [] });
+    setEditSizeInput({ size: "", price: "" });
     setShowEditModal(true);
   };
 
@@ -130,6 +134,9 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
       formData.append("discount", editFormData.discount);
       formData.append("offerText", editFormData.offerText || "");
       formData.append("status", editFormData.status);
+      // Always send sizes (even empty) so sellers can clear all sizes; strip _id
+      const cleanedSizes = (editFormData.sizes || []).map(({ size, price }) => ({ size, price }));
+      formData.append("sizes", JSON.stringify(cleanedSizes));
 
       if (editFormData.imageFile) {
         formData.append("image", editFormData.imageFile);
@@ -157,6 +164,10 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
       formData.append("discount", newProduct.discount);
       formData.append("offerText", newProduct.offerText || "");
 
+      if (newProduct.sizes && newProduct.sizes.length > 0) {
+        formData.append("sizes", JSON.stringify(newProduct.sizes));
+      }
+
       const status = parseInt(newProduct.stock) > 0 ? "active" : "draft";
       formData.append("status", status);
 
@@ -179,8 +190,10 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
         sku: "",
         discount: 0,
         offerText: "",
+        sizes: [],
         imageFile: null,
       });
+      setNewSizeInput({ size: "", price: "" });
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to create product");
@@ -653,6 +666,55 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
                   )}
                 </div>
 
+                {/* Sizes / Pack Variants */}
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-semibold text-gray-700 mb-3">Pack Sizes (optional)</h4>
+                  <p className="text-xs text-gray-500 mb-3">Add volume/size variants with separate prices (e.g. 50ml → Rs 250)</p>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={newSizeInput.size}
+                      onChange={(e) => setNewSizeInput({ ...newSizeInput, size: e.target.value })}
+                      placeholder="Size (e.g. 50ml)"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <input
+                      type="number"
+                      value={newSizeInput.price}
+                      onChange={(e) => setNewSizeInput({ ...newSizeInput, price: e.target.value })}
+                      placeholder="Price"
+                      className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newSizeInput.size || !newSizeInput.price) return;
+                        setNewProduct({ ...newProduct, sizes: [...(newProduct.sizes || []), { size: newSizeInput.size, price: parseFloat(newSizeInput.price) }] });
+                        setNewSizeInput({ size: "", price: "" });
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                  {newProduct.sizes && newProduct.sizes.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {newProduct.sizes.map((s, i) => (
+                        <span key={i} className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium">
+                          {s.size} — Rs {s.price}
+                          <button
+                            type="button"
+                            onClick={() => setNewProduct({ ...newProduct, sizes: newProduct.sizes.filter((_, idx) => idx !== i) })}
+                            className="text-red-500 hover:text-red-700 font-bold"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Product Images
@@ -884,6 +946,55 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
                           Rs {editFormData.price}
                         </span>
                       </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sizes / Pack Variants for Edit */}
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-semibold text-gray-700 mb-3">Pack Sizes (optional)</h4>
+                  <p className="text-xs text-gray-500 mb-3">Add volume/size variants with separate prices (e.g. 50ml → Rs 250)</p>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={editSizeInput.size}
+                      onChange={(e) => setEditSizeInput({ ...editSizeInput, size: e.target.value })}
+                      placeholder="Size (e.g. 50ml)"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <input
+                      type="number"
+                      value={editSizeInput.price}
+                      onChange={(e) => setEditSizeInput({ ...editSizeInput, price: e.target.value })}
+                      placeholder="Price"
+                      className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!editSizeInput.size || !editSizeInput.price) return;
+                        setEditFormData({ ...editFormData, sizes: [...(editFormData.sizes || []), { size: editSizeInput.size, price: parseFloat(editSizeInput.price) }] });
+                        setEditSizeInput({ size: "", price: "" });
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                  {editFormData.sizes && editFormData.sizes.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {editFormData.sizes.map((s, i) => (
+                        <span key={i} className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium">
+                          {s.size} — Rs {s.price}
+                          <button
+                            type="button"
+                            onClick={() => setEditFormData({ ...editFormData, sizes: editFormData.sizes.filter((_, idx) => idx !== i) })}
+                            className="text-red-500 hover:text-red-700 font-bold"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>

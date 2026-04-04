@@ -32,7 +32,7 @@ exports.getCart = async (req, res) => {
 // @access  Private
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, size } = req.body;
     const qty = parseInt(quantity) || 1;
 
     const product = await Product.findById(productId);
@@ -48,20 +48,29 @@ exports.addToCart = async (req, res) => {
       cart = new Cart({ user: req.user._id, items: [] });
     }
 
-    // Check if product already exists in cart
+    // Check if product already exists in cart with same size
     const itemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === productId,
+      (item) => item.product.toString() === productId && item.size === size,
     );
 
     if (itemIndex > -1) {
       // Product exists in cart, update quantity
       cart.items[itemIndex].quantity += qty;
     } else {
+      let finalPrice = product.price;
+      if (size && product.sizes && product.sizes.length > 0) {
+        const sizeObj = product.sizes.find(s => s.size === size);
+        if (sizeObj) {
+          finalPrice = sizeObj.price;
+        }
+      }
+
       // Product does not exist in cart, add new item
       cart.items.push({
         product: productId,
+        size: size,
         quantity: qty,
-        price: product.price,
+        price: finalPrice,
       });
     }
 
@@ -86,7 +95,7 @@ exports.addToCart = async (req, res) => {
 };
 
 // @desc    Remove item from cart
-// @route   DELETE /api/cart/:productId
+// @route   DELETE /api/cart/:itemId
 // @access  Private
 exports.removeFromCart = async (req, res) => {
   try {
@@ -99,7 +108,7 @@ exports.removeFromCart = async (req, res) => {
     }
 
     cart.items = cart.items.filter(
-      (item) => item.product.toString() !== req.params.productId,
+      (item) => item._id.toString() !== req.params.itemId,
     );
 
     await cart.save();
@@ -119,7 +128,7 @@ exports.removeFromCart = async (req, res) => {
 };
 
 // @desc    Update cart item quantity
-// @route   PUT /api/cart/:productId
+// @route   PUT /api/cart/:itemId
 // @access  Private
 exports.updateCartItem = async (req, res) => {
   try {
@@ -133,7 +142,7 @@ exports.updateCartItem = async (req, res) => {
     }
 
     const itemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === req.params.productId,
+      (item) => item._id.toString() === req.params.itemId,
     );
 
     if (itemIndex > -1) {

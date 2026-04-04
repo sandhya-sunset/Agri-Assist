@@ -14,7 +14,7 @@ router.route('/')
   .get(getCart)
   .post(addToCart);
 
-router.route('/:productId')
+router.route('/:itemId')
   .put(updateCartItem)
   .delete(removeFromCart);
 
