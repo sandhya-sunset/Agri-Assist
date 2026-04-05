@@ -1,4 +1,6 @@
 const Product = require('../models/Product');
+const Order = require('../models/Order');
+const Notification = require('../models/Notification');
 const fs = require('fs');
 const path = require('path');
 
@@ -27,19 +29,29 @@ const createProduct = async (req, res) => {
       });
     }
 
+    let parsedSizes = [];
+    if (req.body.sizes) {
+      try {
+        const rawSizes = JSON.parse(req.body.sizes);
+        parsedSizes = rawSizes.map(({ size, price }) => ({ size, price: Number(price) }));
+      } catch (e) {
+        parsedSizes = [];
+      }
+    }
+
     const product = await Product.create({
       seller: req.user._id,
       name,
       category,
-      price,
-      stock,
+      price: price ? Number(price) : undefined,
+      stock: stock ? Number(stock) : undefined,
       description,
       sku: sku || undefined,
-      discount,
+      discount: discount ? Number(discount) : 0,
       offerText,
       status: status || 'active',
       image: req.file.path,
-      sizes: req.body.sizes ? JSON.parse(req.body.sizes) : []
+      sizes: parsedSizes
     });
 
     res.status(201).json({
@@ -58,6 +70,14 @@ const createProduct = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'SKU must be unique'
+      });
+    }
+
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', ')
       });
     }
 
@@ -183,6 +203,52 @@ const updateProduct = async (req, res) => {
   }
 };
 
+// @desc    Update product stock
+// @route   PUT /api/products/:id/stock
+// @access  Private (Seller)
+const updateStock = async (req, res) => {
+  try {
+    const { stock } = req.body;
+    let product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // Verify ownership
+    if (product.seller.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized to update this product' });
+    }
+
+    product.stock = Number(stock);
+    
+    // Automatically manage standard status based on stock if not in draft
+    if (product.status !== 'draft') {
+       product.status = product.stock > 0 ? 'active' : 'outOfStock';
+    }
+
+    await product.save();
+
+    // Trigger realtime updates for the app
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('stockUpdated', {
+        productId: product._id,
+        newStock: product.stock
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Stock updated',
+      data: product
+    });
+  } catch (error) {
+    console.error('Error updating stock', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
 // @desc    Delete a product
 // @route   DELETE /api/products/:id
 // @access  Private (Seller)
@@ -264,6 +330,26 @@ const addReply = async (req, res) => {
 
     await product.save();
 
+    // Notify the user who wrote the review/question
+    try {
+      const io = req.app.get('io');
+      const notificationData = {
+        user: review.user,
+        type: 'review',
+        title: 'New Expert Reply',
+        message: `An expert has replied to your review on "${product.name}".`,
+        link: `/product/${product._id}`
+      };
+
+      const notification = await Notification.create(notificationData);
+
+      if (io) {
+        io.to(review.user.toString()).emit('newNotification', notification);
+      }
+    } catch (notifyError) {
+      console.error('Failed to send expert reply notification:', notifyError);
+    }
+
     res.status(200).json({
       success: true,
       message: 'Reply added',
@@ -316,6 +402,21 @@ const getProductById = async (req, res) => {
 const addReview = async (req, res) => {
   try {
     const { rating, comment } = req.body;
+
+    // Verify purchase before allowing review
+    const hasPurchased = await Order.findOne({
+      user: req.user._id,
+      paymentStatus: 'Completed',
+      'items.product': req.params.id
+    });
+
+    if (!hasPurchased && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'You must purchase this product before leaving a review.'
+      });
+    }
+
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -410,5 +511,6 @@ module.exports = {
   deleteProduct,
   addReview,
   addReply,
-  deleteReview
+  deleteReview,
+  updateStock
 };

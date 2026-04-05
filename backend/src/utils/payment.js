@@ -1,10 +1,13 @@
 const axios = require('axios');
 const config = require('../config/config');
 
-const khaltiHeaders = {
+/**
+ * Helper to get Khalti headers dynamically to ensure latest env values.
+ */
+const getKhaltiHeaders = () => ({
     Authorization: `Key ${config.khalti.secretKey}`,
     'Content-Type': 'application/json',
-};
+});
 
 /**
  * Initiate Khalti e-Payment (v2).
@@ -28,10 +31,11 @@ const initiateKhaltiPayment = async ({ orderId, amount, customerName, customerEm
         const response = await axios.post(
             `${config.khalti.apiUrl}/epayment/initiate/`,
             body,
-            { headers: khaltiHeaders }
+            { headers: getKhaltiHeaders() }
         );
         return response.data; // { pidx, payment_url, expires_at }
     } catch (error) {
+        console.error('Khalti Initiate Error Response:', error.response?.data);
         const msg = error.response?.data?.detail || error.response?.data?.message || 'Failed to initiate Khalti payment.';
         throw { statusCode: 400, message: msg };
     }
@@ -46,10 +50,11 @@ const lookupKhaltiPayment = async (pidx) => {
         const response = await axios.post(
             `${config.khalti.apiUrl}/epayment/lookup/`,
             { pidx },
-            { headers: khaltiHeaders }
+            { headers: getKhaltiHeaders() }
         );
         return response.data;
     } catch (error) {
+        console.error('Khalti Lookup Error Response:', error.response?.data);
         const msg = error.response?.data?.detail || error.response?.data?.message || 'Failed to lookup Khalti payment.';
         throw { statusCode: 400, message: msg };
     }

@@ -3,7 +3,7 @@ const path = require("path");
 const dotenv = require("dotenv");
 
 // Load env vars
-dotenv.config({ path: path.join(__dirname, "../.env") });
+dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 const cors = require("cors");
 const connectDB = require("./config/database");
@@ -41,6 +41,7 @@ app.use("/api/testimonials", require("./routes/testimonialRoutes"));
 app.use("/api/blog", require("./routes/blogRoutes"));
 app.use("/api/deals", require("./routes/dealRoutes"));
 app.use("/api/forum", require("./routes/forumRoutes"));
+app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 
 // Health check route
 app.get("/api/health", (req, res) => {

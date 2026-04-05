@@ -8,7 +8,8 @@ const {
   deleteProduct,
   addReview,
   addReply,
-  deleteReview
+  deleteReview,
+  updateStock
 } = require('../controllers/productController');
 
 const { protect, seller } = require('../middlewares/authMiddleware');
@@ -28,6 +29,7 @@ router.delete('/:id/reviews/:reviewId', protect, deleteReview);
 // Use 'image' as the field name for file upload
 router.post('/', protect, seller, upload.single('image'), createProduct);
 router.put('/:id', protect, seller, upload.single('image'), updateProduct);
+router.put('/:id/stock', protect, seller, updateStock);
 router.delete('/:id', protect, seller, deleteProduct);
 
 // Reply to review

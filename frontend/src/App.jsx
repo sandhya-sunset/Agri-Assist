@@ -25,6 +25,7 @@ import UserOrderDetailPage from "./pages/UserOrderDetailPage";
 import CommunityForum from "./pages/CommunityForum";
 import ForumPostDetail from "./pages/ForumPostDetail";
 import CreateForumPost from "./pages/CreateForumPost";
+import WishlistPage from "./pages/WishlistPage";
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -138,6 +139,14 @@ function App() {
                 element={
                   <ProtectedRoute role="user">
                     <UserOrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute role="user">
+                    <WishlistPage />
                   </ProtectedRoute>
                 }
               />

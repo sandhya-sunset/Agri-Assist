@@ -9,12 +9,14 @@ import {
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import api from "../services/api";
-import { useToast } from "../components/Toast";
+import wishlistService from "../services/wishlistService";
+import { useToast } from "../Components/Toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const ProductListPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [wishlistIds, setWishlistIds] = useState(new Set());
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -24,7 +26,9 @@ const ProductListPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
+    setSearchTerm(query);
     fetchProducts();
+    fetchWishlistIds();
   }, [query]);
 
   const fetchProducts = async () => {
@@ -36,6 +40,30 @@ const ProductListPage = () => {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWishlistIds = async () => {
+    try {
+      const data = await wishlistService.getWishlist();
+      if (data.success) {
+        setWishlistIds(new Set(data.data.map((p) => p._id)));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleToggleWishlist = async (e, productId) => {
+    e.stopPropagation();
+    try {
+      const data = await wishlistService.toggleWishlist(productId);
+      if (data.success) {
+        setWishlistIds(new Set(data.data));
+        addToast(data.isAdded ? 'Added to wishlist ❤️' : 'Removed from wishlist', data.isAdded ? 'success' : 'info');
+      }
+    } catch {
+      addToast('Failed to update wishlist', 'error');
     }
   };
 
@@ -102,19 +130,6 @@ const ProductListPage = () => {
           </div>
 
           <div className="flex gap-4">
-            <div className="relative">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                size={20}
-              />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 w-full md:w-80"
-              />
-            </div>
             <button className="p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50">
               <Filter size={20} className="text-gray-600" />
             </button>
@@ -161,8 +176,15 @@ const ProductListPage = () => {
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <button className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full text-gray-400 hover:text-red-500 transition-colors">
-                    <Heart size={18} />
+                  <button
+                    onClick={(e) => handleToggleWishlist(e, product._id)}
+                    className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md transition-all duration-200 hover:scale-110"
+                    title={wishlistIds.has(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                  >
+                    <Heart
+                      size={18}
+                      className={wishlistIds.has(product._id) ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'}
+                    />
                   </button>
                   <div className="absolute bottom-3 left-3 flex gap-2">
                     <span className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full shadow-lg">

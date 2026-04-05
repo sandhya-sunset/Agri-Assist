@@ -46,11 +46,12 @@ import {
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import productService from "../services/productService";
+import wishlistService from "../services/wishlistService";
 import api from "../services/api";
 import { API_BASE_URL } from "../config";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../components/Toast";
+import { useToast } from "../Components/Toast";
 import ChatWindow from "../components/ChatWindow";
 
 const HomePage = () => {
@@ -61,6 +62,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
+  const [wishlistIds, setWishlistIds] = useState(new Set());
 
   // Dynamic data state
   const [stats, setStats] = useState(null);
@@ -115,7 +117,32 @@ const HomePage = () => {
     fetchHomePageData();
     fetchTasks();
     fetchWeather();
+    fetchWishlistIds();
   }, []);
+
+  const fetchWishlistIds = async () => {
+    try {
+      const data = await wishlistService.getWishlist();
+      if (data.success) {
+        setWishlistIds(new Set(data.data.map((p) => p._id)));
+      }
+    } catch {
+      // ignore - user might not be logged in
+    }
+  };
+
+  const handleToggleWishlist = async (e, productId) => {
+    e.stopPropagation();
+    try {
+      const data = await wishlistService.toggleWishlist(productId);
+      if (data.success) {
+        setWishlistIds(new Set(data.data));
+        addToast(data.isAdded ? 'Added to wishlist ❤️' : 'Removed from wishlist', data.isAdded ? 'success' : 'info');
+      }
+    } catch {
+      addToast('Failed to update wishlist', 'error');
+    }
+  };
 
   // Weather fetching logic using Open-Meteo (Free, no API key needed)
   const fetchWeather = () => {
@@ -1042,6 +1069,18 @@ const HomePage = () => {
                       </div>
                     </div>
 
+                    {/* Wishlist Button */}
+                    <button
+                      onClick={(e) => handleToggleWishlist(e, product._id)}
+                      className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md transition-all duration-200 hover:scale-110"
+                      title={wishlistIds.has(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    >
+                      <Heart
+                        size={18}
+                        className={wishlistIds.has(product._id) ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'}
+                      />
+                    </button>
+
                     <div className="absolute bottom-3 left-3 px-3 py-1 bg-white/95 backdrop-blur-sm text-green-600 text-xs font-bold rounded-full border border-green-200">
                       {product.stock > 0 ? "In Stock" : "Out of Stock"}
                     </div>
@@ -1313,52 +1352,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-linear-to-br from-green-600 via-green-700 to-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
-            <Sparkles size={16} className="text-white" />
-            <span className="text-sm font-bold text-white">
-              Get Started Today
-            </span>
-          </div>
 
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Ready to Transform Your Farming?
-          </h2>
-
-          <p className="text-xl text-green-50 mb-10 max-w-2xl mx-auto">
-            Join 10,000+ farmers who are growing smarter with AgriAssist. Get
-            AI-powered insights and premium products delivered to your farm.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-white text-green-700 rounded-xl font-bold text-lg shadow-2xl hover:bg-gray-50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center justify-center gap-2">
-              <PlayCircle size={20} />
-              Watch Demo
-            </button>
-            <button className="px-8 py-4 bg-green-500 hover:bg-green-400 text-white rounded-xl font-bold text-lg shadow-2xl transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center justify-center gap-2">
-              Start Free Trial
-              <ArrowRight size={20} />
-            </button>
-          </div>
-
-          <div className="mt-12 flex items-center justify-center gap-8 flex-wrap text-white">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={20} className="text-green-300" />
-              <span>No credit card required</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle size={20} className="text-green-300" />
-              <span>Free shipping</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle size={20} className="text-green-300" />
-              <span>24/7 support</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-12">

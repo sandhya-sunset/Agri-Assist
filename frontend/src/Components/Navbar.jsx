@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Sparkles,
+  Users,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -28,6 +29,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [cartItemsCount, setCartItemsCount] = useState(0);
@@ -83,6 +85,7 @@ const Navbar = () => {
     { name: "Products", href: "/products" },
     { name: "Messages", href: "/user-message", icon: MessageSquare },
     { name: "AI Assistant", href: "/disease-detection", icon: Sparkles },
+    { name: "Forum", href: "/forum", icon: Users },
   ];
 
   return (
@@ -120,7 +123,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-10">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -137,7 +140,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {/* Search - Hidden on mobile */}
             {/* Search - Hidden on mobile */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl transition-all duration-300">
@@ -276,7 +279,6 @@ const Navbar = () => {
             )}
 
             {/* Cart */}
-            {/* Cart */}
             <button
               onClick={() => navigate("/cart")}
               className="relative p-2.5 hover:bg-green-50 rounded-xl transition-all duration-300 group"
@@ -292,49 +294,84 @@ const Navbar = () => {
               )}
             </button>
 
-            {/* Auth Buttons */}
-            <div className="hidden sm:flex items-center gap-2">
-              {isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => navigate("/my-orders")}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-300"
-                  >
-                    <Package size={18} />
-                    My Orders
-                  </button>
-                  <button
-                    onClick={() => navigate("/profile")}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-300"
-                  >
-                    <User size={18} />
-                    Profile
-                  </button>
-                  <button
-                    onClick={() => logout()}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
-                  >
-                    <LogOut size={18} />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-300"
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transform hover:-translate-y-0.5 transition-all duration-300"
-                  >
-                    Get Started
-                  </button>
-                </>
-              )}
-            </div>
+            {/* Desktop User Menu Dropdown */}
+            {isAuthenticated ? (
+              <div className="hidden md:block relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  onBlur={() => setTimeout(() => setIsUserMenuOpen(false), 200)}
+                  className="p-2.5 hover:bg-gray-50 rounded-xl transition-all duration-300 group flex items-center gap-1 border border-transparent hover:border-gray-100"
+                  title="Account Menu"
+                >
+                  <Menu
+                    size={22}
+                    className="text-gray-600 group-hover:text-green-600 transition-colors"
+                  />
+                </button>
+
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="p-4 border-b border-gray-50 bg-gray-50/30">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                        Account
+                      </p>
+                      <p className="text-sm font-bold text-gray-900 truncate mt-1">
+                        {user?.name || "User"}
+                      </p>
+                      <p className="text-[10px] text-gray-500 truncate">
+                        {user?.email}
+                      </p>
+                    </div>
+                    <div className="p-2">
+                      <button
+                        onClick={() => navigate("/profile")}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-xl transition-all duration-200"
+                      >
+                        <User size={18} />
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => navigate("/my-orders")}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-xl transition-all duration-200"
+                      >
+                        <Package size={18} />
+                        My Orders
+                      </button>
+                      <button
+                        onClick={() => navigate("/wishlist")}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-xl transition-all duration-200"
+                      >
+                        <Heart size={18} />
+                        Wishlist
+                      </button>
+                      <div className="h-px bg-gray-100 my-1 mx-2"></div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                      >
+                        <LogOut size={18} />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-300"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-200 hover:shadow-green-300 transform hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  Get Started
+                </button>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -389,6 +426,15 @@ const Navbar = () => {
                   className="px-4 py-3 text-sm font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <User size={18} /> Profile
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/wishlist");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="px-4 py-3 text-sm font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <Heart size={18} /> Wishlist
                 </button>
                 <button
                   onClick={() => {

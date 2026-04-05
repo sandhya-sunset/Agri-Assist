@@ -3,6 +3,7 @@ import { ArrowLeft, Send, Loader2, AlertCircle } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../config";
 
 const CreateForumPost = () => {
   const [formData, setFormData] = useState({
@@ -98,7 +99,7 @@ const CreateForumPost = () => {
         ...(formData.tags && { tags: formData.tags.split(",").map((tag) => tag.trim()) }),
       };
 
-      const response = await fetch("http://localhost:5000/api/forum", {
+      const response = await fetch(`${API_BASE_URL}/api/forum`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

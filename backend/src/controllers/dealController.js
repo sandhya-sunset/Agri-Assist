@@ -1,4 +1,6 @@
 const Deal = require('../models/Deal');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // @desc    Get active deals
 // @route   GET /api/deals/active
@@ -41,6 +43,33 @@ exports.createDeal = async (req, res) => {
       success: true,
       data: deal
     });
+
+    // Notify all users about the new deal
+    try {
+      const io = req.app.get('io');
+      const users = await User.find({ role: 'user' });
+      
+      const notifications = users.map(user => ({
+        user: user._id,
+        type: 'system',
+        title: `Big Sale: ${deal.title}`,
+        message: `${deal.subtitle}. Check it out now!`,
+        link: '/home'
+      }));
+
+      await Notification.insertMany(notifications);
+
+      if (io) {
+        io.emit('newNotification', { 
+          type: 'system', 
+          title: `Big Sale: ${deal.title}`,
+          message: deal.subtitle,
+          link: '/home'
+        });
+      }
+    } catch (notifyError) {
+      console.error('Failed to send deal notifications:', notifyError);
+    }
   } catch (error) {
     console.error('Error creating deal:', error);
     res.status(500).json({

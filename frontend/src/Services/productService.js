@@ -37,12 +37,18 @@ const replyToReview = async (productId, reviewId, text) => {
   return response.data;
 };
 
+const updateStock = async (id, stock) => {
+  const response = await api.put(`/products/${id}/stock`, { stock });
+  return response.data;
+};
+
 const productService = {
   getProducts,
   createProduct,
   updateProduct,
   deleteProduct,
   replyToReview,
+  updateStock,
 };
 
 export default productService;

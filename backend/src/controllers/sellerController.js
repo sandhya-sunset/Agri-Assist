@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // @desc    Get seller dashboard statistics (Revenue, Orders, Products, etc.)
 // @route   GET /api/seller/stats
@@ -442,6 +443,42 @@ exports.updateOrderStatus = async (req, res) => {
 
     order.status = status;
     await order.save();
+
+    // Create and emit notification for order status change
+    try {
+      const io = req.app.get('io');
+      const notificationData = {
+        user: order.user,
+        type: 'order',
+        title: `Order #${order._id.toString().substring(0, 8)} Updated`,
+        message: `Your order status is now: ${status}`,
+        link: `/orders/${order._id}`
+      };
+
+      const notification = await Notification.create(notificationData);
+
+      if (io) {
+        io.to(order.user.toString()).emit('newNotification', notification);
+      }
+
+      // If delivered, send a specific review reminder
+      if (status === 'Delivered') {
+        const reminderData = {
+          user: order.user,
+          type: 'review',
+          title: 'We Want Your Feedback!',
+          message: 'Your order was delivered. Please take a moment to review your products to help other farmers.',
+          link: `/orders/${order._id}`
+        };
+        const reminder = await Notification.create(reminderData);
+        if (io) {
+          io.to(order.user.toString()).emit('newNotification', reminder);
+        }
+      }
+
+    } catch (notifyError) {
+      console.error('Failed to send order status notification:', notifyError);
+    }
 
     res.status(200).json({
       success: true,

@@ -51,6 +51,7 @@ exports.createOrder = async (req, res) => {
       user: req.user._id,
       items: cart.items.map((item) => ({
         product: item.product._id,
+        size: item.size,
         quantity: item.quantity,
         price: item.price,
       })),
@@ -62,10 +63,9 @@ exports.createOrder = async (req, res) => {
       location: location || undefined,
     });
 
-    // Clear cart (keep the cart document but empty items)
-    cart.items = [];
-    cart.totalAmount = 0;
-    await cart.save();
+    // NOTE: Cart is NOT cleared here.
+    // It will be cleared only after Khalti payment is confirmed.
+    // This prevents the "No items in cart" error if Khalti initiation fails.
 
     res.status(201).json({
       success: true,
@@ -154,6 +154,14 @@ exports.confirmKhaltiOrderPayment = async (req, res) => {
       order.transactionUuid = lookupData.transaction_id;
       order.khaltiPidx = pidx;
       await order.save();
+
+      // Clear the user's cart ONLY after payment is successfully confirmed
+      const cart = await Cart.findOne({ user: req.user._id });
+      if (cart) {
+        cart.items = [];
+        cart.totalAmount = 0;
+        await cart.save();
+      }
 
       return res.status(200).json({
         success: true,

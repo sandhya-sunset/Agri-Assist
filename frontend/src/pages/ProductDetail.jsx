@@ -24,6 +24,7 @@ import Navbar from "../Components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import ChatWindow from "../components/ChatWindow";
 import api from "../services/api";
+import wishlistService from "../services/wishlistService";
 import { useToast } from "../Components/Toast";
 
 const ProductDetail = () => {
@@ -39,12 +40,37 @@ const ProductDetail = () => {
   const [question, setQuestion] = useState("");
   const [rating, setRating] = useState(5);
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const { addToast } = useToast();
 
   useEffect(() => {
     fetchProduct();
+    fetchWishlistStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const fetchWishlistStatus = async () => {
+    try {
+      const data = await wishlistService.getWishlist();
+      if (data.success) {
+        setIsWishlisted(data.data.some((p) => p._id === id));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    try {
+      const data = await wishlistService.toggleWishlist(id);
+      if (data.success) {
+        setIsWishlisted(data.isAdded);
+        addToast(data.isAdded ? 'Added to wishlist ❤️' : 'Removed from wishlist', data.isAdded ? 'success' : 'info');
+      }
+    } catch {
+      addToast('Failed to update wishlist', 'error');
+    }
+  };
 
   // Auto-select the first size when product loads
   useEffect(() => {
@@ -217,8 +243,12 @@ const ProductDetail = () => {
                 className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute top-4 right-4 flex flex-col gap-2">
-                <button className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white text-gray-600 hover:text-red-500 transition-all">
-                  <Heart size={20} />
+                <button
+                  onClick={handleToggleWishlist}
+                  className={`p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all ${isWishlisted ? 'text-red-500' : 'text-gray-600 hover:text-red-500'}`}
+                  title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                >
+                  <Heart size={20} className={isWishlisted ? 'fill-red-500' : ''} />
                 </button>
                 <button className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white text-gray-600 hover:text-green-600 transition-all">
                   <Share2 size={20} />

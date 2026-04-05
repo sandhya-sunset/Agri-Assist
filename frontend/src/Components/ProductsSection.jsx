@@ -152,6 +152,20 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
     }
   };
 
+  const handleQuickUpdateStock = async (id, newStock) => {
+    try {
+      await productService.updateStock(id, newStock);
+      // The socket event will trigger a UI update automatically,
+      // but we can also instantly apply it locally for faster feedback.
+      setProducts((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, stock: newStock } : p))
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update stock quantity");
+    }
+  };
+
   const handleAddProduct = async () => {
     try {
       const formData = new FormData();
@@ -413,23 +427,40 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`${product.stock > 0 ? "text-gray-800" : "text-red-600"}`}
-                        >
-                          {product.stock} units
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="0"
+                            className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-green-500 font-medium text-gray-800"
+                            defaultValue={product.stock}
+                            onBlur={(e) => {
+                              const val = parseInt(e.target.value);
+                              if (!isNaN(val) && val !== product.stock && val >= 0) {
+                                handleQuickUpdateStock(product._id, val);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                const val = parseInt(e.currentTarget.value);
+                                if (!isNaN(val) && val !== product.stock && val >= 0) {
+                                  handleQuickUpdateStock(product._id, val);
+                                  e.currentTarget.blur();
+                                }
+                              }
+                            }}
+                          />
+                          <span className="text-xs text-gray-500">units</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            product.status === "active"
+                            product.stock > 0
                               ? "bg-green-100 text-green-600"
                               : "bg-red-100 text-red-600"
                           }`}
                         >
-                          {product.status === "active"
-                            ? "Active"
-                            : "Out of Stock"}
+                          {product.stock > 0 ? "In Stock" : "Out of Stock"}
                         </span>
                       </td>
                       <td className="px-6 py-4">

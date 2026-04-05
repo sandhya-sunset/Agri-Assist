@@ -13,6 +13,7 @@ import {
 import Navbar from "../Components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../config";
 
 const CommunityForum = () => {
   const [posts, setPosts] = useState([]);
@@ -52,7 +53,7 @@ const CommunityForum = () => {
         params.append("sortBy", sortBy);
 
         const response = await fetch(
-          `http://localhost:5000/api/forum?${params.toString()}`
+          `${API_BASE_URL}/api/forum?${params.toString()}`
         );
         const data = await response.json();
 

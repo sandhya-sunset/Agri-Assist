@@ -13,6 +13,7 @@ import {
 import Navbar from "../Components/Navbar";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../config";
 
 const ForumPostDetail = () => {
   const { id } = useParams();
@@ -28,7 +29,7 @@ const ForumPostDetail = () => {
     const loadPost = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/forum/${id}`);
+        const response = await fetch(`${API_BASE_URL}/api/forum/${id}`);
         const data = await response.json();
 
         if (data.success) {
@@ -64,7 +65,7 @@ const ForumPostDetail = () => {
       setSubmittingReply(true);
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`http://localhost:5000/api/forum/${id}/replies`, {
+      const response = await fetch(`${API_BASE_URL}/api/forum/${id}/replies`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -96,7 +97,7 @@ const ForumPostDetail = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/forum/${id}/replies/${replyId}/accept`,
+        `${API_BASE_URL}/api/forum/${id}/replies/${replyId}/accept`,
         {
           method: "PUT",
           headers: {
@@ -128,7 +129,7 @@ const ForumPostDetail = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/forum/${id}/replies/${replyId}/like`,
+        `${API_BASE_URL}/api/forum/${id}/replies/${replyId}/like`,
         {
           method: "PUT",
           headers: {
