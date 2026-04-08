@@ -481,9 +481,16 @@ const updatePassword = async (req, res) => {
 
     // Find user with password
     const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     // Check current password
-    if (!(await user.matchPassword(currentPassword))) {
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
       return res.status(401).json({
         success: false,
         message: "Incorrect current password",

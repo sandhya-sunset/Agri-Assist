@@ -1145,6 +1145,7 @@ const HomePage = () => {
                             quantity: 1,
                           });
                           alert("Added to cart!");
+                          navigate("/cart");
                         } catch (e) {
                           console.error(e);
                           alert("Failed to add to cart");

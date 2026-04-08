@@ -48,6 +48,7 @@ const WishlistPage = () => {
     try {
       await api.post("/cart", { productId, quantity: 1 });
       addToast("Added to cart successfully!", "success");
+      navigate("/cart");
     } catch (error) {
       console.error("Error adding to cart:", error);
       addToast("Failed to add to cart.", "error");

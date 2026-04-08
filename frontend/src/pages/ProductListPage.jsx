@@ -75,6 +75,7 @@ const ProductListPage = () => {
         quantity: 1,
       });
       addToast("Product added to cart successfully!", "success");
+      navigate("/cart");
     } catch (error) {
       console.error("Error adding to cart:", error);
       addToast("Failed to add to cart. Please try again.", "error");
