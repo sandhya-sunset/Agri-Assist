@@ -174,7 +174,7 @@ const register = async (req, res) => {
         role: user.role,
         phone: user.phone,
         address: user.address,
-        isVerified: user.isVerified,
+        isVerified: user.isVerified, expertApplicationStatus: user.expertApplicationStatus,
         requiresOTP: role !== "seller",
       },
     });
@@ -249,7 +249,7 @@ const verifyOTP = async (req, res) => {
         role: user.role,
         phone: user.phone,
         address: user.address,
-        isVerified: user.isVerified,
+        isVerified: user.isVerified, expertApplicationStatus: user.expertApplicationStatus,
         token,
       },
     });
@@ -381,7 +381,7 @@ const login = async (req, res) => {
         role: user.role,
         phone: user.phone,
         address: user.address,
-        isVerified: user.isVerified,
+        isVerified: user.isVerified, expertApplicationStatus: user.expertApplicationStatus,
         token,
       },
     });
@@ -616,6 +616,54 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// @desc    Apply for Expert role
+// @route   POST /api/auth/apply-expert
+// @access  Private
+const applyExpert = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.role === 'expert') {
+      return res.status(400).json({ success: false, message: "You are already an expert" });
+    }
+
+    if (user.expertApplicationStatus === 'pending') {
+      return res.status(400).json({ success: false, message: "Application already pending" });
+    }
+
+    const { degree, specialization, experienceYears, institution, bio } = req.body;
+
+    if (!degree || !specialization || !experienceYears || !institution) {
+      return res.status(400).json({ success: false, message: "Please provide all required expert details" });
+    }
+
+    user.expertDetails = {
+      degree,
+      specialization,
+      experienceYears: Number(experienceYears),
+      institution,
+      bio
+    };
+    user.expertApplicationStatus = 'pending';
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Expert application submitted successfully. Please wait for admin approval.",
+      data: {
+        expertApplicationStatus: user.expertApplicationStatus
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -626,4 +674,5 @@ module.exports = {
   updatePassword,
   forgotPassword,
   resetPassword,
+  applyExpert,
 };

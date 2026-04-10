@@ -10,6 +10,7 @@ const {
   updatePassword,
   forgotPassword,
   resetPassword,
+  applyExpert,
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
@@ -41,5 +42,6 @@ router.post('/reset-password', resetPassword);
 router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
 router.put('/update-password', protect, updatePassword);
+router.post('/apply-expert', protect, applyExpert);
 
 module.exports = router;

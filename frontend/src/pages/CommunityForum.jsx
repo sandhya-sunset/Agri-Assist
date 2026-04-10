@@ -246,7 +246,7 @@ const CommunityForum = () => {
 
                   <div className="flex items-center gap-1 text-gray-600">
                     <MessageSquare size={16} />
-                    <span className="text-xs">{post.replies.length} replies</span>
+                    <span className="text-xs">{post.replies?.length || 0} replies</span>
                   </div>
 
                   <span className="text-xs text-gray-500 ml-auto">

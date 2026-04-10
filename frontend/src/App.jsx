@@ -26,6 +26,7 @@ import CommunityForum from "./pages/CommunityForum";
 import ForumPostDetail from "./pages/ForumPostDetail";
 import CreateForumPost from "./pages/CreateForumPost";
 import WishlistPage from "./pages/WishlistPage";
+import ApplyExpert from "./pages/ApplyExpert";
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -159,6 +160,11 @@ function App() {
                 }
               />
               <Route path="/forum" element={<CommunityForum />} />
+              <Route path="/apply-expert" element={
+                <ProtectedRoute role="user">
+                  <ApplyExpert />
+                </ProtectedRoute>
+              } />
               <Route
                 path="/forum/create"
                 element={

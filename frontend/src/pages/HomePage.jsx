@@ -712,6 +712,24 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Expert Application Banner */}
+      {user?.role === 'user' && user?.expertApplicationStatus !== 'approved' && (
+        <section className="bg-green-600 text-white py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
+            <div className="mb-6 md:mb-0">
+              <h2 className="text-3xl font-bold mb-2 flex items-center gap-2"><Award /> Are you an Agriculture Expert?</h2>
+              <p className="text-green-100 text-lg">Help farmers by sharing your knowledge in our community forum. Apply now to get your expert badge!</p>
+            </div>
+            <button 
+              onClick={() => navigate('/apply-expert')}
+              className="bg-white text-green-600 font-bold px-8 py-3 rounded-lg hover:bg-green-50 shadow-lg transition-colors whitespace-nowrap"
+            >
+              {user?.expertApplicationStatus === 'pending' ? 'View Setup Status' : 'Apply Now'}
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* Farmer To-Do List */}
       <section className="py-8 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

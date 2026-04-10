@@ -206,3 +206,84 @@ exports.updateCommissionSettings = async (req, res) => {
     });
   }
 };
+
+// @desc    Get pending expert applications
+// @route   GET /api/admin/expert-applications
+// @access  Private/Admin
+exports.getExpertApplications = async (req, res) => {
+  try {
+    const { status } = req.query; // 'pending', 'approved', 'rejected'
+    const query = { expertApplicationStatus: status || 'pending' };
+
+    const applications = await User.find(query).select('name email phone address expertDetails expertApplicationStatus createdAt updatedAt');
+
+    res.status(200).json({
+      success: true,
+      count: applications.length,
+      data: applications
+    });
+  } catch (error) {
+    console.error('Error fetching expert applications:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Approve expert application
+// @route   PUT /api/admin/expert-applications/:id/approve
+// @access  Private/Admin
+exports.approveExpertApplication = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.expertApplicationStatus !== 'pending') {
+      return res.status(400).json({ success: false, message: 'Application is not in pending status' });
+    }
+
+    user.expertApplicationStatus = 'approved';
+    user.role = 'expert';
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Expert application approved successfully',
+      data: user
+    });
+  } catch (error) {
+    console.error('Error approving expert application:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Reject expert application
+// @route   PUT /api/admin/expert-applications/:id/reject
+// @access  Private/Admin
+exports.rejectExpertApplication = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.expertApplicationStatus !== 'pending') {
+      return res.status(400).json({ success: false, message: 'Application is not in pending status' });
+    }
+
+    user.expertApplicationStatus = 'rejected';
+    // optionally keep role as 'user' or revert if something else
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Expert application rejected',
+      data: user
+    });
+  } catch (error) {
+    console.error('Error rejecting expert application:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

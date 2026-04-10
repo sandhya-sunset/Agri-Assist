@@ -35,8 +35,20 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'seller', 'admin'],
+      enum: ['user', 'seller', 'expert', 'admin'],
       default: 'user',
+    },
+    expertDetails: {
+      degree: String,
+      specialization: String,
+      experienceYears: Number,
+      institution: String,
+      bio: String
+    },
+    expertApplicationStatus: {
+      type: String,
+      enum: ['none', 'pending', 'approved', 'rejected'],
+      default: 'none',
     },
     location: {
       type: {

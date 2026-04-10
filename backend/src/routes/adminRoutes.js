@@ -5,7 +5,10 @@ const {
   getDashboardStats,
   getOrders,
   getCommissionSettings,
-  updateCommissionSettings
+  updateCommissionSettings,
+  getExpertApplications,
+  approveExpertApplication,
+  rejectExpertApplication
 } = require('../controllers/adminController');
 
 // All routes require authentication and admin role
@@ -21,5 +24,10 @@ router.get('/orders', getOrders);
 // Commission settings
 router.get('/commission', getCommissionSettings);
 router.put('/commission', updateCommissionSettings);
+
+// Expert applications management
+router.get('/expert-applications', getExpertApplications);
+router.put('/expert-applications/:id/approve', approveExpertApplication);
+router.put('/expert-applications/:id/reject', rejectExpertApplication);
 
 module.exports = router;

@@ -33,8 +33,7 @@ router.get('/', async (req, res) => {
 
     const posts = await ForumPost.find(query)
       .sort(sortOption)
-      .limit(50)
-      .select('-replies');
+      .limit(50);
 
     res.json({
       success: true,
@@ -137,6 +136,14 @@ router.post('/:id/replies', protect, async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Post not found',
+      });
+    }
+
+    // Only allow experts, admins, or the original poster to reply
+    if (req.user.role !== 'expert' && req.user.role !== 'admin' && post.userId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only verified agriculture experts can reply to forum posts. Please apply to become an expert.',
       });
     }
 
