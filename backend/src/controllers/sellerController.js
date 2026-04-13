@@ -452,7 +452,7 @@ exports.updateOrderStatus = async (req, res) => {
         type: 'order',
         title: `Order #${order._id.toString().substring(0, 8)} Updated`,
         message: `Your order status is now: ${status}`,
-        link: `/orders/${order._id}`
+        link: `/order/${order._id}`
       };
 
       const notification = await Notification.create(notificationData);
@@ -468,7 +468,7 @@ exports.updateOrderStatus = async (req, res) => {
           type: 'review',
           title: 'We Want Your Feedback!',
           message: 'Your order was delivered. Please take a moment to review your products to help other farmers.',
-          link: `/orders/${order._id}`
+          link: `/order/${order._id}`
         };
         const reminder = await Notification.create(reminderData);
         if (io) {

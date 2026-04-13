@@ -188,8 +188,8 @@ const Navbar = () => {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
+                          onMouseDown={(e) => {
+                            e.preventDefault();
                             clearNotifications();
                           }}
                           className="text-xs text-red-600 hover:text-red-700 font-bold transition-colors"
@@ -324,21 +324,21 @@ const Navbar = () => {
                     </div>
                     <div className="p-2">
                       <button
-                        onClick={() => navigate("/profile")}
+                        onMouseDown={() => navigate("/profile")}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-xl transition-all duration-200"
                       >
                         <User size={18} />
                         Profile
                       </button>
                       <button
-                        onClick={() => navigate("/my-orders")}
+                        onMouseDown={() => navigate("/my-orders")}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-xl transition-all duration-200"
                       >
                         <Package size={18} />
                         My Orders
                       </button>
                       <button
-                        onClick={() => navigate("/wishlist")}
+                        onMouseDown={() => navigate("/wishlist")}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-xl transition-all duration-200"
                       >
                         <Heart size={18} />
@@ -346,7 +346,7 @@ const Navbar = () => {
                       </button>
                       <div className="h-px bg-gray-100 my-1 mx-2"></div>
                       <button
-                        onClick={handleLogout}
+                        onMouseDown={handleLogout}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
                       >
                         <LogOut size={18} />

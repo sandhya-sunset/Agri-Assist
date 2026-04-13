@@ -293,6 +293,16 @@ const UserOrderDetailPage = () => {
                         Rs. {item.price.toFixed(2)}
                       </p>
                     </div>
+                    {order.status === "Delivered" && (
+                      <div className="flex items-center">
+                        <Link 
+                           to={`/product/${item.product._id}`}
+                           className="px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg text-sm font-semibold transition-colors border border-green-200"
+                        >
+                          Write a Review
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

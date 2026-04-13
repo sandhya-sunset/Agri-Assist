@@ -639,9 +639,9 @@ const DiseaseDetection = () => {
                     <select
                       value={selectedPlant}
                       onChange={(e) => setSelectedPlant(e.target.value)}
-                      className="w-full p-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                      className="w-full p-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 text-gray-700"
                     >
-                      <option value="">-- Choose a Plant --</option>
+                      <option value="" disabled>Select a plant type...</option>
                       {plantOptions.map((plant) => (
                         <option key={plant} value={plant}>
                           {plant}

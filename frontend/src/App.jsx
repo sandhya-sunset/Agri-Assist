@@ -159,6 +159,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/orders/:id"
+                element={
+                  <ProtectedRoute role="user">
+                    <UserOrderDetailPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/forum" element={<CommunityForum />} />
               <Route path="/apply-expert" element={
                 <ProtectedRoute role="user">
