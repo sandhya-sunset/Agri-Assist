@@ -76,3 +76,29 @@ exports.getMessages = async (req, res) => {
     });
   }
 };
+
+// @desc    Get contacts (sellers, experts, admins) to start a chat with
+// @route   GET /api/messages/contacts
+// @access  Private
+const User = require("../models/User");
+
+exports.getContacts = async (req, res) => {
+  try {
+    // Only return users who are sellers, experts, or admins.
+    // Also, don't return the currently logged in user to themselves.
+    const contacts = await User.find({
+      _id: { $ne: req.user._id },
+      role: { $in: ['seller', 'expert', 'admin'] }
+    }).select("name email role profileImage");
+
+    res.status(200).json({
+      success: true,
+      data: contacts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

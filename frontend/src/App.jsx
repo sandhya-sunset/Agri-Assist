@@ -27,6 +27,8 @@ import ForumPostDetail from "./pages/ForumPostDetail";
 import CreateForumPost from "./pages/CreateForumPost";
 import WishlistPage from "./pages/WishlistPage";
 import ApplyExpert from "./pages/ApplyExpert";
+import UserManual from "./pages/UserManual";
+import ComboPacksPage from "./pages/ComboPacksPage";
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -167,6 +169,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/manual" element={<UserManual />} />
+              <Route path="/combo-packs" element={<ComboPacksPage />} />
               <Route path="/forum" element={<CommunityForum />} />
               <Route path="/apply-expert" element={
                 <ProtectedRoute role="user">

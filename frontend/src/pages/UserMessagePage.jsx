@@ -14,6 +14,8 @@ import {
   Package,
   ShoppingBag,
   Loader2,
+  Users,
+  MessageSquare,
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import api from "../services/api";
@@ -24,7 +26,10 @@ const UserMessagesPage = () => {
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [conversations, setConversations] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [activeTab, setActiveTab] = useState("chats"); // "chats" or "contacts"
   const [loading, setLoading] = useState(true);
+  const [contactsLoading, setContactsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const { user } = useAuth();
@@ -32,9 +37,25 @@ const UserMessagesPage = () => {
   useEffect(() => {
     if (user?._id) {
       fetchConversations();
+      fetchContacts();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  const fetchContacts = async () => {
+    if (!user?._id) return;
+    try {
+      setContactsLoading(true);
+      const response = await api.get("/messages/contacts");
+      if (response.data.success) {
+        setContacts(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    } finally {
+      setContactsLoading(false);
+    }
+  };
 
   const fetchConversations = async () => {
     if (!user?._id) return;
@@ -152,15 +173,54 @@ const UserMessagesPage = () => {
     );
   };
 
-  const filteredConversations = conversations.filter(
-    (conv) =>
-      conv.sellerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredConversations = conversations.filter((conv) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      conv.sellerName?.toLowerCase().includes(q) ||
+      conv.email?.toLowerCase().includes(q) ||
+      conv.productName?.toLowerCase().includes(q) ||
+      conv.lastMessage?.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredContacts = contacts.filter((contact) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      contact.name?.toLowerCase().includes(q) ||
+      contact.email?.toLowerCase().includes(q) ||
+      contact.role?.toLowerCase().includes(q)
+    );
+  });
 
   const totalUnread = conversations.reduce((sum, conv) => sum + conv.unread, 0);
+
+  const startChatWithContact = (contact) => {
+    // Check if conversation already exists
+    const existing = conversations.find(c => c.id === contact._id);
+    if (existing) {
+      setSelectedConversation(existing);
+      setActiveTab("chats");
+    } else {
+      // Create a temporary new conversation state
+      const newConv = {
+        id: contact._id,
+        sellerName: contact.name || contact.email || "Unknown User",
+        email: contact.email,
+        avatar: (contact.name || "U").charAt(0).toUpperCase(),
+        lastMessage: "New Conversation",
+        time: "Now",
+        unread: 0,
+        isOnline: false,
+        productName: `Chat with ${contact.role}`,
+        messages: [],
+      };
+      setConversations([newConv, ...conversations]);
+      setSelectedConversation(newConv);
+      setActiveTab("chats");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -185,8 +245,30 @@ const UserMessagesPage = () => {
           <div className="flex h-full">
             {/* Conversations List Sidebar */}
             <div className="w-full sm:w-80 lg:w-96 border-r border-gray-200 flex flex-col bg-gray-50">
-              {/* Search Bar */}
+              {/* Search Bar & Tabs */}
               <div className="p-4 border-b border-gray-200 bg-white">
+                <div className="flex bg-gray-100 p-1 rounded-xl mb-4">
+                  <button
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === "chats"
+                        ? "bg-white text-gray-900 shadow-sm border border-gray-200"
+                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                    }`}
+                    onClick={() => setActiveTab("chats")}
+                  >
+                    Chats
+                  </button>
+                  <button
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === "contacts"
+                        ? "bg-white text-gray-900 shadow-sm border border-gray-200"
+                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                    }`}
+                    onClick={() => setActiveTab("contacts")}
+                  >
+                    New Chat
+                  </button>
+                </div>
                 <div className="relative">
                   <Search
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -194,7 +276,7 @@ const UserMessagesPage = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Search sellers or products..."
+                    placeholder={`Search ${activeTab === 'chats' ? 'messages' : 'contacts'}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -202,85 +284,134 @@ const UserMessagesPage = () => {
                 </div>
               </div>
 
-              {/* Conversation List */}
+              {/* List */}
               <div className="flex-1 overflow-y-auto">
-                {loading ? (
-                  <div className="flex items-center justify-center h-64">
-                    <Loader2
-                      className="animate-spin text-green-600"
-                      size={32}
-                    />
-                  </div>
-                ) : filteredConversations.length > 0 ? (
-                  filteredConversations.map((conv) => (
-                    <div
-                      key={conv.id}
-                      onClick={() => {
-                        setSelectedConversation(conv);
-                        markAsRead(conv.id);
-                      }}
-                      className={`p-4 border-b border-gray-200 cursor-pointer transition-all ${
-                        selectedConversation?.id === conv.id
-                          ? "bg-green-50 border-l-4 border-l-green-600"
-                          : "hover:bg-white"
-                      } ${conv.unread > 0 ? "bg-blue-50" : ""}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="relative shrink-0">
-                          <div className="w-12 h-12 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
-                              {conv.avatar}
-                            </span>
-                          </div>
-                          {conv.isOnline && (
-                            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <p
-                              className={`font-semibold text-gray-800 truncate ${conv.unread > 0 ? "text-gray-900" : ""}`}
-                            >
-                              {conv.sellerName}
-                            </p>
-                            {conv.unread > 0 && (
-                              <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full ml-2 shrink-0 font-semibold">
-                                {conv.unread}
+                {activeTab === "chats" ? (
+                  loading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2
+                        className="animate-spin text-green-600"
+                        size={32}
+                      />
+                    </div>
+                  ) : filteredConversations.length > 0 ? (
+                    filteredConversations.map((conv) => (
+                      <div
+                        key={conv.id}
+                        onClick={() => {
+                          setSelectedConversation(conv);
+                          markAsRead(conv.id);
+                        }}
+                        className={`p-4 border-b border-gray-200 cursor-pointer transition-all ${
+                          selectedConversation?.id === conv.id
+                            ? "bg-green-50 border-l-4 border-l-green-600"
+                            : "hover:bg-white"
+                        } ${conv.unread > 0 ? "bg-blue-50" : ""}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="relative shrink-0">
+                            <div className="w-12 h-12 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                              <span className="text-white font-semibold text-sm">
+                                {conv.avatar}
                               </span>
+                            </div>
+                            {conv.isOnline && (
+                              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Package
-                              size={12}
-                              className="text-green-600 shrink-0"
-                            />
-                            <p className="text-xs text-green-600 font-medium truncate">
-                              {conv.productName}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <p
+                                className={`font-semibold text-gray-800 truncate ${conv.unread > 0 ? "text-gray-900" : ""}`}
+                              >
+                                {conv.sellerName}
+                              </p>
+                              {conv.unread > 0 && (
+                                <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full ml-2 shrink-0 font-semibold">
+                                  {conv.unread}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <Package
+                                size={12}
+                                className="text-green-600 shrink-0"
+                              />
+                              <p className="text-xs text-green-600 font-medium truncate">
+                                {conv.productName}
+                              </p>
+                            </div>
+
+                            <p
+                              className={`text-sm truncate ${conv.unread > 0 ? "font-semibold text-gray-700" : "text-gray-600"}`}
+                            >
+                              {conv.lastMessage}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {conv.time}
                             </p>
                           </div>
-
-                          <p
-                            className={`text-sm truncate ${conv.unread > 0 ? "font-semibold text-gray-700" : "text-gray-600"}`}
-                          >
-                            {conv.lastMessage}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {conv.time}
-                          </p>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      <Search size={48} className="mx-auto mb-4 text-gray-300" />
+                      <p className="font-semibold">No conversations found</p>
+                      <p className="text-sm mt-1">
+                        Start chatting with sellers from product pages
+                      </p>
                     </div>
-                  ))
+                  )
                 ) : (
-                  <div className="p-8 text-center text-gray-500">
-                    <Search size={48} className="mx-auto mb-4 text-gray-300" />
-                    <p className="font-semibold">No conversations found</p>
-                    <p className="text-sm mt-1">
-                      Start chatting with sellers from product pages
-                    </p>
-                  </div>
+                  // Contacts Tab
+                  contactsLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2
+                        className="animate-spin text-green-600"
+                        size={32}
+                      />
+                    </div>
+                  ) : filteredContacts.length > 0 ? (
+                    filteredContacts.map((contact) => (
+                      <div
+                        key={contact._id}
+                        onClick={() => startChatWithContact(contact)}
+                        className="p-4 border-b border-gray-200 cursor-pointer transition-all hover:bg-white group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="relative shrink-0">
+                            <div className="w-12 h-12 bg-linear-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+                              <span className="text-white font-semibold text-sm">
+                                {(contact.name || contact.email || "U").charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 truncate">
+                              {contact.name || "Unknown"}
+                            </p>
+                            <p className="text-sm truncate text-blue-600 capitalize font-medium mb-1">
+                              {contact.role}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {contact.email}
+                            </p>
+                          </div>
+                          <div>
+                            <MessageSquare size={18} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      <Users size={48} className="mx-auto mb-4 text-gray-300" />
+                      <p className="font-semibold">No contacts found</p>
+                    </div>
+                  )
                 )}
               </div>
             </div>

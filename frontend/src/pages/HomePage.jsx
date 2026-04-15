@@ -459,6 +459,7 @@ const HomePage = () => {
         "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=400&fit=crop",
       badge: "Limited Time",
       color: "from-red-500 to-orange-600",
+      link: "/products?sale=flash",
     },
     {
       title: "Combo Packs",
@@ -467,6 +468,7 @@ const HomePage = () => {
         "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600&h=400&fit=crop",
       badge: "Best Value",
       color: "from-blue-500 to-purple-600",
+      link: "/combo-packs",
     },
   ];
 
@@ -940,7 +942,10 @@ const HomePage = () => {
                     <p className="text-xl text-white/90 mb-4">
                       {deal.subtitle}
                     </p>
-                    <button className="px-6 py-3 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center gap-2">
+                    <button 
+                      onClick={() => navigate(deal.link || "/products")}
+                      className="px-6 py-3 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center gap-2"
+                    >
                       Shop Now <ArrowRight size={18} />
                     </button>
                   </div>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendMessage, getMessages } = require('../controllers/messageController');
+const { sendMessage, getMessages, getContacts } = require('../controllers/messageController');
 
 // Middleware to protect routes and get user from token
 const jwt = require('jsonwebtoken');
@@ -27,6 +27,8 @@ const protect = async (req, res, next) => {
     res.status(401).json({ success: false, message: 'Not authorized, no token' });
   }
 };
+
+router.get('/contacts', protect, getContacts);
 
 router.route('/')
   .post(protect, sendMessage)

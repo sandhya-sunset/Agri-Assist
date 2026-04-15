@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Sparkles,
   Users,
+  Book,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -86,6 +87,7 @@ const Navbar = () => {
     { name: "Messages", href: "/user-message", icon: MessageSquare },
     { name: "AI Assistant", href: "/disease-detection", icon: Sparkles },
     { name: "Forum", href: "/forum", icon: Users },
+    { name: "Manual", href: "/manual", icon: Book },
   ];
 
   return (
@@ -123,15 +125,15 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-10">
+          <div className="hidden md:flex flex-1 justify-center items-center gap-4 lg:gap-6 xl:gap-8 px-4">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.href}
-                className="flex items-center gap-1.5 text-gray-600 hover:text-green-600 font-semibold text-sm transition-all duration-200 relative group py-2"
+                className="flex items-center gap-1 lg:gap-1.5 text-gray-600 hover:text-green-600 font-semibold text-sm transition-all duration-200 relative group py-2 whitespace-nowrap"
               >
                 {link.icon && (
-                  <link.icon size={16} className="text-green-500" />
+                  <link.icon size={16} className="text-green-500 hidden lg:block" />
                 )}
                 {link.name}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
@@ -140,14 +142,13 @@ const Navbar = () => {
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-6">
-            {/* Search - Hidden on mobile */}
-            {/* Search - Hidden on mobile */}
+          <div className="flex items-center gap-3 sm:gap-4 md:gap-6">
+            {/* Search - Hidden on smaller screens */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl transition-all duration-300">
-              <Search size={18} className="text-gray-400" />
+              <Search size={16} className="text-gray-400" />
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleSearch}
