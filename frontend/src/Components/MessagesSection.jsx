@@ -126,11 +126,16 @@ const MessagesSection = () => {
               avatar: contact.name.charAt(0).toUpperCase(),
               lastMessage: msg.text,
               time: new Date(msg.createdAt).toLocaleTimeString(),
-              unread: msg.isRead ? 0 : 1,
+              unread: 0,
               isOnline: false,
               messages: [],
             };
           }
+          
+          if (msg.sender._id !== user._id && !msg.isRead) {
+            groups[contact._id].unread += 1;
+          }
+
           groups[contact._id].messages.push({
             id: msg._id,
             sender: msg.sender._id === user._id ? "seller" : "customer",

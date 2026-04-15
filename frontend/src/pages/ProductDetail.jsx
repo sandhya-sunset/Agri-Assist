@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Loader2,
   User,
+  Tag,
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -305,7 +306,7 @@ const ProductDetail = () => {
             </div>
 
             <div className="mb-8">
-              <div className="flex items-baseline gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <span className="text-4xl font-bold text-gray-900">
                   Rs.{" "}
                   {product.discount > 0
@@ -315,6 +316,12 @@ const ProductDetail = () => {
                 {product.discount > 0 && (
                   <span className="text-xl text-gray-400 line-through">
                     Rs. {Number(getDisplayPrice()).toFixed(2)}
+                  </span>
+                )}
+                {product.offerText && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-sm font-bold">
+                    <Tag size={16} />
+                    {product.offerText}
                   </span>
                 )}
               </div>

@@ -32,7 +32,7 @@ const UserMessagesPage = () => {
   const [contactsLoading, setContactsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   useEffect(() => {
     if (user?._id) {
@@ -84,12 +84,17 @@ const UserMessagesPage = () => {
             avatar: (contact.name || "U").charAt(0).toUpperCase(),
             lastMessage: msg.text,
             time: new Date(msg.createdAt).toLocaleTimeString(),
-            unread: msg.isRead ? 0 : 1,
+            unread: 0,
             isOnline: false,
             productName: msg.product?.name || "General Inquiry",
             messages: [],
           };
         }
+
+        if (senderId !== currentUserId && !msg.isRead) {
+          groups[contact._id].unread += 1;
+        }
+
         groups[contact._id].messages.push({
           id: msg._id,
           sender: senderId === currentUserId ? "user" : "seller",
@@ -165,12 +170,7 @@ const UserMessagesPage = () => {
     );
 
     try {
-      await fetch(`http://localhost:5000/api/messages/read/${convId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await api.put(`/messages/read/${convId}`);
     } catch (error) {
       console.error("Error marking messages as read:", error);
     }

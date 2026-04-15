@@ -44,6 +44,8 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedStatus, setSelectedStatus] = useState("All Status");
   const { socket } = useSocket();
 
   useEffect(() => {
@@ -266,11 +268,21 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
     );
   }
 
-  const filteredProducts = products.filter(
-    (p) =>
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch =
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+      p.category.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory =
+      selectedCategory === "All Categories" || p.category === selectedCategory;
+
+    const matchesStatus =
+      selectedStatus === "All Status" ||
+      (selectedStatus === "Active" && p.stock > 0) ||
+      (selectedStatus === "Out of Stock" && p.stock === 0);
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-6">
@@ -302,7 +314,11 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
               </div>
             </div>
 
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+            <select 
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
               <option>All Categories</option>
               <option>Fertilizer</option>
               <option>Pesticide</option>
@@ -313,11 +329,14 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
               <option>Other</option>
             </select>
 
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+            <select 
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+            >
               <option>All Status</option>
               <option>Active</option>
               <option>Out of Stock</option>
-              <option>Draft</option>
             </select>
 
             <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">

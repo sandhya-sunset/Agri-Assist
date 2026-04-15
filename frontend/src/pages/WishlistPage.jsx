@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, Trash2, Loader2, ArrowRight } from "lucide-react";
+import { Heart, ShoppingCart, Trash2, Loader2, ArrowRight, Tag } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import wishlistService from "../services/wishlistService";
 import api from "../services/api";
@@ -126,11 +126,19 @@ const WishlistPage = () => {
                       <Trash2 size={18} />
                     </button>
                   </div>
-                  {product.discount > 0 && (
-                    <div className="absolute bottom-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
-                      -{product.discount}%
-                    </div>
-                  )}
+                  <div className="absolute bottom-3 left-3 flex flex-wrap gap-2 pr-2">
+                    {product.discount > 0 && (
+                      <div className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
+                        -{product.discount}%
+                      </div>
+                    )}
+                    {product.offerText && (
+                      <div className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
+                        <Tag size={12} />
+                        {product.offerText}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="p-5">

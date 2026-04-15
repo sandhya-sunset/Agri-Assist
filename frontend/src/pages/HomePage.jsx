@@ -43,6 +43,7 @@ import {
   MapPin,
   Thermometer,
   Droplets,
+  Tag,
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import productService from "../services/productService";
@@ -919,14 +920,29 @@ const HomePage = () => {
               <div
                 key={idx}
                 className="relative group overflow-hidden rounded-2xl h-64 cursor-pointer"
+                onClick={() => navigate(deal.link || "/products")}
               >
-                <img
-                  src={deal.image}
-                  alt={deal.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
+                {deal.images && deal.images.length > 1 ? (
+                  <div className="absolute inset-0 flex">
+                    {deal.images.slice(0, 3).map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        alt={`${deal.title} ${i + 1}`}
+                        className="flex-1 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        style={{ marginLeft: i > 0 ? '-10%' : '0', clipPath: i > 0 ? 'polygon(10% 0, 100% 0, 100% 100%, 0 100%)' : 'none' }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <img
+                    src={deal.image}
+                    alt={deal.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                )}
                 <div
-                  className={`absolute inset-0 bg-linear-to-r ${deal.color} opacity-80`}
+                  className={`absolute inset-0 bg-linear-to-r ${deal.color || 'from-green-500 to-emerald-700'} opacity-80`}
                 ></div>
                 <div className="absolute inset-0 p-8 flex flex-col justify-between">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full self-start">
@@ -1080,14 +1096,20 @@ const HomePage = () => {
                     />
 
                     {/* Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                    <div className="absolute top-3 left-3 right-12 flex flex-col items-start gap-2 max-h-full overflow-hidden">
                       {product.discount > 0 && (
                         <div className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
                           <Percent size={12} />
                           {product.discount}% OFF
                         </div>
                       )}
-                      <div className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full shadow-lg">
+                      {product.offerText && (
+                        <div className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
+                          <Tag size={12} />
+                          {product.offerText}
+                        </div>
+                      )}
+                      <div className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full shadow-lg shrink-0">
                         {product.category}
                       </div>
                     </div>

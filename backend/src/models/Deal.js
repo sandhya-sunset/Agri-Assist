@@ -11,8 +11,11 @@ const dealSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    required: true
+    required: false
   },
+  images: [{
+    type: String
+  }],
   badge: {
     type: String,
     default: 'Limited Time'

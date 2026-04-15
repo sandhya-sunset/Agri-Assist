@@ -10,13 +10,15 @@ import {
   Bell,
   BarChart3,
   LogOut,
+  Tag,
 } from "lucide-react";
-import DashboardView from "../components/admin/DashboardView";
-import UsersView from "../components/admin/UsersView";
-import SellersView from "../components/admin/SellersView";
-import CommissionView from "../components/admin/CommissionView";
-import OrdersView from "../components/admin/OrdersView";
-import SettingsView from "../components/admin/SettingsView";
+import DashboardView from "../Components/admin/DashboardView";
+import UsersView from "../Components/admin/UsersView";
+import SellersView from "../Components/admin/SellersView";
+import CommissionView from "../Components/admin/CommissionView";
+import OrdersView from "../Components/admin/OrdersView";
+import SettingsView from "../Components/admin/SettingsView";
+import DealsView from "../Components/admin/DealsView";
 import { useNavigate } from "react-router-dom";
 
 import api from "../services/api";
@@ -154,6 +156,7 @@ const AdminPanel = () => {
     { id: "users", label: "Users", icon: Users },
     { id: "sellers", label: "Sellers", icon: Store },
     { id: "orders", label: "Orders", icon: Package },
+    { id: "deals", label: "Promo Deals", icon: Tag },
     { id: "commission", label: "Commission", icon: DollarSign },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -431,6 +434,7 @@ const AdminPanel = () => {
             />
           )}
           {activeTab === "settings" && <SettingsView />}
+          {activeTab === "deals" && <DealsView />}
         </div>
       </main>
 

@@ -6,6 +6,7 @@ import {
   Star,
   Heart,
   Loader2,
+  Tag,
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import api from "../services/api";
@@ -187,13 +188,19 @@ const ProductListPage = () => {
                       className={wishlistIds.has(product._id) ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'}
                     />
                   </button>
-                  <div className="absolute bottom-3 left-3 flex gap-2">
+                  <div className="absolute bottom-3 left-3 flex flex-wrap gap-2 pr-2">
                     <span className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full shadow-lg">
                       {product.category}
                     </span>
                     {product.discount > 0 && (
                       <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
                         -{product.discount}%
+                      </span>
+                    )}
+                    {product.offerText && (
+                      <span className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
+                        <Tag size={12} />
+                        {product.offerText}
                       </span>
                     )}
                   </div>
