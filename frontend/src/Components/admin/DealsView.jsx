@@ -9,6 +9,7 @@ const DealsView = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -142,7 +143,14 @@ const DealsView = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
+    if (!formData.title || !formData.subtitle) {
+      toast.error("Please fill in all required fields (Title and Description)");
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       if (editingId) {
         const response = await api.put(`/deals/${editingId}`, formData);
@@ -160,6 +168,8 @@ const DealsView = () => {
     } catch (error) {
       console.error("Error saving deal:", error);
       toast.error(error.response?.data?.message || "Failed to save deal");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -403,8 +413,11 @@ const DealsView = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
+                  {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                   {editingId ? "Update Deal" : "Create Deal"}
                 </button>
               </div>

@@ -28,6 +28,10 @@ const dealSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  link: {
+    type: String,
+    default: '/products'
+  },
   startDate: {
     type: Date,
     default: Date.now
