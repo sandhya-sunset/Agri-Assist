@@ -102,3 +102,44 @@ exports.getContacts = async (req, res) => {
     });
   }
 };
+
+// @desc    Mark messages from a specific sender as read
+// @route   PUT /api/messages/read/:id
+// @access  Private
+exports.markAsRead = async (req, res) => {
+  try {
+    const contactId = req.params.id;
+
+    // Update all unread messages where the contact is the sender, and the current user is the receiver
+    await Message.updateMany(
+      {
+        sender: contactId,
+        receiver: req.user._id,
+        isRead: false
+      },
+      {
+        $set: { isRead: true }
+      }
+    );
+
+    // Also marked as read if the current user is the sender and the other person is the receiver? No, we only can read messages sent TO us
+    
+    // Also delete any existing "New Message" notifications from this sender to the user
+    await Notification.deleteMany({
+      user: req.user._id,
+      type: "message",
+      link: "/user-message"
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Messages marked as read'
+    });
+  } catch (error) {
+    console.error("Mark as read error", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

@@ -179,12 +179,23 @@ const MessagesSection = () => {
     }
   };
 
-  const markAsRead = (convId) => {
+  const markAsRead = async (convId) => {
     setConversations(
       conversations.map((conv) =>
         conv.id === convId ? { ...conv, unread: 0, status: "read" } : conv,
       ),
     );
+
+    try {
+      await fetch(`http://localhost:5000/api/messages/read/${convId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
   };
 
   const toggleStar = (convId) => {
@@ -193,6 +204,22 @@ const MessagesSection = () => {
         conv.id === convId ? { ...conv, starred: !conv.starred } : conv,
       ),
     );
+  };
+
+  const handleMarkAllAsRead = async () => {
+    setConversations(conversations.map((conv) => ({ ...conv, unread: 0, status: "read" })));
+    try {
+      await Promise.all(
+        conversations.map((conv) =>
+          fetch(`http://localhost:5000/api/messages/read/${conv.id}`, {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        )
+      );
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
   };
 
   const filteredConversations = conversations.filter(
@@ -219,7 +246,10 @@ const MessagesSection = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-colors">
+          <button 
+            onClick={handleMarkAllAsRead}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-colors"
+          >
             Mark all as read
           </button>
         </div>

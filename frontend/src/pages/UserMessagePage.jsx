@@ -157,12 +157,23 @@ const UserMessagesPage = () => {
     }
   };
 
-  const markAsRead = (convId) => {
+  const markAsRead = async (convId) => {
     setConversations(
       conversations.map((conv) =>
         conv.id === convId ? { ...conv, unread: 0 } : conv,
       ),
     );
+
+    try {
+      await fetch(`http://localhost:5000/api/messages/read/${convId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
   };
 
   const toggleStar = (convId) => {
