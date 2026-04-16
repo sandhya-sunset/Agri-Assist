@@ -11,7 +11,12 @@ const cartSchema = new mongoose.Schema({
       product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
-        required: true
+        required: function() { return !this.deal; } // Required if no deal
+      },
+      deal: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Deal',
+        required: function() { return !this.product; } // Required if no product
       },
       size: {
         type: String

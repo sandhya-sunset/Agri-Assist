@@ -11,7 +11,12 @@ const orderSchema = new mongoose.Schema({
       product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
-        required: true
+        required: function() { return !this.deal; }
+      },
+      deal: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Deal',
+        required: function() { return !this.product; }
       },
       size: {
         type: String

@@ -94,6 +94,17 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
+  const handleAddDealToCart = async (e, deal) => {
+    e.stopPropagation();
+    try {
+      await api.post("/cart", { dealId: deal._id, quantity: 1 });
+      addToast("Combo deal added to cart successfully!", "success");
+      navigate("/cart");
+    } catch (error) {
+      addToast("Failed to add combo to cart", "error");
+    }
+  };
+
   // Auto-rotate hero carousel
   useEffect(() => {
     const timer = setInterval(() => {
@@ -916,58 +927,121 @@ const HomePage = () => {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-6">
-            {displayDeals.map((deal, idx) => (
-              <div
-                key={idx}
-                className="relative group overflow-hidden rounded-2xl h-64 cursor-pointer"
-                onClick={() => navigate(deal.link || "/products")}
-              >
-                {deal.images && deal.images.length > 1 ? (
-                  <div className="absolute inset-0 flex">
-                    {deal.images.slice(0, 3).map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`${deal.title} ${i + 1}`}
-                        className="flex-1 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        style={{ marginLeft: i > 0 ? '-10%' : '0', clipPath: i > 0 ? 'polygon(10% 0, 100% 0, 100% 100%, 0 100%)' : 'none' }}
-                      />
-                    ))}
+            {displayDeals.map((deal, idx) => {
+              const isCombo = deal.images && deal.images.length > 1;
+
+              if (isCombo) {
+                return (
+                  <div
+                    key={idx}
+                    className="relative group bg-white border border-gray-200 overflow-hidden rounded-2xl h-80 md:h-64 cursor-pointer hover:border-red-300 hover:shadow-xl transition-all flex flex-col md:flex-row"
+                    onClick={() => navigate(deal.link && deal.link.trim() !== "" ? deal.link : `/products?search=${encodeURIComponent(deal.title)}`)}
+                  >
+                    {/* Image Area - Combo Display */}
+                    <div className="relative w-full md:w-1/2 h-40 md:h-full bg-gray-50 flex items-center justify-center p-4">
+                      {/* Ribbon */}
+                      <div className="absolute z-30 bg-red-600 text-white text-xs font-bold px-6 py-1.5 uppercase tracking-wider transform -rotate-6 top-[40%] md:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-lg">
+                        Combo Offer
+                      </div>
+
+                      {/* Side-by-side products */}
+                      <div className="flex items-center justify-center w-full z-10 gap-2">
+                        {deal.images.slice(0, 2).map((img, i) => (
+                          <div 
+                            key={i} 
+                            className={`w-28 h-28 md:w-32 md:h-32 bg-white rounded-xl shadow-sm border border-gray-100 p-2 transform transition-transform duration-500 group-hover:scale-105 z-20 ${i === 0 ? '-rotate-3' : 'rotate-3'}`}
+                          >
+                            <img
+                              src={img}
+                              alt={`${deal.title} product ${i + 1}`}
+                              className="w-full h-full object-contain drop-shadow-sm"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Badge if available */}
+                      {deal.badge && (
+                        <div className="absolute top-3 left-3 z-30 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                          {deal.badge}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Text Area */}
+                    <div className="w-full md:w-1/2 p-6 flex flex-col justify-center border-t md:border-t-0 md:border-l border-gray-100">
+                      <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 line-clamp-2">
+                        {deal.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm md:text-base mb-4 line-clamp-3">
+                        {deal.subtitle}
+                      </p>
+                      
+                      {deal.price && (
+                        <div className="flex items-end gap-3 mb-4">
+                           <span className="text-2xl font-bold text-green-600">Rs. {deal.price}</span>
+                           {deal.originalPrice && <span className="text-gray-400 line-through text-sm mb-1">Rs. {deal.originalPrice}</span>}
+                        </div>
+                      )}
+                      
+                      <div className="mt-auto">
+                        <button 
+                          onClick={(e) => {
+                            if (!deal.link || deal.link.trim() === "" || deal.link === "/products") {
+                              handleAddDealToCart(e, deal);
+                            } else {
+                              navigate(deal.link);
+                            }
+                          }}
+                          className="w-full px-4 py-2.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 hover:border-red-600 rounded-lg font-bold transition-colors duration-200 inline-flex items-center justify-center gap-2"
+                        >
+                          {(!deal.link || deal.link.trim() === "" || deal.link === "/products") ? 'Add Combo to Cart' : 'Get Combo Deal'} <ArrowRight size={16} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                ) : (
+                );
+              }
+
+              // Standard full-background Deal Banner
+              return (
+                <div
+                  key={idx}
+                  className="relative group overflow-hidden rounded-2xl h-64 cursor-pointer"
+                  onClick={() => navigate(deal.link && deal.link.trim() !== "" ? deal.link : `/products?search=${encodeURIComponent(deal.title)}`)}
+                >
                   <img
-                    src={deal.image}
+                    src={deal.image || (deal.images && deal.images[0])}
                     alt={deal.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                )}
-                <div
-                  className={`absolute inset-0 bg-linear-to-r ${deal.color || 'from-green-500 to-emerald-700'} opacity-80`}
-                ></div>
-                <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full self-start">
-                    <Gift size={16} className="text-white" />
-                    <span className="text-sm font-bold text-white">
-                      {deal.badge}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                      {deal.title}
-                    </h3>
-                    <p className="text-xl text-white/90 mb-4">
-                      {deal.subtitle}
-                    </p>
-                    <button 
-                      onClick={() => navigate(deal.link || "/products")}
-                      className="px-6 py-3 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center gap-2"
-                    >
-                      Shop Now <ArrowRight size={18} />
-                    </button>
+                  <div
+                    className={`absolute inset-0 bg-linear-to-r ${deal.color || 'from-green-500 to-emerald-700'} opacity-80`}
+                  ></div>
+                  <div className="absolute inset-0 p-8 flex flex-col justify-between z-10">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full self-start">
+                      <Gift size={16} className="text-white" />
+                      <span className="text-sm font-bold text-white">
+                        {deal.badge}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                        {deal.title}
+                      </h3>
+                      <p className="text-xl text-white/90 mb-4">
+                        {deal.subtitle}
+                      </p>
+                      <button 
+                        className="px-6 py-3 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center gap-2"
+                      >
+                        Shop Now <ArrowRight size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

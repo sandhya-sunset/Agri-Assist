@@ -33,7 +33,14 @@ const initiateKhaltiPayment = async ({ orderId, amount, customerName, customerEm
             body,
             { headers: getKhaltiHeaders() }
         );
-        return response.data; // { pidx, payment_url, expires_at }
+        let data = response.data; // { pidx, payment_url, expires_at }
+        
+        // Fix for Khalti returning live URL in test environment
+        if (config.khalti.apiUrl.includes('a.khalti.com') && data.payment_url) {
+            data.payment_url = data.payment_url.replace('https://pay.khalti.com/', 'https://test-pay.khalti.com/');
+        }
+        
+        return data;
     } catch (error) {
         console.error('Khalti Initiate Error Response:', error.response?.data);
         const msg = error.response?.data?.detail || error.response?.data?.message || 'Failed to initiate Khalti payment.';

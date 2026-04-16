@@ -28,6 +28,14 @@ const dealSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  price: {
+    type: Number, // combo offer price
+    default: 0
+  },
+  originalPrice: {
+    type: Number, // regular original price summing the items
+    default: 0
+  },
   link: {
     type: String,
     default: '/products'

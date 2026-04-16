@@ -11,9 +11,9 @@ exports.createOrder = async (req, res) => {
     const { paymentMethod, shippingAddress, shippingFee, location } = req.body;
 
     // Get user cart
-    const cart = await Cart.findOne({ user: req.user._id }).populate(
-      "items.product",
-    );
+    const cart = await Cart.findOne({ user: req.user._id })
+      .populate("items.product")
+      .populate("items.deal");
 
     if (!cart || cart.items.length === 0) {
       return res
@@ -21,36 +21,53 @@ exports.createOrder = async (req, res) => {
         .json({ success: false, message: "No items in cart" });
     }
 
+    // Calculate resilient total mapping deal overrides if present
+    let synchronizedTotalAmount = 0;
+    cart.items.forEach((item) => {
+      let effectivePrice = item.price || 0;
+      if (item.deal) {
+         effectivePrice = item.deal.price || item.price || 0;
+         item.price = effectivePrice;
+      } else if (item.product) {
+         let basePrice = item.price || 0;
+         if (item.product.discount && item.product.discount > 0) {
+            basePrice = item.price * (1 - item.product.discount / 100);
+         }
+         effectivePrice = basePrice;
+      }
+      synchronizedTotalAmount += (effectivePrice * item.quantity);
+    });
+
     // Check stock availability
     for (const item of cart.items) {
-      if (!item.product) {
-        return res
-          .status(404)
-          .json({ success: false, message: "One or more products not found" });
-      }
-      if (item.product.stock < item.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Insufficient stock for ${item.product.name}. Available: ${item.product.stock}`,
-        });
+      if (item.product) {
+        if (item.product.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient stock for ${item.product.name}. Available: ${item.product.stock}`,
+          });
+        }
       }
     }
 
     // Decrement stock for each product
     for (const item of cart.items) {
-      const product = await Product.findById(item.product._id);
-      if (product) {
-        product.stock -= item.quantity;
-        await product.save();
+      if (item.product) {
+        const product = await Product.findById(item.product._id);
+        if (product) {
+          product.stock -= item.quantity;
+          await product.save();
+        }
       }
     }
 
-    const totalAmount = cart.totalAmount + (shippingFee || 0);
+    const totalAmount = Math.max(synchronizedTotalAmount || 0, cart.totalAmount || 0) + (shippingFee || 0);
 
     const order = await Order.create({
       user: req.user._id,
       items: cart.items.map((item) => ({
-        product: item.product._id,
+        product: item.product ? item.product._id : undefined,
+        deal: item.deal ? item.deal._id : undefined,
         size: item.size,
         quantity: item.quantity,
         price: item.price,
@@ -212,7 +229,8 @@ exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate("user", "name email")
-      .populate("items.product", "name image price");
+      .populate("items.product", "name image price")
+      .populate("items.deal", "title image images price badge");
 
     if (!order) {
       return res

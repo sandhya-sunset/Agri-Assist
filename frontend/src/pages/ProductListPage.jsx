@@ -93,24 +93,28 @@ const ProductListPage = () => {
   ];
 
   const filteredProducts = products.filter((product) => {
-    // Search in product name, description, and category
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.toLowerCase().trim();
+    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+    
+    if (!searchLower) return matchesCategory;
+
+    // Direct matches
     const nameMatch = product.name.toLowerCase().includes(searchLower);
     const descriptionMatch = product.description?.toLowerCase().includes(searchLower) || false;
     const categoryMatch = product.category.toLowerCase().includes(searchLower);
     
-    // Also check if any keyword from searchTerm matches
-    const keywords = searchLower.split(" ").filter(k => k.length > 0);
-    const keywordMatch = keywords.some(keyword => 
-      keyword.length > 2 && (
-        product.name.toLowerCase().includes(keyword) ||
-        product.description?.toLowerCase().includes(keyword) ||
-        product.category.toLowerCase().includes(keyword)
-      )
+    // Combo / specific keyword filtering (remove generic words)
+    const stopWords = ["and", "with", "for", "the", "combo", "offer", "pack", "bundle", "deals", "deal", "special", "premium", "starter"];
+    const keywords = searchLower.split(/\s+/)
+      .filter(k => k.length > 2 && !stopWords.includes(k));
+      
+    // Keyword match: We identify products that contain AT LEAST ONE specific keyword
+    const keywordMatch = keywords.length > 0 && keywords.some(keyword => 
+      product.name.toLowerCase().includes(keyword) ||
+      product.category.toLowerCase().includes(keyword)
     );
     
     const matchesSearch = nameMatch || descriptionMatch || categoryMatch || keywordMatch;
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
     
     return matchesSearch && matchesCategory;
   });

@@ -274,17 +274,50 @@ const UserOrderDetailPage = () => {
               <div className="divide-y divide-gray-100">
                 {order.items.map((item) => (
                   <div key={item._id} className="p-4 flex gap-4">
-                    <img
-                      src={`http://localhost:5000/${item.product.image.replace(/\\/g, "/")}`}
-                      alt={item.product.name}
-                      className="w-20 h-20 rounded-lg object-cover border border-gray-200"
-                      onError={(e) => {
-                        e.target.src = "https://via.placeholder.com/150";
-                      }}
-                    />
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center relative border border-gray-200">
+                      {item.deal && item.deal.images && item.deal.images.length > 1 ? (
+                        <>
+                          <div className="absolute z-10 bg-red-600 text-white text-[6px] font-bold px-2 py-0.5 uppercase tracking-wider transform -rotate-6 shadow-sm">
+                            Combo
+                          </div>
+                          <div className="flex items-center justify-center w-full gap-1 p-1">
+                            {item.deal.images.slice(0, 2).map((img, i) => (
+                              <div 
+                                key={i} 
+                                className={`w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-md shadow-sm border border-gray-100 p-0.5 transform ${i === 0 ? '-rotate-6' : 'rotate-6 z-0'}`}
+                              >
+                                <img
+                                  src={img.startsWith("http") ? img : `http://localhost:5000/${img.replace(/\\/g, "/")}`}
+                                  alt={`${item.deal.title} item ${i + 1}`}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <img
+                          src={
+                            item.deal 
+                            ? (item.deal.image || item.deal.images?.[0] || "").startsWith("http") 
+                              ? (item.deal.image || item.deal.images?.[0] || "") 
+                              : `http://localhost:5000/${(item.deal.image || item.deal.images?.[0] || "").replace(/\\/g, "/")}`
+                            : (item.product?.image || "").startsWith("http")
+                              ? (item.product?.image || "")
+                              : `http://localhost:5000/${(item.product?.image || "").replace(/\\/g, "/")}`
+                          }
+                          alt={item.deal ? item.deal.title : item.product?.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = "https://via.placeholder.com/150";
+                          }}
+                        />
+                      )}
+                    </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">
-                        {item.product.name}
+                        {item.deal ? item.deal.title : item.product?.name}
+                        {item.deal && <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">Combo Offer</span>}
                       </h4>
                       <p className="text-sm text-gray-500 mt-1">
                         Quantity: {item.quantity}
@@ -293,7 +326,7 @@ const UserOrderDetailPage = () => {
                         Rs. {item.price.toFixed(2)}
                       </p>
                     </div>
-                    {order.status === "Delivered" && (
+                    {order.status === "Delivered" && !item.deal && item.product && (
                       <div className="flex items-center">
                         <Link 
                            to={`/product/${item.product._id}`}

@@ -19,6 +19,8 @@ const DealsView = () => {
     badge: "Limited Time",
     color: "from-red-500 to-orange-600",
     active: true,
+    price: "",
+    originalPrice: "",
     link: "/products"
   });
 
@@ -104,6 +106,8 @@ const DealsView = () => {
       badge: "Limited Time",
       color: "from-red-500 to-orange-600",
       active: true,
+      price: "",
+      originalPrice: "",
       link: "/products"
     });
     setEditingId(null);
@@ -120,6 +124,8 @@ const DealsView = () => {
       badge: deal.badge || "Limited Time",
       color: deal.color || "from-red-500 to-orange-600",
       active: deal.active !== undefined ? deal.active : true,
+      price: deal.price || "",
+      originalPrice: deal.originalPrice || "",
       link: deal.link || "/products"
     });
     setEditingId(deal._id);
@@ -295,6 +301,32 @@ const DealsView = () => {
                     className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white"
                     placeholder="e.g. Get 3 bags of seeds and 1 premium fertilizer for just Rs. 1500!"
                   ></textarea>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-bold text-gray-700">Combo Price (Rs.) *</label>
+                    <input 
+                      type="number" 
+                      name="price" 
+                      required 
+                      value={formData.price || ''} 
+                      onChange={handleInputChange}
+                      className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white"
+                      placeholder="869"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700">Original Total Price (Rs.)</label>
+                    <input 
+                      type="number" 
+                      name="originalPrice" 
+                      value={formData.originalPrice || ''} 
+                      onChange={handleInputChange}
+                      className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white"
+                      placeholder="1200"
+                    />
+                  </div>
                 </div>
 
                 <div>

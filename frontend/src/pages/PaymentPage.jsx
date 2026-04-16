@@ -40,7 +40,17 @@ const PaymentPage = () => {
       const response = await api.get("/cart");
       if (response.data.success) {
         const data = response.data.data;
-        setCartTotal(data.totalAmount);
+        // Dynamically calculate total to ensure accuracy even if DB is out of sync
+        let calculatedTotal = 0;
+        if (data.items) {
+          calculatedTotal = data.items.reduce((total, item) => {
+            const itemPrice = item.deal 
+              ? (item.deal.price || item.price || 0) 
+              : (item.product?.discount > 0 ? item.price * (1 - item.product.discount / 100) : item.price || 0);
+            return total + (itemPrice * item.quantity);
+          }, 0);
+        }
+        setCartTotal(Math.max(data.totalAmount || 0, calculatedTotal));
         const hasDiscountItem = data.items.some(
           (item) =>
             item.product && item.product.discount && item.product.discount > 0,

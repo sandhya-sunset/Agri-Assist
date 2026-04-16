@@ -1,41 +1,66 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../Components/Navbar";
-import { Package, ArrowRight, ShoppingCart } from "lucide-react";
+import { Package, ArrowRight, ShoppingCart, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import api from "../Services/api";
+import { useToast } from "../Components/Toast";
 
 const ComboPacksPage = () => {
   const navigate = useNavigate();
+  const [combos, setCombos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { addToast } = useToast();
 
-  // Dummy combo pack data for demonstration
+  const handleAddToCart = async (e, dealId) => {
+    e.stopPropagation();
+    try {
+      await api.post("/cart", { dealId, quantity: 1 });
+      addToast("Combo deal added to cart successfully!", "success");
+      navigate("/cart");
+    } catch (error) {
+      addToast("Failed to add combo to cart", "error");
+    }
+  };
+
+  useEffect(() => {
+    const fetchCombos = async () => {
+      try {
+        const response = await api.get("/deals/active");
+        if (response.data.success) {
+          // Filter to only show actual "combos" (deals with > 1 image or badge 'combo')
+          const comboDeals = response.data.data.filter(
+             deal => (deal.images && deal.images.length > 1) || deal.title.toLowerCase().includes('combo')
+          );
+          setCombos(comboDeals);
+        }
+      } catch (error) {
+        console.error("Failed to fetch combo deals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCombos();
+  }, []);
+
+  // Dummy fallback if no deals
   const dummyCombos = [
     {
-      id: 1,
+      _id: "dummy1",
       title: "Complete Wheat Setup",
-      description: "Includes high-yield wheat seeds, NPK 10-26-26 fertilizer, and basic farming tools.",
-      price: 1500,
-      originalPrice: 2000,
-      image: "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600&h=400&fit=crop",
-      savings: "Save Rs. 500",
+      subtitle: "Includes high-yield wheat seeds, NPK 10-26-26 fertilizer.",
+      images: ["https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600&h=400&fit=crop"],
+      badge: "Save Rs. 500",
     },
     {
-      id: 2,
+      _id: "dummy2",
       title: "Organic Vegetable Starter",
-      description: "A mix of seasonal vegetable seeds along with 10kg premium organic compost.",
-      price: 850,
-      originalPrice: 1200,
-      image: "https://images.unsplash.com/photo-1595841696677-6489ff81bc33?w=600&h=400&fit=crop",
-      savings: "Save Rs. 350",
-    },
-    {
-      id: 3,
-      title: "Pesticide & Fertilizer Duo",
-      description: "Our top-selling eco-friendly pesticide paired with growth-boosting fertilizer.",
-      price: 2100,
-      originalPrice: 2600,
-      image: "https://images.unsplash.com/photo-1585822765365-5c918342ca02?w=600&h=400&fit=crop",
-      savings: "Save Rs. 500",
+      subtitle: "Mix of seasonal vegetable seeds + 10kg premium compost.",
+      images: ["https://images.unsplash.com/photo-1595841696677-6489ff81bc33?w=600&h=400&fit=crop"],
+      badge: "Save Rs. 350",
     }
   ];
+
+  const displayCombos = combos.length > 0 ? combos : dummyCombos;
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -64,40 +89,103 @@ const ComboPacksPage = () => {
         {/* Dummy Products Grid */}
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Bundles</h2>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {dummyCombos.map((combo) => (
-            <div key={combo.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-              <div className="relative h-48 overflow-hidden">
-                <img 
-                  src={combo.image} 
-                  alt={combo.title} 
-                  className="w-full h-full object-cover object-center"
-                />
-                <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
-                  {combo.savings}
-                </div>
-              </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+             <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-green-600"></div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayCombos.map((combo) => {
+              const hasMultipleImages = combo.images && combo.images.length > 1;
+              const displayImage = hasMultipleImages ? null : (combo.image || (combo.images && combo.images[0]));
               
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{combo.title}</h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{combo.description}</p>
-                
-                <div className="flex items-end gap-3 mb-6">
-                  <span className="text-2xl font-bold text-green-600">Rs. {combo.price}</span>
-                  <span className="text-gray-400 line-through text-sm mb-1">Rs. {combo.originalPrice}</span>
-                </div>
+              return (
+                <div key={combo._id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:border-red-300 hover:shadow-xl transition-all group flex flex-col">
+                  {/* Dynamic Combo Image Rendering */}
+                  {hasMultipleImages ? (
+                    <div className="relative h-56 bg-gray-50 flex items-center justify-center p-4 border-b border-gray-100">
+                        {/* Red Ribbon */}
+                        <div className="absolute z-30 bg-red-600 text-white text-[10px] font-bold px-5 py-1 uppercase tracking-wider transform -rotate-6 top-[40%] md:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-lg">
+                          Combo Offer
+                        </div>
 
-                <button 
-                  onClick={() => alert("This is a dummy page! You can attach this button to your real cart system later.")}
-                  className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
-                >
-                  <ShoppingCart size={18} />
-                  Add Combo to Cart
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                        {/* Side-by-side images */}
+                        <div className="flex items-center justify-center w-full z-10 gap-2">
+                          {combo.images.slice(0, 2).map((img, i) => (
+                            <div 
+                              key={i} 
+                              className={`w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-xl shadow-sm border border-gray-100 p-2 transform transition-transform duration-500 group-hover:scale-105 z-20 ${i === 0 ? '-rotate-6' : 'rotate-6'}`}
+                            >
+                              <img
+                                src={img}
+                                alt={`${combo.title} item ${i + 1}`}
+                                className="w-full h-full object-contain drop-shadow-sm"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {(combo.badge || combo.savings) && (
+                          <div className="absolute top-4 left-4 z-40 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                            {combo.badge || combo.savings}
+                          </div>
+                        )}
+                    </div>
+                  ) : (
+                    <div className="relative h-56 overflow-hidden bg-gray-100 border-b border-gray-100 p-4">
+                      {displayImage && (
+                        <img 
+                          src={displayImage} 
+                          alt={combo.title} 
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
+                      {(combo.badge || combo.savings) && (
+                        <div className="absolute top-4 left-4 z-40 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                          {combo.badge || combo.savings}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">{combo.title}</h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{combo.subtitle || combo.description}</p>
+                    
+                    {/* Deal pricing if available */}
+                    <div className="flex flex-col gap-1 mb-6">
+                       {combo.price ? (
+                         <div className="flex items-end gap-3">
+                           <span className="text-2xl font-bold text-green-600">Rs. {combo.price}</span>
+                           {combo.originalPrice && <span className="text-gray-400 line-through text-sm mb-1">Rs. {combo.originalPrice}</span>}
+                         </div>
+                       ) : (
+                         <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
+                            <CheckCircle2 size={16} /> Best Value Assured
+                         </div>
+                       )}
+                    </div>
+
+                    <button 
+                      onClick={(e) => {
+                        // If it's a generic link or undefined, add combo to cart, else go to link
+                        if (!combo.link || combo.link.trim() === "" || combo.link === "/products") {
+                          handleAddToCart(e, combo._id);
+                        } else {
+                          navigate(combo.link);
+                        }
+                      }}
+                      className="w-full py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 hover:border-red-600 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 mt-auto"
+                    >
+                      <ShoppingCart size={18} />
+                      {(!combo.link || combo.link.trim() === "" || combo.link === "/products") ? 'Add Combo to Cart' : 'Shop the Deal'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Return Button */}
         <div className="mt-12 text-center">
