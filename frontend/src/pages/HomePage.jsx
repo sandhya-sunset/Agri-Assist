@@ -1426,7 +1426,10 @@ const HomePage = () => {
                 Expert tips and guides to help you grow better
               </p>
             </div>
-            <button className="mt-4 md:mt-0 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors duration-200 inline-flex items-center gap-2">
+            <button 
+              onClick={() => navigate('/blog')}
+              className="mt-4 md:mt-0 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors duration-200 inline-flex items-center gap-2"
+            >
               View All Articles <ArrowRight size={18} />
             </button>
           </div>
@@ -1435,6 +1438,7 @@ const HomePage = () => {
             {blogPosts.map((post, idx) => (
               <div
                 key={idx}
+                onClick={() => navigate(`/blog/${post._id}`)}
                 className="group bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer"
               >
                 <div className="relative h-48 overflow-hidden bg-gray-100">
@@ -1462,7 +1466,10 @@ const HomePage = () => {
                   <h3 className="font-bold text-gray-900 text-xl mb-4 line-clamp-2 group-hover:text-green-600 transition-colors">
                     {post.title}
                   </h3>
-                  <button className="text-green-600 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all duration-300">
+                  <button 
+                    onClick={() => navigate(`/blog/${post._id}`)}
+                    className="text-green-600 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all duration-300"
+                  >
                     Read More <ArrowRight size={16} />
                   </button>
                 </div>

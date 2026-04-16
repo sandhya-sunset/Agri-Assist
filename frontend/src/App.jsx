@@ -29,6 +29,8 @@ import WishlistPage from "./pages/WishlistPage";
 import ApplyExpert from "./pages/ApplyExpert";
 import UserManual from "./pages/UserManual";
 import ComboPacksPage from "./pages/ComboPacksPage";
+import BlogListPage from "./pages/BlogListPage";
+import BlogDetail from "./pages/BlogDetail";
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -172,6 +174,8 @@ function App() {
               <Route path="/manual" element={<UserManual />} />
               <Route path="/combo-packs" element={<ComboPacksPage />} />
               <Route path="/forum" element={<CommunityForum />} />
+              <Route path="/blog" element={<BlogListPage />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
               <Route path="/apply-expert" element={
                 <ProtectedRoute role="user">
                   <ApplyExpert />

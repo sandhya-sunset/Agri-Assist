@@ -26,13 +26,36 @@ exports.getBlogPosts = async (req, res) => {
   }
 };
 
+// @desc    Get single blog post
+// @route   GET /api/blog/posts/:id
+// @access  Public
+exports.getBlogPostById = async (req, res) => {
+  try {
+    const post = await BlogPost.findById(req.params.id).populate('author', 'name');
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Blog post not found' });
+    }
+    res.status(200).json({
+      success: true,
+      data: post
+    });
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
 // @desc    Create blog post (admin only)
 // @route   POST /api/blog/posts
 // @access  Private/Admin
 exports.createBlogPost = async (req, res) => {
   try {
     const post = await BlogPost.create(req.body);
-    
+
     res.status(201).json({
       success: true,
       data: post

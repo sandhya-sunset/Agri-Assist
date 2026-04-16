@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Recommendation = require("./models/Recommendation");
-require("dotenv").config();
+require("dotenv").config({ path: require("path").join(__dirname, "../../.env") });
 
 const recommendations = [
   {
