@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { toast } from "react-hot-toast";
 import { Plus, Edit2, Trash2, Search, X, Image as ImageIcon } from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const BlogView = () => {
   const [blogs, setBlogs] = useState([]);
@@ -22,7 +24,7 @@ const BlogView = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/posts");
+      const response = await api.get("/blog/posts");
       // Assuming response.data is the array or response.data.posts
       setBlogs(Array.isArray(response.data) ? response.data : response.data.posts || response.data.data || []);
     } catch (error) {
@@ -74,7 +76,7 @@ const BlogView = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this blog post?")) {
       try {
-        await api.delete(`/posts/${id}`);
+        await api.delete(`/blog/posts/${id}`);
         toast.success("Blog post deleted successfully");
         fetchBlogs();
       } catch (error) {
@@ -85,37 +87,41 @@ const BlogView = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     
-    if (!formData.title || !formData.content) {
-      return toast.error("Title and content are required");
-    }
-    
-    // Create FormData for multipart/form-data
-    const submitData = new FormData();
-    submitData.append("title", formData.title);
-    submitData.append("content", formData.content);
-    submitData.append("category", formData.category);
-    
-    if (formData.tags) {
-      const tagsArray = formData.tags.split(",").map(tag => tag.trim());
-      submitData.append("tags", JSON.stringify(tagsArray));
-    }
-    
-    if (formData.image) {
-      submitData.append("image", formData.image); // Depending on what multer expects, could be 'coverImage'
-    }
-
     try {
+      const contentStr = formData.content || "";
+      const strippedContent = contentStr.replace(/(<([^>]+)>)/gi, "").trim();
+
+      if (!formData.title || !strippedContent) {
+        return toast.error("Title and content are required");
+      }
+      
+      // Create FormData for multipart/form-data
+      const submitData = new FormData();
+      submitData.append("title", formData.title);
+      submitData.append("content", formData.content);
+      submitData.append("category", formData.category);
+      
+      if (formData.tags) {
+        const tagsStr = String(formData.tags);
+        const tagsArray = tagsStr.split(",").map(tag => tag.trim()).filter(t => t);
+        submitData.append("tags", JSON.stringify(tagsArray));
+      }
+      
+      if (formData.image) {
+        submitData.append("image", formData.image);
+      }
+
       if (editingBlog) {
-        // Edit existing blog - assuming PUT or PATCH /posts/:id
-        await api.put(`/posts/${editingBlog._id}`, submitData, {
+        // Edit existing blog
+        await api.put(`/blog/posts/${editingBlog._id}`, submitData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         toast.success("Blog post updated successfully");
       } else {
         // Create new blog
-        await api.post("/posts", submitData, {
+        await api.post("/blog/posts", submitData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         toast.success("Blog post created successfully");
@@ -125,7 +131,8 @@ const BlogView = () => {
       fetchBlogs();
     } catch (error) {
       console.error("Error saving blog:", error);
-      toast.error(error.response?.data?.message || "Failed to save blog post");
+      const errorMsg = error.response?.data?.message || "Failed to save blog post";
+      toast.error(errorMsg);
     }
   };
 
@@ -237,7 +244,7 @@ const BlogView = () => {
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form className="p-6 space-y-6">
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -321,15 +328,15 @@ const BlogView = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Content *
                   </label>
-                  <textarea
-                    name="content"
-                    value={formData.content}
-                    onChange={handleInputChange}
-                    required
-                    rows="8"
-                    className="w-full p-3 border border-gray-200 outline-none rounded-lg focus:ring-2 focus:ring-green-500"
-                    placeholder="Write your blog content here..."
-                  ></textarea>
+                  <div className="w-full rounded-lg overflow-hidden border border-gray-200">
+                    <ReactQuill 
+                      theme="snow"
+                      value={formData.content}
+                      onChange={(content) => setFormData({ ...formData, content })}
+                      className="bg-white [&_.ql-editor]:min-h-[250px] [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none"
+                      placeholder="Write your blog content here..."
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -342,7 +349,8 @@ const BlogView = () => {
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   className="px-6 py-2.5 text-white bg-green-600 outline-none hover:bg-green-700 rounded-lg font-medium transition"
                 >
                   {editingBlog ? "Update Post" : "Publish Post"}

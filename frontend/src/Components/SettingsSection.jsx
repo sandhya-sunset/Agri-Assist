@@ -8,6 +8,8 @@ import {
   Store,
   Check,
   AlertCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import axios from "axios";
 
@@ -379,6 +381,10 @@ const SecuritySettings = () => {
   });
   const [msg, setMsg] = useState("");
 
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const handleChange = (e) => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
   };
@@ -386,6 +392,10 @@ const SecuritySettings = () => {
   const handleUpdate = async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
       setMsg("New passwords do not match");
+      return;
+    }
+    if (passwords.newPassword.length < 6) {
+      setMsg("Password must be at least 6 characters");
       return;
     }
     try {
@@ -428,39 +438,66 @@ const SecuritySettings = () => {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Current Password
             </label>
-            <input
-              type="password"
-              name="currentPassword"
-              value={passwords.currentPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                name="currentPassword"
+                value={passwords.currentPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               New Password
             </label>
-            <input
-              type="password"
-              name="newPassword"
-              value={passwords.newPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                name="newPassword"
+                value={passwords.newPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Confirm New Password
             </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={passwords.confirmPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={passwords.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button

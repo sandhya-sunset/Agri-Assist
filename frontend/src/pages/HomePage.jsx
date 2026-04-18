@@ -1163,7 +1163,7 @@ const HomePage = () => {
                       src={
                         product.image.startsWith("http")
                           ? product.image
-                          : `${API_BASE_URL}/${product.image.replace(/\\/g, "/")}`
+                          : `${API_BASE_URL}${product.image?.startsWith("/") ? "" : "/"}${product.image?.replace(/\\/g, "/")}`
                       }
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -1435,7 +1435,7 @@ const HomePage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {blogPosts.map((post, idx) => (
+            {displayBlogPosts.map((post, idx) => (
               <div
                 key={idx}
                 onClick={() => navigate(`/blog/${post._id}`)}
@@ -1443,8 +1443,8 @@ const HomePage = () => {
               >
                 <div className="relative h-48 overflow-hidden bg-gray-100">
                   <img
-                    src={post.image}
-                    alt={post.title}
+                      src={post.image?.startsWith("http") ? post.image : `${API_BASE_URL}${post.image?.startsWith("/") ? "" : "/"}${post.image?.replace(/\\/g, "/")}`}
+                      alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-3 left-3 px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full">

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Calendar, Clock, User, Share2 } from 'lucide-react';
 import Navbar from '../Components/Navbar';
+import { API_BASE_URL } from '../config';
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -69,7 +70,13 @@ const BlogDetail = () => {
         <article className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="relative h-[300px] md:h-[450px] w-full">
             <img 
-              src={post.image || 'https://images.unsplash.com/photo-1592982537447-6f2aafe6a0c5'} 
+              src={
+                post.image
+                  ? post.image.startsWith("http")
+                    ? post.image
+                    : `${API_BASE_URL}${post.image?.startsWith("/") ? "" : "/"}${post.image?.replace(/\\/g, "/")}`
+                  : 'https://images.unsplash.com/photo-1592982537447-6f2aafe6a0c5'
+              } 
               alt={post.title}
               className="w-full h-full object-cover"
             />

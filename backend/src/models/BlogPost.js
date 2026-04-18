@@ -9,6 +9,10 @@ const blogPostSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  tags: {
+    type: [String],
+    default: []
+  },
   content: {
     type: String,
     required: true

@@ -116,6 +116,10 @@ const UserProfilePage = () => {
       alert("Passwords do not match!");
       return;
     }
+    if (passwordData.newPassword.length < 6) {
+      alert("Password must be at least 6 characters!");
+      return;
+    }
 
     try {
       setLoading(true);

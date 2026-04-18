@@ -43,12 +43,14 @@ const ProtectedRoute = ({ children, role }) => {
 };
 
 import { ToastProvider } from "./components/Toast";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <AuthProvider>
       <SocketProvider>
         <ToastProvider>
+          <Toaster position="top-right" />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<LandingPage />} />

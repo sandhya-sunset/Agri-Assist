@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Save, User, Lock, Bell, Globe, Shield, Mail } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Save, User, Lock, Bell, Globe, Shield, Mail, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
+import api from "../../Services/api";
 
 const SettingsView = () => {
   const [settings, setSettings] = useState({
@@ -30,6 +31,33 @@ const SettingsView = () => {
     confirmPassword: "",
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get("/auth/profile");
+      const user = response.data.data;
+      if (user) {
+        setSettings(prev => ({
+          ...prev,
+          adminName: user.name || "Admin",
+          adminEmail: user.email || "admin@agriassist.com",
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch profile", error);
+    }
+  };
+
   const handleSettingChange = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
@@ -39,12 +67,29 @@ const SettingsView = () => {
     setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveSettings = () => {
-    // TODO: API call to save settings
-    toast.success("Settings saved successfully!");
+  const handleSaveSettings = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      setIsSaving(true);
+      await api.put("/auth/profile", {
+        name: settings.adminName,
+      });
+      // System and notification settings mock
+      toast.success("Settings saved successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to save settings");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast.error("Please fill all password fields");
+      return;
+    }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error("Passwords do not match!");
       return;
@@ -53,13 +98,37 @@ const SettingsView = () => {
       toast.error("Password must be at least 6 characters!");
       return;
     }
-    // TODO: API call to change password
-    toast.success("Password changed successfully!");
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    
+    try {
+      setIsLoading(true);
+      const response = await api.put("/auth/update-password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      
+      if (response && response.data && response.data.success) {
+        toast.success("Password changed successfully!");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else if (response && response.status === 200) {
+        toast.success("Password changed successfully!");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        toast.error("Failed to change password, please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to change password");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -143,49 +212,78 @@ const SettingsView = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Current Password
                 </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Enter current password"
-                />
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter current password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   New Password
                 </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Enter new password"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Confirm New Password
                 </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Confirm new password"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Confirm new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <button
+                type="button"
                 onClick={handleChangePassword}
-                className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 font-semibold transition-colors"
+                disabled={isLoading}
+                className={`w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 font-semibold transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                Change Password
+                {isLoading ? "Changing Password..." : "Change Password"}
               </button>
             </div>
           </div>
@@ -371,11 +469,13 @@ const SettingsView = () => {
 
           {/* Save Button */}
           <button
+            type="button"
             onClick={handleSaveSettings}
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center justify-center gap-2"
+            disabled={isSaving}
+            className={`w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             <Save size={20} />
-            Save All Settings
+            {isSaving ? "Saving Settings..." : "Save All Settings"}
           </button>
         </div>
       </div>

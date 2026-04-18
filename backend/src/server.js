@@ -54,10 +54,14 @@ app.get("/api/health", (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
+  
+  // Catch Multer errors or other bad requests
+  const statusCode = err.name === 'MulterError' ? 400 : (err.status || 500);
+  
+  res.status(statusCode).json({
     success: false,
-    message: "Something went wrong!",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    message: err.message || "Something went wrong!",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined
   });
 });
 

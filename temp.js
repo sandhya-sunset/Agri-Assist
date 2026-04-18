@@ -55,7 +55,7 @@ const BlogListPage = () => {
               >
                 <div className="relative h-56 overflow-hidden bg-gray-200 shrink-0">
                   <img
-                      src={post.image ? (post.image.startsWith('http') ? post.image : `${API_BASE_URL}${post.image.startsWith('/') ? '' : '/'}${post.image.replace(/\\/g, '/')}`) : 'https://images.unsplash.com/photo-1592982537447-6f2aafe6a0c5'}
+                    src={post.image || 'https://images.unsplash.com/photo-1592982537447-6f2aafe6a0c5'}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
