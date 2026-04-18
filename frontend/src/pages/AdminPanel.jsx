@@ -11,6 +11,7 @@ import {
   BarChart3,
   LogOut,
   Tag,
+  FileText,
 } from "lucide-react";
 import DashboardView from "../Components/admin/DashboardView";
 import UsersView from "../Components/admin/UsersView";
@@ -19,6 +20,7 @@ import CommissionView from "../Components/admin/CommissionView";
 import OrdersView from "../Components/admin/OrdersView";
 import SettingsView from "../Components/admin/SettingsView";
 import DealsView from "../Components/admin/DealsView";
+import BlogView from "../Components/admin/BlogView";
 import { useNavigate } from "react-router-dom";
 
 import api from "../services/api";
@@ -157,6 +159,7 @@ const AdminPanel = () => {
     { id: "sellers", label: "Sellers", icon: Store },
     { id: "orders", label: "Orders", icon: Package },
     { id: "deals", label: "Promo Deals", icon: Tag },
+    { id: "blogs", label: "Blogs", icon: FileText },
     { id: "commission", label: "Commission", icon: DollarSign },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -416,6 +419,7 @@ const AdminPanel = () => {
               handleUserAction={handleUserAction}
             />
           )}
+          {activeTab === "blogs" && <BlogView />}
           {activeTab === "sellers" && (
             <SellersView
               sellers={sellers}
