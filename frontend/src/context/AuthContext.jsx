@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import api from '../Services/api';
 
 const AuthContext = createContext(null);
 
@@ -9,7 +10,30 @@ export const AuthProvider = ({ children }) => {
     return storedUser && storedToken ? JSON.parse(storedUser) : null;
   });
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const verifyToken = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        try {
+          const response = await api.get('/auth/profile');
+          if (response.data.success) {
+            setUser(response.data.data);
+            setToken(storedToken);
+          } else {
+            logout();
+          }
+        } catch (error) {
+          console.error("Token validation failed:", error);
+          logout();
+        }
+      }
+      setLoading(false);
+    };
+
+    verifyToken();
+  }, []);
 
   const login = (userData, userToken) => {
     setUser(userData);

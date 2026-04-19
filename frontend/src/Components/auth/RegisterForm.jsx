@@ -30,7 +30,6 @@ const RegisterForm = ({
             placeholder="John Doe"
             disabled={loading}
           />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
         </div>
       </div>
 
@@ -49,7 +48,6 @@ const RegisterForm = ({
             placeholder="your@email.com"
             disabled={loading}
           />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
         </div>
       </div>
 
@@ -68,7 +66,6 @@ const RegisterForm = ({
             placeholder="+977 9800000000"
             disabled={loading}
           />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
         </div>
       </div>
 
@@ -140,6 +137,7 @@ const RegisterForm = ({
             placeholder="Street, City, District"
             rows="2"
             disabled={loading}
+            spellCheck="false"
           />
         </div>
       </div>
