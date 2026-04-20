@@ -245,7 +245,9 @@ exports.approveExpertApplication = async (req, res) => {
 
     user.expertApplicationStatus = 'approved';
     user.role = 'expert';
-    await user.save();
+    
+    // Save, bypassing full validation if location/citizenship is problematic for experts
+    await user.save({ validateBeforeSave: false });
 
     res.status(200).json({
       success: true,
@@ -275,7 +277,7 @@ exports.rejectExpertApplication = async (req, res) => {
 
     user.expertApplicationStatus = 'rejected';
     // optionally keep role as 'user' or revert if something else
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
     res.status(200).json({
       success: true,

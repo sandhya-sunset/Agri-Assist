@@ -149,6 +149,12 @@ const register = async (req, res) => {
 
     // Send OTP email for regular users
     if (role !== "seller") {
+      // 🔑 We log the OTP to the console for easy local testing
+      console.log(`\n=========================================`);
+      console.log(`🔑 [DEV MODE] OTP Generated for ${user.email}`);
+      console.log(`🔑 YOUR OTP IS: ${userData.otp}`);
+      console.log(`=========================================\n`);
+
       try {
         await sendOTPEmail(user.email, userData.otp, user.name);
       } catch (emailError) {
@@ -295,6 +301,11 @@ const resendOTP = async (req, res) => {
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
+
+    console.log(`\n=========================================`);
+    console.log(`🔑 [DEV MODE] New OTP Generated for ${user.email}`);
+    console.log(`🔑 YOUR NEW OTP IS: ${otp}`);
+    console.log(`=========================================\n`);
 
     // Send OTP email
     try {
@@ -543,6 +554,11 @@ const forgotPassword = async (req, res) => {
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
+
+    console.log(`\n=========================================`);
+    console.log(`🔑 [DEV MODE] Forgot Password OTP Generated for ${user.email}`);
+    console.log(`🔑 YOUR RESET OTP IS: ${otp}`);
+    console.log(`=========================================\n`);
 
     try {
       await sendPasswordResetEmail(user.email, otp, user.name);

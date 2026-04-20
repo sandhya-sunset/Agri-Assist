@@ -12,6 +12,7 @@ import {
   LogOut,
   Tag,
   FileText,
+  UserCheck,
 } from "lucide-react";
 import DashboardView from "../Components/admin/DashboardView";
 import UsersView from "../Components/admin/UsersView";
@@ -21,6 +22,7 @@ import OrdersView from "../Components/admin/OrdersView";
 import SettingsView from "../Components/admin/SettingsView";
 import DealsView from "../Components/admin/DealsView";
 import BlogView from "../Components/admin/BlogView";
+import ExpertView from "../Components/admin/ExpertView";
 import { useNavigate } from "react-router-dom";
 
 import api from "../services/api";
@@ -157,6 +159,7 @@ const AdminPanel = () => {
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "users", label: "Users", icon: Users },
     { id: "sellers", label: "Sellers", icon: Store },
+    { id: "experts", label: "Experts", icon: UserCheck },
     { id: "orders", label: "Orders", icon: Package },
     { id: "deals", label: "Promo Deals", icon: Tag },
     { id: "blogs", label: "Blogs", icon: FileText },
@@ -419,6 +422,7 @@ const AdminPanel = () => {
               handleUserAction={handleUserAction}
             />
           )}
+          {activeTab === "experts" && <ExpertView />}
           {activeTab === "blogs" && <BlogView />}
           {activeTab === "sellers" && (
             <SellersView
