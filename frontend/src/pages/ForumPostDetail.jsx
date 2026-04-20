@@ -321,23 +321,64 @@ const ForumPostDetail = () => {
                         {new Date(reply.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    {isPostOwner && !reply.isAccepted && (
-                      <button
-                        onClick={() => handleAcceptAnswer(reply._id)}
-                        className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-full font-bold transition-all"
-                      >
-                        Accept Answer
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {user && user.id === reply.userId && (
+                        <div className="flex items-center gap-2 mr-2">
+                          <button
+                            onClick={() => startEditing(reply)}
+                            className="text-gray-500 hover:text-blue-600 transition-colors"
+                            title="Edit reply"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteReply(reply._id)}
+                            className="text-gray-500 hover:text-red-600 transition-colors"
+                            title="Delete reply"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      )}
+                      {isPostOwner && !reply.isAccepted && (
+                        <button
+                          onClick={() => handleAcceptAnswer(reply._id)}
+                          className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-full font-bold transition-all"
+                        >
+                          Accept Answer
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  <p className="text-gray-700 mb-4 whitespace-pre-wrap">
-                    {reply.content}
-                  </p>
-
-                  <button
-                    onClick={() => handleLikeReply(reply._id)}
-                    className="flex items-center gap-1 text-gray-600 hover:text-red-600 transition-all"
+                  {editingReplyId === reply._id ? (
+                    <div className="mb-4">
+                      <textarea
+                        value={editReplyContent}
+                        onChange={(e) => setEditReplyContent(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        rows="3"
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => handleEditReply(reply._id)}
+                          className="bg-green-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-green-700"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingReplyId(null)}
+                          className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm font-medium hover:bg-gray-300"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-700 mb-4 whitespace-pre-wrap">
+                      {reply.content}
+                    </p>
+                  )}
                   >
                     <ThumbsUp size={16} />
                     <span className="text-sm">{reply.likes}</span>

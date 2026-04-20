@@ -234,56 +234,35 @@ exports.getExpertApplications = async (req, res) => {
 exports.approveExpertApplication = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (user.expertApplicationStatus !== 'pending') return res.status(400).json({ success: false, message: 'Application is not in pending status' });
     
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    if (user.expertApplicationStatus !== 'pending') {
-      return res.status(400).json({ success: false, message: 'Application is not in pending status' });
-    }
-
-    user.expertApplicationStatus = 'approved';
-    user.role = 'expert';
-    
-    // Save, bypassing full validation if location/citizenship is problematic for experts
-    await user.save({ validateBeforeSave: false });
-
-    res.status(200).json({
-      success: true,
-      message: 'Expert application approved successfully',
-      data: user
-    });
+    // Update using findByIdAndUpdate to completely bypass MongoDB save structure validation
+    // because empty 'location' object without 'coordinates' triggers 2dsphere index errors
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { expertApplicationStatus: 'approved', role: 'expert' } },
+      { new: true, runValidators: false }
+    );
+    res.status(200).json({ success: true, message: 'Expert application approved successfully', data: updatedUser });
   } catch (error) {
     console.error('Error approving expert application:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// @desc    Reject expert application
-// @route   PUT /api/admin/expert-applications/:id/reject
-// @access  Private/Admin
 exports.rejectExpertApplication = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (user.expertApplicationStatus !== 'pending') return res.status(400).json({ success: false, message: 'Application is not in pending status' });
     
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    if (user.expertApplicationStatus !== 'pending') {
-      return res.status(400).json({ success: false, message: 'Application is not in pending status' });
-    }
-
-    user.expertApplicationStatus = 'rejected';
-    // optionally keep role as 'user' or revert if something else
-    await user.save({ validateBeforeSave: false });
-
-    res.status(200).json({
-      success: true,
-      message: 'Expert application rejected',
-      data: user
-    });
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { expertApplicationStatus: 'rejected', role: 'user' } },
+      { new: true, runValidators: false }
+    );
+    res.status(200).json({ success: true, message: 'Expert application rejected successfully', data: updatedUser });
   } catch (error) {
     console.error('Error rejecting expert application:', error);
     res.status(500).json({ success: false, message: 'Server error' });

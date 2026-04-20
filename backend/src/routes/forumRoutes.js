@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const { protect } = require('../middlewares/authMiddleware');
 const ForumPost = require('../models/ForumPost');
@@ -147,36 +148,38 @@ router.post('/:id/replies', protect, async (req, res) => {
       });
     }
 
-    const reply = {
-      _id: new require('mongoose').Types.ObjectId(),
-      userId: req.user.id,
-      userName: req.user.name,
-      userRole: req.user.role,
-      userAvatar: req.user.avatar,
-      content,
-      isAccepted: false,
-      likes: 0,
-      createdAt: new Date(),
-    };
+          const reply = {
+        _id: new mongoose.Types.ObjectId(),
+        userId: req.user.id,
+        userName: req.user.name,
+        userRole: req.user.role,
+        userAvatar: req.user.avatar,
+        content,
+        isAccepted: false,
+        likes: 0,
+        createdAt: new Date(),
+      };
 
-    post.replies.push(reply);
-    
-    // Update post status to answered if it was open
-    if (post.status === 'open' && req.user.role === 'expert') {
-      post.status = 'answered';
-    }
+      const updateData = { $push: { replies: reply } };
+      if (post.status === 'open' && req.user.role === 'expert') {
+        updateData.$set = { status: 'answered' };
+      }
 
-    await post.save();
+      const updatedPost = await require('../models/ForumPost').findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true, runValidators: false }
+      );
 
-    res.status(201).json({
-      success: true,
-      message: 'Reply added successfully',
-      data: post,
-    });
+      res.status(201).json({
+        success: true,
+        message: 'Reply added successfully',
+        data: updatedPost,
+      });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error adding reply',
+      message: `Error adding reply: ${error.message || error}`,
       error: error.message,
     });
   }
@@ -346,6 +349,54 @@ router.put('/:postId/replies/:replyId/like', protect, async (req, res) => {
       message: 'Error liking reply',
       error: error.message,
     });
+  }
+});
+
+
+// Edit a reply
+router.put('/:postId/replies/:replyId', protect, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content) return res.status(400).json({ success: false, message: 'Content is required' });
+
+    const post = await ForumPost.findById(req.params.postId);
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+    const reply = post.replies.id(req.params.replyId);
+    if (!reply) return res.status(404).json({ success: false, message: 'Reply not found' });
+
+    if (reply.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized to edit this reply' });
+    }
+
+    reply.content = content;
+    await post.save();
+
+    res.json({ success: true, message: 'Reply updated successfully', data: post });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error editing reply', error: error.message });
+  }
+});
+
+// Delete a reply
+router.delete('/:postId/replies/:replyId', protect, async (req, res) => {
+  try {
+    const post = await ForumPost.findById(req.params.postId);
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+    const reply = post.replies.id(req.params.replyId);
+    if (!reply) return res.status(404).json({ success: false, message: 'Reply not found' });
+
+    if (reply.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized to delete this reply' });
+    }
+
+    reply.deleteOne();
+    await post.save();
+
+    res.json({ success: true, message: 'Reply deleted successfully', data: post });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error deleting reply', error: error.message });
   }
 });
 
