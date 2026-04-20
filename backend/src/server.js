@@ -42,6 +42,7 @@ app.use("/api/blog", require("./routes/blogRoutes"));
 app.use("/api/deals", require("./routes/dealRoutes"));
 app.use("/api/forum", require("./routes/forumRoutes"));
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
+app.use("/api/tasks", require("./routes/taskRoute"));
 
 // Health check route
 app.get("/api/health", (req, res) => {
@@ -100,6 +101,10 @@ io.on("connection", (socket) => {
 
 // Make io accessible to our routes/controllers
 app.set("io", io);
+
+// Start the cron jobs
+const startTaskReminderJob = require("./jobs/taskReminderJob");
+startTaskReminderJob(io);
 
 const PORT = process.env.PORT || 5000;
 

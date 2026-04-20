@@ -379,6 +379,9 @@ const ForumPostDetail = () => {
                       {reply.content}
                     </p>
                   )}
+                  <button
+                    onClick={() => handleLikeReply(reply._id)}
+                    className="flex items-center gap-1 text-gray-500 hover:text-green-600 transition-colors"
                   >
                     <ThumbsUp size={16} />
                     <span className="text-sm">{reply.likes}</span>
