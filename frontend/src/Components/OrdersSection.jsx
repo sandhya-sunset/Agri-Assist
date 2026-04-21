@@ -13,7 +13,7 @@ import {
   Users,
 } from "lucide-react";
 import api from "../services/api";
-import { useToast } from "../components/Toast";
+import { useToast } from "../Components/Toast";
 
 const OrdersSection = ({ searchQuery }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);

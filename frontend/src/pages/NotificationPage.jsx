@@ -4,7 +4,7 @@ import Navbar from "../Components/Navbar";
 import { Bell, MessageSquare, Trash2, CheckCircle, Info, MessageCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../components/Toast";
+import { useToast } from "../Components/Toast";
 
 const NotificationPage = () => {
   const { notifications, clearNotifications } = useSocket();

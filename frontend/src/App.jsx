@@ -42,7 +42,7 @@ const ProtectedRoute = ({ children, role }) => {
   return children;
 };
 
-import { ToastProvider } from "./components/Toast";
+import { ToastProvider } from "./Components/Toast";
 import { Toaster } from "react-hot-toast";
 
 function App() {

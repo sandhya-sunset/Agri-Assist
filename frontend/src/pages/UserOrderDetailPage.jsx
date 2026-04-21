@@ -15,7 +15,7 @@ import {
 import { useParams, Link } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import api from "../services/api";
-import { useToast } from "../components/Toast";
+import { useToast } from "../Components/Toast";
 
 const UserOrderDetailPage = () => {
   const { id } = useParams();
