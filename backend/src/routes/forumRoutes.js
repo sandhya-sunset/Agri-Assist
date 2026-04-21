@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const { protect } = require('../middlewares/authMiddleware');
 const ForumPost = require('../models/ForumPost');
+const Notification = require('../models/Notification');
 
 // Get all forum posts with filters
 router.get('/', async (req, res) => {
@@ -170,6 +171,23 @@ router.post('/:id/replies', protect, async (req, res) => {
         updateData,
         { new: true, runValidators: false }
       );
+
+      // Create notification if someone else replies to the post
+      if (post.userId.toString() !== req.user.id) {
+        const notification = await Notification.create({
+          user: post.userId,
+          type: 'forum',
+          title: 'New Reply to Your Post',
+          message: `${req.user.name} replied: ${content.substring(0, 40)}${content.length > 40 ? '...' : ''}`,
+          link: `/forum/${post._id}`
+        });
+
+        // Try emitting to socket if IO is available
+        const io = req.app.get('io');
+        if (io) {
+          io.to(post.userId.toString()).emit('newNotification', notification);
+        }
+      }
 
       res.status(201).json({
         success: true,
@@ -365,7 +383,7 @@ router.put('/:postId/replies/:replyId', protect, async (req, res) => {
     const reply = post.replies.id(req.params.replyId);
     if (!reply) return res.status(404).json({ success: false, message: 'Reply not found' });
 
-    if (reply.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (reply.userId.toString() !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'expert') {
       return res.status(403).json({ success: false, message: 'Not authorized to edit this reply' });
     }
 
@@ -387,7 +405,7 @@ router.delete('/:postId/replies/:replyId', protect, async (req, res) => {
     const reply = post.replies.id(req.params.replyId);
     if (!reply) return res.status(404).json({ success: false, message: 'Reply not found' });
 
-    if (reply.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (reply.userId.toString() !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'expert') {
       return res.status(403).json({ success: false, message: 'Not authorized to delete this reply' });
     }
 

@@ -9,6 +9,8 @@ import {
   MessageCircle,
   Eye,
   Clock,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import { useNavigate, useParams } from "react-router-dom";
@@ -22,6 +24,8 @@ const ForumPostDetail = () => {
   const [error, setError] = useState(null);
   const [replyContent, setReplyContent] = useState("");
   const [submittingReply, setSubmittingReply] = useState(false);
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editReplyContent, setEditReplyContent] = useState("");
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
 
@@ -148,6 +152,76 @@ const ForumPostDetail = () => {
     }
   };
 
+  const startEditing = (reply) => {
+    setEditingReplyId(reply._id);
+    setEditReplyContent(reply.content);
+  };
+
+  const handleEditReply = async (replyId) => {
+    if (!editReplyContent.trim()) {
+      alert("Please enter reply content");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${API_BASE_URL}/api/forum/${id}/replies/${replyId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ content: editReplyContent }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPost(data.data);
+        setEditingReplyId(null);
+        setEditReplyContent("");
+      } else {
+        alert(data.message || "Failed to update reply");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error updating reply");
+    }
+  };
+
+  const handleDeleteReply = async (replyId) => {
+    if (!window.confirm("Are you sure you want to delete this reply?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${API_BASE_URL}/api/forum/${id}/replies/${replyId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPost(data.data);
+      } else {
+        alert(data.message || "Failed to delete reply");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting reply");
+    }
+  };
+
   const getCategoryColor = (category) => {
     const colors = {
       "Crop Disease": "bg-red-100 text-red-700",
@@ -205,7 +279,7 @@ const ForumPostDetail = () => {
     );
   }
 
-  const isPostOwner = user && user.id === post.userId;
+  const isPostOwner = user && (user.id === post.userId || user._id === post.userId);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -322,7 +396,11 @@ const ForumPostDetail = () => {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {user && user.id === reply.userId && (
+                      {user &&
+                        ((user.id === reply.userId ||
+                          user._id === reply.userId) ||
+                          user.role === "expert" ||
+                          user.role === "admin") && (
                         <div className="flex items-center gap-2 mr-2">
                           <button
                             onClick={() => startEditing(reply)}

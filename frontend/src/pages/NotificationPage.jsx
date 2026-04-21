@@ -1,7 +1,7 @@
 import React from "react";
 import { useSocket } from "../context/SocketContext";
 import Navbar from "../Components/Navbar";
-import { Bell, MessageSquare, Trash2, CheckCircle, Info } from "lucide-react";
+import { Bell, MessageSquare, Trash2, CheckCircle, Info, MessageCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
@@ -86,13 +86,17 @@ const NotificationPage = () => {
                     className={`p-3 rounded-xl shrink-0 ${
                       notification.type === "message"
                         ? "bg-blue-50 text-blue-600"
-                        : notification.type === "success"
-                          ? "bg-green-50 text-green-600"
-                          : "bg-gray-50 text-gray-600"
+                        : notification.type === "forum"
+                          ? "bg-purple-50 text-purple-600"
+                          : notification.type === "success"
+                            ? "bg-green-50 text-green-600"
+                            : "bg-gray-50 text-gray-600"
                     }`}
                   >
                     {notification.type === "message" ? (
                       <MessageSquare size={20} />
+                    ) : notification.type === "forum" ? (
+                      <MessageCircle size={20} />
                     ) : notification.type === "success" ? (
                       <CheckCircle size={20} />
                     ) : (
