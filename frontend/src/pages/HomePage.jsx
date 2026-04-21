@@ -149,10 +149,13 @@ const HomePage = () => {
       const data = await wishlistService.toggleWishlist(productId);
       if (data.success) {
         setWishlistIds(new Set(data.data));
-        addToast(data.isAdded ? 'Added to wishlist ❤️' : 'Removed from wishlist', data.isAdded ? 'success' : 'info');
+        addToast(
+          data.isAdded ? "Added to wishlist ❤️" : "Removed from wishlist",
+          data.isAdded ? "success" : "info",
+        );
       }
     } catch {
-      addToast('Failed to update wishlist', 'error');
+      addToast("Failed to update wishlist", "error");
     }
   };
 
@@ -172,12 +175,18 @@ const HomePage = () => {
 
           // Reverse geocoding for City using Open-Meteo Geocoding
           try {
-            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&format=json`);
+            const geoRes = await fetch(
+              `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&format=json`,
+            );
             if (geoRes.ok) {
               const geoData = await geoRes.json();
               if (geoData.results && geoData.results.length > 0) {
                 // Determine best location name (City or state)
-                setLocationName(geoData.results[0].name || geoData.results[0].admin1 || "Local Area");
+                setLocationName(
+                  geoData.results[0].name ||
+                    geoData.results[0].admin1 ||
+                    "Local Area",
+                );
               }
             }
           } catch (e) {
@@ -205,7 +214,7 @@ const HomePage = () => {
         setWeatherError("Location access denied");
         setWeatherLoading(false);
       },
-      { timeout: 10000 }
+      { timeout: 10000 },
     );
   };
 
@@ -514,15 +523,15 @@ const HomePage = () => {
   // Use dynamic data if available, fallback to static
   const displayStats = stats
     ? [
-      { icon: Users, value: stats.totalUsers, label: "Happy Farmers" },
-      { icon: Package, value: stats.totalOrders, label: "Orders Delivered" },
-      { icon: Award, value: stats.avgRating, label: "Customer Rating" },
-      {
-        icon: BarChart3,
-        value: stats.yieldIncrease,
-        label: "Avg. Yield Increase",
-      },
-    ]
+        { icon: Users, value: stats.totalUsers, label: "Happy Farmers" },
+        { icon: Package, value: stats.totalOrders, label: "Orders Delivered" },
+        { icon: Award, value: stats.avgRating, label: "Customer Rating" },
+        {
+          icon: BarChart3,
+          value: stats.yieldIncrease,
+          label: "Avg. Yield Increase",
+        },
+      ]
     : staticStats;
 
   const displayTestimonials =
@@ -534,13 +543,19 @@ const HomePage = () => {
   const getWeatherDetails = (code, isDay) => {
     if (code === undefined) return { icon: Cloud, description: "Unknown" };
     // Map WMO codes: https://open-meteo.com/en/docs
-    if (code === 0) return { icon: isDay ? Sun : Cloud, description: "Clear sky" };
-    if ([1, 2, 3].includes(code)) return { icon: isDay ? Sun : Cloud, description: "Partly cloudy" };
+    if (code === 0)
+      return { icon: isDay ? Sun : Cloud, description: "Clear sky" };
+    if ([1, 2, 3].includes(code))
+      return { icon: isDay ? Sun : Cloud, description: "Partly cloudy" };
     if ([45, 48].includes(code)) return { icon: Cloud, description: "Foggy" };
-    if ([51, 53, 55, 56, 57].includes(code)) return { icon: CloudRain, description: "Drizzle" };
-    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { icon: CloudRain, description: "Rain" };
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return { icon: CloudSnow, description: "Snow" };
-    if ([95, 96, 99].includes(code)) return { icon: CloudLightning, description: "Thunderstorm" };
+    if ([51, 53, 55, 56, 57].includes(code))
+      return { icon: CloudRain, description: "Drizzle" };
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code))
+      return { icon: CloudRain, description: "Rain" };
+    if ([71, 73, 75, 77, 85, 86].includes(code))
+      return { icon: CloudSnow, description: "Snow" };
+    if ([95, 96, 99].includes(code))
+      return { icon: CloudLightning, description: "Thunderstorm" };
 
     return { icon: Cloud, description: "Cloudy" };
   };
@@ -555,8 +570,9 @@ const HomePage = () => {
           {heroSlides.map((slide, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${currentSlide === index ? "opacity-100" : "opacity-0"
-                }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                currentSlide === index ? "opacity-100" : "opacity-0"
+              }`}
             >
               <div className="absolute inset-0">
                 <img
@@ -603,57 +619,88 @@ const HomePage = () => {
                     {weatherLoading ? (
                       <div className="flex items-center gap-3 text-white/80 animate-pulse">
                         <Loader2 className="animate-spin" size={20} />
-                        <span className="text-sm">Fetching local weather...</span>
+                        <span className="text-sm">
+                          Fetching local weather...
+                        </span>
                       </div>
                     ) : weatherError ? (
                       <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg w-fit backdrop-blur-md border border-white/10">
                         <Cloud className="text-gray-300" size={20} />
-                        <span className="text-sm font-medium">{weatherError}</span>
+                        <span className="text-sm font-medium">
+                          {weatherError}
+                        </span>
                       </div>
-                    ) : weather && (
-                      <div className="bg-black/30 backdrop-blur-md border border-white/20 p-5 rounded-2xl text-white shadow-xl hover:bg-black/40 transition-colors cursor-default">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="text-green-400" size={18} />
-                            <span className="font-semibold">{locationName}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full">
-                            {React.createElement(getWeatherDetails(weather.weather_code, weather.is_day === 1).icon, { size: 14, className: "text-blue-300" })}
-                            <span className="text-xs font-medium">
-                              {getWeatherDetails(weather.weather_code, weather.is_day === 1).description}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-end gap-4">
-                          <div className="flex items-start gap-1">
-                            <span className="text-5xl font-bold tracking-tighter">
-                              {Math.round(weather.temperature_2m)}
-                            </span>
-                            <span className="text-2xl text-white/70 mt-1">°C</span>
-                          </div>
-
-                          <div className="h-10 w-px bg-white/20 mx-2"></div>
-
-                          <div className="flex flex-col gap-1.5 pb-1 flex-1">
-                            <div className="flex justify-between items-center w-full">
-                              <div className="flex items-center gap-1.5 text-white/80">
-                                <Droplets size={14} className="text-blue-400" />
-                                <span className="text-xs">Humidity</span>
-                              </div>
-                              <span className="text-sm font-semibold">{weather.relative_humidity_2m}%</span>
+                    ) : (
+                      weather && (
+                        <div className="bg-black/30 backdrop-blur-md border border-white/20 p-5 rounded-2xl text-white shadow-xl hover:bg-black/40 transition-colors cursor-default">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="text-green-400" size={18} />
+                              <span className="font-semibold">
+                                {locationName}
+                              </span>
                             </div>
-
-                            <div className="flex justify-between items-center w-full">
-                              <div className="flex items-center gap-1.5 text-white/80">
-                                <Wind size={14} className="text-gray-300" />
-                                <span className="text-xs">Wind</span>
-                              </div>
-                              <span className="text-sm font-semibold">{weather.wind_speed_10m} <span className="text-[10px] text-white/60">km/h</span></span>
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full">
+                              {React.createElement(
+                                getWeatherDetails(
+                                  weather.weather_code,
+                                  weather.is_day === 1,
+                                ).icon,
+                                { size: 14, className: "text-blue-300" },
+                              )}
+                              <span className="text-xs font-medium">
+                                {
+                                  getWeatherDetails(
+                                    weather.weather_code,
+                                    weather.is_day === 1,
+                                  ).description
+                                }
+                              </span>
                             </div>
                           </div>
+
+                          <div className="flex items-end gap-4">
+                            <div className="flex items-start gap-1">
+                              <span className="text-5xl font-bold tracking-tighter">
+                                {Math.round(weather.temperature_2m)}
+                              </span>
+                              <span className="text-2xl text-white/70 mt-1">
+                                °C
+                              </span>
+                            </div>
+
+                            <div className="h-10 w-px bg-white/20 mx-2"></div>
+
+                            <div className="flex flex-col gap-1.5 pb-1 flex-1">
+                              <div className="flex justify-between items-center w-full">
+                                <div className="flex items-center gap-1.5 text-white/80">
+                                  <Droplets
+                                    size={14}
+                                    className="text-blue-400"
+                                  />
+                                  <span className="text-xs">Humidity</span>
+                                </div>
+                                <span className="text-sm font-semibold">
+                                  {weather.relative_humidity_2m}%
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between items-center w-full">
+                                <div className="flex items-center gap-1.5 text-white/80">
+                                  <Wind size={14} className="text-gray-300" />
+                                  <span className="text-xs">Wind</span>
+                                </div>
+                                <span className="text-sm font-semibold">
+                                  {weather.wind_speed_10m}{" "}
+                                  <span className="text-[10px] text-white/60">
+                                    km/h
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )
                     )}
                   </div>
                 </div>
@@ -667,10 +714,11 @@ const HomePage = () => {
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${currentSlide === index
-                  ? "w-12 bg-green-500"
-                  : "w-2 bg-white/50"
-                  }`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  currentSlide === index
+                    ? "w-12 bg-green-500"
+                    : "w-2 bg-white/50"
+                }`}
               />
             ))}
           </div>
@@ -727,22 +775,30 @@ const HomePage = () => {
       </section>
 
       {/* Expert Application Banner */}
-      {user?.role === 'user' && user?.expertApplicationStatus !== 'approved' && (
-        <section className="bg-green-600 text-white py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
-            <div className="mb-6 md:mb-0">
-              <h2 className="text-3xl font-bold mb-2 flex items-center gap-2"><Award /> Are you an Agriculture Expert?</h2>
-              <p className="text-green-100 text-lg">Help farmers by sharing your knowledge in our community forum. Apply now to get your expert badge!</p>
+      {user?.role === "user" &&
+        user?.expertApplicationStatus !== "approved" && (
+          <section className="bg-green-600 text-white py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
+              <div className="mb-6 md:mb-0">
+                <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                  <Award /> Are you an Agriculture Expert?
+                </h2>
+                <p className="text-green-100 text-lg">
+                  Help farmers by sharing your knowledge in our community forum.
+                  Apply now to get your expert badge!
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/apply-expert")}
+                className="bg-white text-green-600 font-bold px-8 py-3 rounded-lg hover:bg-green-50 shadow-lg transition-colors whitespace-nowrap"
+              >
+                {user?.expertApplicationStatus === "pending"
+                  ? "View Setup Status"
+                  : "Apply Now"}
+              </button>
             </div>
-            <button 
-              onClick={() => navigate('/apply-expert')}
-              className="bg-white text-green-600 font-bold px-8 py-3 rounded-lg hover:bg-green-50 shadow-lg transition-colors whitespace-nowrap"
-            >
-              {user?.expertApplicationStatus === 'pending' ? 'View Setup Status' : 'Apply Now'}
-            </button>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
       {/* Farmer To-Do List */}
       <section className="py-8 bg-white border-b border-gray-200">
@@ -800,10 +856,7 @@ const HomePage = () => {
                   />
                   <div className="flex gap-2">
                     <div className="flex-1 flex items-center gap-2 px-3 py-2.5 bg-white border border-gray-300 rounded-xl">
-                      <Calendar
-                        size={16}
-                        className="text-gray-500 shrink-0"
-                      />
+                      <Calendar size={16} className="text-gray-500 shrink-0" />
                       <input
                         type="date"
                         value={taskForm.scheduledDate}
@@ -869,18 +922,20 @@ const HomePage = () => {
                   {tasks.map((task) => (
                     <div
                       key={task._id}
-                      className={`flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors ${task.isCompleted ? "bg-green-50/50" : ""
-                        }`}
+                      className={`flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors ${
+                        task.isCompleted ? "bg-green-50/50" : ""
+                      }`}
                     >
                       <button
                         type="button"
                         onClick={() =>
                           handleToggleTask(task._id, task.isCompleted)
                         }
-                        className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${task.isCompleted
-                          ? "bg-green-600 border-green-600 text-white"
-                          : "border-gray-300 hover:border-green-500"
-                          }`}
+                        className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          task.isCompleted
+                            ? "bg-green-600 border-green-600 text-white"
+                            : "border-gray-300 hover:border-green-500"
+                        }`}
                       >
                         {task.isCompleted && (
                           <Check size={14} strokeWidth={3} />
@@ -888,8 +943,9 @@ const HomePage = () => {
                       </button>
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`font-medium text-gray-900 truncate ${task.isCompleted ? "line-through text-gray-500" : ""
-                            }`}
+                          className={`font-medium text-gray-900 truncate ${
+                            task.isCompleted ? "line-through text-gray-500" : ""
+                          }`}
                         >
                           {task.title}
                         </p>
@@ -935,7 +991,13 @@ const HomePage = () => {
                   <div
                     key={idx}
                     className="relative group bg-white border border-gray-200 overflow-hidden rounded-2xl h-80 md:h-64 cursor-pointer hover:border-red-300 hover:shadow-xl transition-all flex flex-col md:flex-row"
-                    onClick={() => navigate(deal.link && deal.link.trim() !== "" ? deal.link : `/products?search=${encodeURIComponent(deal.title)}`)}
+                    onClick={() =>
+                      navigate(
+                        deal.link && deal.link.trim() !== ""
+                          ? deal.link
+                          : `/products?search=${encodeURIComponent(deal.title)}`,
+                      )
+                    }
                   >
                     {/* Image Area - Combo Display */}
                     <div className="relative w-full md:w-1/2 h-40 md:h-full bg-gray-50 flex items-center justify-center p-4">
@@ -947,9 +1009,9 @@ const HomePage = () => {
                       {/* Side-by-side products */}
                       <div className="flex items-center justify-center w-full z-10 gap-2">
                         {deal.images.slice(0, 2).map((img, i) => (
-                          <div 
-                            key={i} 
-                            className={`w-28 h-28 md:w-32 md:h-32 bg-white rounded-xl shadow-sm border border-gray-100 p-2 transform transition-transform duration-500 group-hover:scale-105 z-20 ${i === 0 ? '-rotate-3' : 'rotate-3'}`}
+                          <div
+                            key={i}
+                            className={`w-28 h-28 md:w-32 md:h-32 bg-white rounded-xl shadow-sm border border-gray-100 p-2 transform transition-transform duration-500 group-hover:scale-105 z-20 ${i === 0 ? "-rotate-3" : "rotate-3"}`}
                           >
                             <img
                               src={img}
@@ -959,7 +1021,7 @@ const HomePage = () => {
                           </div>
                         ))}
                       </div>
-                      
+
                       {/* Badge if available */}
                       {deal.badge && (
                         <div className="absolute top-3 left-3 z-30 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
@@ -976,18 +1038,28 @@ const HomePage = () => {
                       <p className="text-gray-600 text-sm md:text-base mb-4 line-clamp-3">
                         {deal.subtitle}
                       </p>
-                      
+
                       {deal.price && (
                         <div className="flex items-end gap-3 mb-4">
-                           <span className="text-2xl font-bold text-green-600">Rs. {deal.price}</span>
-                           {deal.originalPrice && <span className="text-gray-400 line-through text-sm mb-1">Rs. {deal.originalPrice}</span>}
+                          <span className="text-2xl font-bold text-green-600">
+                            Rs. {deal.price}
+                          </span>
+                          {deal.originalPrice && (
+                            <span className="text-gray-400 line-through text-sm mb-1">
+                              Rs. {deal.originalPrice}
+                            </span>
+                          )}
                         </div>
                       )}
-                      
+
                       <div className="mt-auto">
-                        <button 
+                        <button
                           onClick={(e) => {
-                            if (!deal.link || deal.link.trim() === "" || deal.link === "/products") {
+                            if (
+                              !deal.link ||
+                              deal.link.trim() === "" ||
+                              deal.link === "/products"
+                            ) {
                               handleAddDealToCart(e, deal);
                             } else {
                               navigate(deal.link);
@@ -995,7 +1067,12 @@ const HomePage = () => {
                           }}
                           className="w-full px-4 py-2.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 hover:border-red-600 rounded-lg font-bold transition-colors duration-200 inline-flex items-center justify-center gap-2"
                         >
-                          {(!deal.link || deal.link.trim() === "" || deal.link === "/products") ? 'Add Combo to Cart' : 'Get Combo Deal'} <ArrowRight size={16} />
+                          {!deal.link ||
+                          deal.link.trim() === "" ||
+                          deal.link === "/products"
+                            ? "Add Combo to Cart"
+                            : "Get Combo Deal"}{" "}
+                          <ArrowRight size={16} />
                         </button>
                       </div>
                     </div>
@@ -1008,7 +1085,13 @@ const HomePage = () => {
                 <div
                   key={idx}
                   className="relative group overflow-hidden rounded-2xl h-64 cursor-pointer"
-                  onClick={() => navigate(deal.link && deal.link.trim() !== "" ? deal.link : `/products?search=${encodeURIComponent(deal.title)}`)}
+                  onClick={() =>
+                    navigate(
+                      deal.link && deal.link.trim() !== ""
+                        ? deal.link
+                        : `/products?search=${encodeURIComponent(deal.title)}`,
+                    )
+                  }
                 >
                   <img
                     src={deal.image || (deal.images && deal.images[0])}
@@ -1016,7 +1099,7 @@ const HomePage = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div
-                    className={`absolute inset-0 bg-linear-to-r ${deal.color || 'from-green-500 to-emerald-700'} opacity-80`}
+                    className={`absolute inset-0 bg-linear-to-r ${deal.color || "from-green-500 to-emerald-700"} opacity-80`}
                   ></div>
                   <div className="absolute inset-0 p-8 flex flex-col justify-between z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full self-start">
@@ -1032,9 +1115,7 @@ const HomePage = () => {
                       <p className="text-xl text-white/90 mb-4">
                         {deal.subtitle}
                       </p>
-                      <button 
-                        className="px-6 py-3 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center gap-2"
-                      >
+                      <button className="px-6 py-3 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center gap-2">
                         Shop Now <ArrowRight size={18} />
                       </button>
                     </div>
@@ -1098,7 +1179,10 @@ const HomePage = () => {
           </div>
 
           <div className="mt-12 text-center">
-            <button onClick={() => navigate("/disease-detection")} className="px-8 py-4 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl font-bold shadow-2xl hover:shadow-green-500/50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2">
+            <button
+              onClick={() => navigate("/disease-detection")}
+              className="px-8 py-4 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-xl font-bold shadow-2xl hover:shadow-green-500/50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2"
+            >
               <Sparkles size={20} />
               Try AI Assistant Free
             </button>
@@ -1132,10 +1216,11 @@ const HomePage = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${selectedCategory === cat.id
-                  ? "bg-green-600 text-white shadow-lg shadow-green-200 scale-105"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  selectedCategory === cat.id
+                    ? "bg-green-600 text-white shadow-lg shadow-green-200 scale-105"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
                 <cat.icon size={18} />
                 {cat.name}
@@ -1192,11 +1277,19 @@ const HomePage = () => {
                     <button
                       onClick={(e) => handleToggleWishlist(e, product._id)}
                       className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md transition-all duration-200 hover:scale-110"
-                      title={wishlistIds.has(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                      title={
+                        wishlistIds.has(product._id)
+                          ? "Remove from Wishlist"
+                          : "Add to Wishlist"
+                      }
                     >
                       <Heart
                         size={18}
-                        className={wishlistIds.has(product._id) ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'}
+                        className={
+                          wishlistIds.has(product._id)
+                            ? "fill-red-500 text-red-500"
+                            : "text-gray-400 hover:text-red-400"
+                        }
                       />
                     </button>
 
@@ -1330,10 +1423,11 @@ const HomePage = () => {
               {displayTestimonials.map((testimonial, index) => (
                 <div
                   key={index}
-                  className={`transition-opacity duration-500 ${currentTestimonial === index
-                    ? "opacity-100"
-                    : "opacity-0 absolute inset-0"
-                    }`}
+                  className={`transition-opacity duration-500 ${
+                    currentTestimonial === index
+                      ? "opacity-100"
+                      : "opacity-0 absolute inset-0"
+                  }`}
                 >
                   <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
                     <Quote className="text-green-200 mb-6" size={48} />
@@ -1379,10 +1473,11 @@ const HomePage = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${currentTestimonial === index
-                    ? "w-12 bg-green-600"
-                    : "w-2 bg-gray-300"
-                    }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    currentTestimonial === index
+                      ? "w-12 bg-green-600"
+                      : "w-2 bg-gray-300"
+                  }`}
                 />
               ))}
             </div>
@@ -1426,8 +1521,8 @@ const HomePage = () => {
                 Expert tips and guides to help you grow better
               </p>
             </div>
-            <button 
-              onClick={() => navigate('/blog')}
+            <button
+              onClick={() => navigate("/blog")}
               className="mt-4 md:mt-0 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors duration-200 inline-flex items-center gap-2"
             >
               View All Articles <ArrowRight size={18} />
@@ -1443,8 +1538,12 @@ const HomePage = () => {
               >
                 <div className="relative h-48 overflow-hidden bg-gray-100">
                   <img
-                      src={post.image?.startsWith("http") ? post.image : `${API_BASE_URL}${post.image?.startsWith("/") ? "" : "/"}${post.image?.replace(/\\/g, "/")}`}
-                      alt={post.title}
+                    src={
+                      post.image?.startsWith("http")
+                        ? post.image
+                        : `${API_BASE_URL}${post.image?.startsWith("/") ? "" : "/"}${post.image?.replace(/\\/g, "/")}`
+                    }
+                    alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-3 left-3 px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full">
@@ -1466,7 +1565,7 @@ const HomePage = () => {
                   <h3 className="font-bold text-gray-900 text-xl mb-4 line-clamp-2 group-hover:text-green-600 transition-colors">
                     {post.title}
                   </h3>
-                  <button 
+                  <button
                     onClick={() => navigate(`/blog/${post._id}`)}
                     className="text-green-600 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all duration-300"
                   >
@@ -1478,8 +1577,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
-
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-12">
