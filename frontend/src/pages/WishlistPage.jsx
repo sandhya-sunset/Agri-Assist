@@ -109,7 +109,7 @@ const WishlistPage = () => {
                     src={
                       product.image?.startsWith("http")
                         ? product.image
-                        : `http://localhost:5000/${product.image?.replace(/\\/g, "/")}`
+                        : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${product.image?.replace(/\\/g, "/")}`
                     }
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

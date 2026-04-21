@@ -97,7 +97,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
     if (!imagePath)
       return "https://images.unsplash.com/photo-1592424002053-21f369ad7fdb?w=100&h=100&fit=crop"; // Fallback
     if (imagePath.startsWith("http")) return imagePath;
-    return `http://localhost:5000/${imagePath.replace(/\\/g, "/")}`;
+    return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${imagePath.replace(/\\/g, "/")}`;
   };
 
   const handleDeleteProduct = async (id) => {

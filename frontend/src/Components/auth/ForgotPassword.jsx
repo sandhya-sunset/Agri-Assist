@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Mail, Key, Loader, Shield, Lock, Eye, EyeOff } from "lucide-react";
 import Alert from "./Alert";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
 
 function ForgotPassword({ onBack }) {
   const [step, setStep] = useState(1);

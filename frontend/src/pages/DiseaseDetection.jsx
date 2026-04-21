@@ -26,7 +26,7 @@ import {
 import Navbar from "../Components/Navbar";
 
 const DiseaseDetection = () => {
-  const apiBaseUrl = "http://localhost:5000";
+  const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -59,7 +59,7 @@ const DiseaseDetection = () => {
     try {
       setForumLoading(true);
       const response = await fetch(
-        "http://localhost:5000/api/forum?sortBy=latest"
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/forum?sortBy=latest`
       );
       const data = await response.json();
       if (data.success) {

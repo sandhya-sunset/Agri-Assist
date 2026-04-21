@@ -4,7 +4,7 @@ import Alert from "./Alert";
 
 // We need to pass API_BASE_URL or import it. Assuming it's passed or defined here to match Login.jsx style.
 // Best practice: Import from config or const file. For now, duplication or props is fine.
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
 
 function OTPVerification({ email, onVerified, onBack }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);

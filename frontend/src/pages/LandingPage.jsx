@@ -286,7 +286,7 @@ const LandingPage = () => {
                 >
                   <div className="relative h-48 overflow-hidden bg-gray-100">
                     <img
-                      src={`http://localhost:5000/${product.image}`}
+                      src={`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${product.image}`}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

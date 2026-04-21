@@ -17,7 +17,7 @@ const NotificationPage = () => {
   // Function to mark a single notification as read (simulated/backend)
   const markAsRead = async (id, link) => {
     try {
-      await fetch(`http://localhost:5000/api/notifications/${id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/notifications/${id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });

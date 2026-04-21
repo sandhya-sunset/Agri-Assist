@@ -114,7 +114,7 @@ const CartPage = () => {
                               className={`w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-md shadow-sm border border-gray-100 p-1 transform ${i === 0 ? '-rotate-6' : 'rotate-6 z-0'}`}
                             >
                               <img
-                                  src={img && (img.startsWith("http") || img.startsWith("data:")) ? img : (img ? `http://localhost:5000/${img.replace(/\\/g, "/")}` : "https://via.placeholder.com/150?text=Combo")}
+                                  src={img && (img.startsWith("http") || img.startsWith("data:")) ? img : (img ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${img.replace(/\\/g, "/")}` : "https://via.placeholder.com/150?text=Combo")}
                                   alt={`${item.deal.title} item ${i + 1}`}
                                   className="w-full h-full object-contain"
                                   onError={(e) => {
@@ -131,10 +131,10 @@ const CartPage = () => {
                           item.deal 
                             ? ((item.deal.image || (item.deal.images && item.deal.images[0]))?.startsWith("http") || (item.deal.image || (item.deal.images && item.deal.images[0]))?.startsWith("data:")
                               ? (item.deal.image || (item.deal.images && item.deal.images[0])) 
-                              : ((item.deal.image || (item.deal.images && item.deal.images[0])) ? `http://localhost:5000/${(item.deal.image || (item.deal.images && item.deal.images[0])).replace(/\\/g, "/")}` : "https://via.placeholder.com/150?text=Combo"))
+                              : ((item.deal.image || (item.deal.images && item.deal.images[0])) ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${(item.deal.image || (item.deal.images && item.deal.images[0])).replace(/\\/g, "/")}` : "https://via.placeholder.com/150?text=Combo"))
                             : (item.product?.image?.startsWith("http") || item.product?.image?.startsWith("data:")
                               ? item.product.image
-                              : (item.product?.image ? `http://localhost:5000/${item.product.image.replace(/\\/g, "/")}` : "https://via.placeholder.com/150"))
+                              : (item.product?.image ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${item.product.image.replace(/\\/g, "/")}` : "https://via.placeholder.com/150"))
                         }
                         alt={item.deal ? item.deal.title : item.product?.name}
                         className="w-full h-full object-cover"
