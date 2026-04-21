@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Leaf, Shield, Loader, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Alert from "../components/auth/Alert";
-import OTPVerification from "../components/auth/OTPVerification";
-import LoginForm from "../components/auth/LoginForm";
-import RegisterForm from "../components/auth/RegisterForm";
-import ForgotPassword from "../components/auth/ForgotPassword";
+import Alert from "../Components/auth/Alert";
+import OTPVerification from "../Components/auth/OTPVerification";
+import LoginForm from "../Components/auth/LoginForm";
+import RegisterForm from "../Components/auth/RegisterForm";
+import ForgotPassword from "../Components/auth/ForgotPassword";
 import "leaflet/dist/leaflet.css";
 
 // API Configuration
