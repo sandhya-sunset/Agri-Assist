@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import ChatWindow from "../components/ChatWindow";
+import ChatWindow from "../Components/ChatWindow";
 import api from "../services/api";
 import wishlistService from "../services/wishlistService";
 import { useToast } from "../Components/Toast";

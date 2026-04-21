@@ -53,7 +53,7 @@ import { API_BASE_URL } from "../config";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Components/Toast";
-import ChatWindow from "../components/ChatWindow";
+import ChatWindow from "../Components/ChatWindow";
 
 const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");

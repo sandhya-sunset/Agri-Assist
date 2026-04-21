@@ -14,12 +14,12 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import ProductsSection from "../components/ProductsSection";
-import OrdersSection from "../components/OrdersSection";
-import MessagesSection from "../components/MessagesSection";
-import AnalyticsSection from "../components/AnalyticsSection";
-import SettingsSection from "../components/SettingsSection";
-import SellerNavbar from "../components/SellerNavbar"; // Import the new Navbar
+import ProductsSection from "../Components/ProductsSection";
+import OrdersSection from "../Components/OrdersSection";
+import MessagesSection from "../Components/MessagesSection";
+import AnalyticsSection from "../Components/AnalyticsSection";
+import SettingsSection from "../Components/SettingsSection";
+import SellerNavbar from "../Components/SellerNavbar"; // Import the new Navbar
 
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";

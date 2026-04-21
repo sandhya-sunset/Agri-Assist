@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Lock, Shield, Loader2, ArrowRight } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import api from "../services/api";
-import LocationPicker from "../components/LocationPicker";
+import LocationPicker from "../Components/LocationPicker";
 import { MapPin } from "lucide-react";
 
 const PaymentPage = () => {
