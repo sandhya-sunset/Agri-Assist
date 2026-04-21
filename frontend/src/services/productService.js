@@ -51,4 +51,6 @@ const productService = {
   updateStock,
 };
 
+//PRODUCT SERVICES EXPORTED
+
 export default productService;
