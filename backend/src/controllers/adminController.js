@@ -3,9 +3,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const mongoose = require("mongoose");
 
-// @desc    Get admin dashboard statistics
-// @route   GET /api/admin/stats
-// @access  Private/Admin
+
 exports.getDashboardStats = async (req, res) => {
   try {
     // Get total revenue from completed orders
