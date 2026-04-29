@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import { CheckCircle, XCircle, Loader2, ShoppingBag } from "lucide-react";
-import api from "../Services/api";
+import api from "../services/api";
 
 /**
  * This page is the return_url target after Khalti e-Payment.

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../Components/Navbar";
 import { Package, ArrowRight, ShoppingCart, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import api from "../Services/api";
+import api from "../services/api";
 import { useToast } from "../Components/Toast";
 
 const ComboPacksPage = () => {

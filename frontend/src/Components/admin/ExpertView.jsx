@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, Eye, XCircle, Check, UserCheck } from "lucide-react";
-import api from "../../Services/api";
+import api from "../../services/api";
 import { toast } from "react-hot-toast";
 
 const ExpertView = () => {

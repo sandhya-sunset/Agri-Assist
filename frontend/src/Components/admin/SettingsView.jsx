@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Save, User, Lock, Bell, Globe, Shield, Mail, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
-import api from "../../Services/api";
+import api from "../../services/api";
 
 const SettingsView = () => {
   const [settings, setSettings] = useState({
