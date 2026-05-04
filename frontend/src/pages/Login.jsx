@@ -9,8 +9,7 @@ import RegisterForm from "../Components/auth/RegisterForm";
 import ForgotPassword from "../Components/auth/ForgotPassword";
 import "leaflet/dist/leaflet.css";
 
-// API Configuration
-const API_BASE_URL = "http://localhost:5000/api";
+import { API_URL } from "../config";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -126,7 +125,7 @@ export default function Login() {
     setAlert(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -208,7 +207,7 @@ export default function Login() {
         );
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         body: formDataToSend,
       });

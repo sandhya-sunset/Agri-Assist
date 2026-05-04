@@ -49,7 +49,7 @@ const ChatWindow = ({
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/messages", {
+      const response = await fetch("https://agri-assist-1-j9z7.onrender.com/api/messages", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -75,7 +75,7 @@ const ChatWindow = ({
 
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5000/api/messages", {
+      const response = await fetch("https://agri-assist-1-j9z7.onrender.com/api/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

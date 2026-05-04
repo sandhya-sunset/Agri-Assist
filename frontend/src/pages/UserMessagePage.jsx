@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Send,
   Search,
@@ -523,7 +523,7 @@ const UserMessagesPage = () => {
                             <p className="text-xs text-gray-500">{msg.time}</p>
                             {msg.sender === "user" && (
                               <span className="text-xs text-gray-500">
-                                {msg.read ? "✓✓" : "✓"}
+                                {msg.read ? "??" : "?"}
                               </span>
                             )}
                           </div>
@@ -610,20 +610,20 @@ const UserMessagesPage = () => {
               label: "Active Chats",
               value: conversations.length,
               color: "blue",
-              icon: "💬",
+              icon: "??",
             },
-            { label: "Unread", value: totalUnread, color: "red", icon: "🔔" },
+            { label: "Unread", value: totalUnread, color: "red", icon: "??" },
             {
               label: "Products Inquired",
               value: new Set(conversations.map((c) => c.productName)).size,
               color: "green",
-              icon: "📦",
+              icon: "??",
             },
             {
               label: "Avg Response",
               value: "< 2h",
               color: "purple",
-              icon: "⚡",
+              icon: "?",
             },
           ].map((stat, idx) => (
             <div

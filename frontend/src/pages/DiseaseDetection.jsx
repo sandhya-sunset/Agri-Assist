@@ -26,7 +26,7 @@ import {
 import Navbar from "../Components/Navbar";
 
 const DiseaseDetection = () => {
-  const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const apiBaseUrl = import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com";
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -59,7 +59,7 @@ const DiseaseDetection = () => {
     try {
       setForumLoading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/forum?sortBy=latest`
+        `${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/forum?sortBy=latest`
       );
       const data = await response.json();
       if (data.success) {

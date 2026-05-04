@@ -106,7 +106,7 @@ const MessagesSection = () => {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -156,7 +156,7 @@ const MessagesSection = () => {
   const handleSendMessage = async () => {
     if (messageText.trim() && selectedConversation) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/messages`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -192,7 +192,7 @@ const MessagesSection = () => {
     );
 
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/messages/read/${convId}`, {
+      await fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages/read/${convId}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -216,7 +216,7 @@ const MessagesSection = () => {
     try {
       await Promise.all(
         conversations.map((conv) =>
-          fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/messages/read/${conv.id}`, {
+          fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages/read/${conv.id}`, {
             method: "PUT",
             headers: { Authorization: `Bearer ${token}` },
           })

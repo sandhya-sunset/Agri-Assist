@@ -287,7 +287,7 @@ const UserOrderDetailPage = () => {
                                 className={`w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-md shadow-sm border border-gray-100 p-0.5 transform ${i === 0 ? '-rotate-6' : 'rotate-6 z-0'}`}
                               >
                                 <img
-                                  src={img.startsWith("http") ? img : `http://localhost:5000/${img.replace(/\\/g, "/")}`}
+                                  src={img.startsWith("http") ? img : `https://agri-assist-1-j9z7.onrender.com/${img.replace(/\\/g, "/")}`}
                                   alt={`${item.deal.title} item ${i + 1}`}
                                   className="w-full h-full object-contain"
                                 />
@@ -301,10 +301,10 @@ const UserOrderDetailPage = () => {
                             item.deal 
                             ? (item.deal.image || item.deal.images?.[0] || "").startsWith("http") 
                               ? (item.deal.image || item.deal.images?.[0] || "") 
-                              : `http://localhost:5000/${(item.deal.image || item.deal.images?.[0] || "").replace(/\\/g, "/")}`
+                              : `https://agri-assist-1-j9z7.onrender.com/${(item.deal.image || item.deal.images?.[0] || "").replace(/\\/g, "/")}`
                             : (item.product?.image || "").startsWith("http")
                               ? (item.product?.image || "")
-                              : `http://localhost:5000/${(item.product?.image || "").replace(/\\/g, "/")}`
+                              : `https://agri-assist-1-j9z7.onrender.com/${(item.product?.image || "").replace(/\\/g, "/")}`
                           }
                           alt={item.deal ? item.deal.title : item.product?.name}
                           className="w-full h-full object-cover"

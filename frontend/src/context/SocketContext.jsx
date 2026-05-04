@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }) => {
       const fetchNotifications = async () => {
         try {
           const response = await fetch(
-            "http://localhost:5000/api/notifications",
+            "https://agri-assist-1-j9z7.onrender.com/api/notifications",
             {
               headers: { Authorization: `Bearer ${token}` },
             },

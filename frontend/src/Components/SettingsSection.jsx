@@ -24,7 +24,7 @@ const SettingsSection = () => {
     const loadProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/auth/profile", {
+        const res = await axios.get("https://agri-assist-1-j9z7.onrender.com/api/auth/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data.data);
@@ -59,7 +59,7 @@ const SettingsSection = () => {
       }
 
       const res = await axios.put(
-        "http://localhost:5000/api/auth/profile",
+        "https://agri-assist-1-j9z7.onrender.com/api/auth/profile",
         updatedData,
         config,
       );
@@ -164,7 +164,7 @@ const ProfileSettings = ({ user, onUpdate }) => {
             <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
               {user.storeImage ? (
                 <img
-                  src={`http://localhost:5000/${user.storeImage}`}
+                  src={`https://agri-assist-1-j9z7.onrender.com/${user.storeImage}`}
                   alt="Store"
                   className="w-full h-full object-cover"
                 />
@@ -401,7 +401,7 @@ const SecuritySettings = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        "http://localhost:5000/api/auth/update-password",
+        "https://agri-assist-1-j9z7.onrender.com/api/auth/update-password",
         {
           currentPassword: passwords.currentPassword,
           newPassword: passwords.newPassword,

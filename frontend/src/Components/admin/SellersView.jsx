@@ -290,12 +290,12 @@ const SellersView = ({
                       {selectedSeller.citizenship?.front ? (
                         <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-200 group">
                           <img
-                            src={`http://localhost:5000/${selectedSeller.citizenship.front.replace(/\\/g, "/").replace("public/", "")}`}
+                            src={`https://agri-assist-1-j9z7.onrender.com/${selectedSeller.citizenship.front.replace(/\\/g, "/").replace("public/", "")}`}
                             alt="Citizenship Front"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform cursor-pointer"
                             onClick={() =>
                               window.open(
-                                `http://localhost:5000/${selectedSeller.citizenship.front.replace(/\\/g, "/").replace("public/", "")}`,
+                                `https://agri-assist-1-j9z7.onrender.com/${selectedSeller.citizenship.front.replace(/\\/g, "/").replace("public/", "")}`,
                                 "_blank",
                               )
                             }
@@ -319,12 +319,12 @@ const SellersView = ({
                       {selectedSeller.citizenship?.back ? (
                         <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-200 group">
                           <img
-                            src={`http://localhost:5000/${selectedSeller.citizenship.back.replace(/\\/g, "/").replace("public/", "")}`}
+                            src={`https://agri-assist-1-j9z7.onrender.com/${selectedSeller.citizenship.back.replace(/\\/g, "/").replace("public/", "")}`}
                             alt="Citizenship Back"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform cursor-pointer"
                             onClick={() =>
                               window.open(
-                                `http://localhost:5000/${selectedSeller.citizenship.back.replace(/\\/g, "/").replace("public/", "")}`,
+                                `https://agri-assist-1-j9z7.onrender.com/${selectedSeller.citizenship.back.replace(/\\/g, "/").replace("public/", "")}`,
                                 "_blank",
                               )
                             }

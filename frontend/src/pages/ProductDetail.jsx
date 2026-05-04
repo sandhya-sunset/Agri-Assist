@@ -83,7 +83,7 @@ const ProductDetail = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/${id}`);
+      const response = await fetch(`https://agri-assist-1-j9z7.onrender.com/api/products/${id}`);
       const data = await response.json();
       if (data.success) {
         setProduct(data.data);
@@ -106,7 +106,7 @@ const ProductDetail = () => {
     try {
       setSubmittingQuestion(true);
       const response = await fetch(
-        `http://localhost:5000/api/products/${id}/reviews`,
+        `https://agri-assist-1-j9z7.onrender.com/api/products/${id}/reviews`,
         {
           method: "POST",
           headers: {
@@ -239,7 +239,7 @@ const ProductDetail = () => {
                 src={
                   product.image.startsWith("http")
                     ? product.image
-                    : `http://localhost:5000/${product.image.replace(/\\/g, "/")}`
+                    : `https://agri-assist-1-j9z7.onrender.com/${product.image.replace(/\\/g, "/")}`
                 }
                 alt={product.name}
                 className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"

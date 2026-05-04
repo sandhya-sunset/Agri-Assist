@@ -308,7 +308,7 @@ const BlogView = () => {
                     {imagePreview ? (
                       <div className="flex flex-col items-center">
                         <img 
-                          src={imagePreview.startsWith('blob:') ? imagePreview : `http://localhost:5000${imagePreview}`} 
+                          src={imagePreview.startsWith('blob:') ? imagePreview : `https://agri-assist-1-j9z7.onrender.com${imagePreview}`} 
                           alt="Preview" 
                           className="h-32 object-cover rounded-lg mb-2" 
                         />
