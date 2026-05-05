@@ -5,12 +5,23 @@ const User = require("../models/User");
 
 // Configure nodemailer transporter
 const getTransporter = () => {
+  const service = process.env.SMTP_SERVICE || process.env.EMAIL_SERVICE || "gmail";
+  const user = process.env.SMTP_EMAIL || process.env.EMAIL_USER;
+  const pass = process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
+
+  // Use explicit host/port for better reliability on cloud platforms like Render
+  if (service.toLowerCase() === 'gmail') {
+    return nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+    });
+  }
+
   return nodemailer.createTransport({
-    service: process.env.SMTP_SERVICE || process.env.EMAIL_SERVICE || "gmail",
-    auth: {
-      user: process.env.SMTP_EMAIL || process.env.EMAIL_USER,
-      pass: process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS,
-    },
+    service: service,
+    auth: { user, pass },
   });
 };
 
@@ -155,16 +166,15 @@ const register = async (req, res) => {
       console.log(`🔑 YOUR OTP IS: ${userData.otp}`);
       console.log(`=========================================\n`);
 
-      try {
-        await sendOTPEmail(user.email, userData.otp, user.name);
-      } catch (emailError) {
-        console.error("OTP Email sending failed (Check .env configuration):", emailError.message);
-        // We log the OTP to the console for easy local testing
-        console.log(`\n=========================================`);
-        console.log(`🛠️ [DEV MODE] Email skipped.`);
-        console.log(`🔑 YOUR OTP IS: ${userData.otp}`);
-        console.log(`=========================================\n`);
-      }
+      // Send email in background (don't await)
+      sendOTPEmail(user.email, userData.otp, user.name).catch((emailError) => {
+        console.error("❌ EMAIL ERROR [Register]:", {
+          message: emailError.message,
+          code: emailError.code,
+          command: emailError.command,
+          user: process.env.EMAIL_USER
+        });
+      });
     }
 
     res.status(201).json({
@@ -309,16 +319,14 @@ const resendOTP = async (req, res) => {
     console.log(`🔑 YOUR NEW OTP IS: ${otp}`);
     console.log(`=========================================\n`);
 
-    // Send OTP email
-    try {
-      await sendOTPEmail(user.email, otp, user.name);
-    } catch (emailError) {
-      console.error("OTP Email sending failed (Check .env configuration):", emailError.message);
-      console.log(`\n=========================================`);
-      console.log(`🛠️ [DEV MODE] Email skipped.`);
-      console.log(`🔑 YOUR NEW OTP IS: ${otp}`);
-      console.log(`=========================================\n`);
-    }
+    // Send email in background (don't await)
+    sendOTPEmail(user.email, otp, user.name).catch((emailError) => {
+      console.error("❌ EMAIL ERROR [Resend]:", {
+        message: emailError.message,
+        code: emailError.code,
+        user: process.env.EMAIL_USER
+      });
+    });
 
     res.status(200).json({
       success: true,
@@ -562,27 +570,15 @@ const forgotPassword = async (req, res) => {
     console.log(`🔑 YOUR RESET OTP IS: ${otp}`);
     console.log(`=========================================\n`);
 
-    try {
-      await sendPasswordResetEmail(user.email, otp, user.name);
-      res.status(200).json({
-        success: true,
-        message: "OTP sent to your email for password reset",
-      });
-    } catch (emailError) {
-      console.error("Forgot password email failed (Check .env config):", emailError.message);
-      
-      console.log(`\n=========================================`);
-      console.log(`🛠️ [DEV MODE] Reset Password Email skipped.`);
-      console.log(`🔑 YOUR RESET OTP IS: ${otp}`);
-      console.log(`=========================================\n`);
-      
-      // Even if email fails, return success so the frontend proceeds to step 2
-      // The user can read the OTP from this terminal console to test it!
-      res.status(200).json({
-        success: true,
-        message: "Email config incomplete. DEV MODE: Used console for OTP.",
-      });
-    }
+    // Send email in background (don't await)
+    sendPasswordResetEmail(user.email, otp, user.name).catch((emailError) => {
+      console.error("Background Password Reset Email failed:", emailError.message);
+    });
+    
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email for password reset",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
