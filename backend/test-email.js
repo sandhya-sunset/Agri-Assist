@@ -1,45 +1,35 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 const nodemailer = require('nodemailer');
 
-const testEmail = async () => {
-    const service = process.env.SMTP_SERVICE || process.env.EMAIL_SERVICE || "gmail";
-    const user = process.env.SMTP_EMAIL || process.env.EMAIL_USER;
-    const pass = process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD;
+const EMAIL_SERVICE = process.env.EMAIL_SERVICE || 'gmail';
 
-    console.log(`Testing email sending with:`);
-    console.log(`Service: ${service}`);
-    console.log(`User: ${user}`);
-    console.log(`Pass: ${pass ? '********' : 'NOT SET'}`);
+console.log('Testing with:');
+console.log('User:', EMAIL_USER);
+console.log('Pass:', EMAIL_PASS ? '********' : 'MISSING');
+console.log('Service:', EMAIL_SERVICE);
 
-    if (user === 'your_email@gmail.com' || pass === 'your_app_password') {
-        console.error('ERROR: You are still using the placeholder values in .env file!');
-        process.exit(1);
-    }
+const transporter = nodemailer.createTransport({
+  service: EMAIL_SERVICE,
+  auth: {
+    user: EMAIL_USER,
+    pass: EMAIL_PASS,
+  },
+});
 
-    const transporter = nodemailer.createTransport({
-        service: service,
-        auth: {
-            user: user,
-            pass: pass,
-        },
-    });
-
-    try {
-        await transporter.verify();
-        console.log('SUCCESS: SMTP connection verified!');
-        
-        const info = await transporter.sendMail({
-            from: user,
-            to: user, // Send to yourself
-            subject: "SMTP Test Email",
-            text: "If you received this, your email configuration is working correctly!",
-        });
-        
-        console.log('SUCCESS: Email sent! Message ID:', info.messageId);
-    } catch (error) {
-        console.error('FAILED: Could not send email.');
-        console.error('Error Details:', error);
-    }
+const mailOptions = {
+  from: EMAIL_USER,
+  to: EMAIL_USER, // send to self
+  subject: 'Test Email from Agri-Assist',
+  text: 'If you see this, your email configuration is correct!',
 };
 
-testEmail();
+transporter.sendMail(mailOptions, (error, info) => {
+  if (error) {
+    console.error('Error occurred:', error.message);
+  } else {
+    console.log('Email sent successfully!');
+    console.log('Response:', info.response);
+  }
+});
