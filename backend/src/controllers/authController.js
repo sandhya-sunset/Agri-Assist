@@ -22,23 +22,34 @@ const generateOTP = () => {
 
 // Send OTP Email via Resend (HTTP API — not blocked by Render)
 const sendOTPEmail = async (email, otp, name) => {
-  const resend = getResend();
-  await resend.emails.send({
-    from: FROM_EMAIL,
-    to: email,
-    subject: "Email Verification - OTP",
-    html: `
-      <div style="font-family: Arial, sans-serif; padding: 20px;">
-        <h2>Welcome ${name}!</h2>
-        <p>Thank you for registering. Please verify your email address.</p>
-        <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
+  try {
+    const resend = getResend();
+    console.log(`📡 [Resend] Attempting to send email to ${email} from ${FROM_EMAIL}...`);
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: "Email Verification - OTP",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Welcome ${name}!</h2>
+          <p>Thank you for registering. Please verify your email address.</p>
+          <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
+          </div>
+          <p>This OTP will expire in 10 minutes.</p>
+          <p>If you didn't request this, please ignore this email.</p>
         </div>
-        <p>This OTP will expire in 10 minutes.</p>
-        <p>If you didn't request this, please ignore this email.</p>
-      </div>
-    `,
-  });
+      `,
+    });
+
+    if (error) {
+      console.error("❌ [Resend ERROR]:", error);
+    } else {
+      console.log("✅ [Resend SUCCESS]:", data);
+    }
+  } catch (err) {
+    console.error("❌ [Resend CRASH]:", err.message);
+  }
 };
 
 // Send Password Reset OTP Email via Resend
