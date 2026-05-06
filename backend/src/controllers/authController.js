@@ -9,13 +9,15 @@ const getTransporter = () => {
   const user = process.env.SMTP_EMAIL || process.env.EMAIL_USER;
   const pass = process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
 
-  // Use explicit host/port for better reliability on cloud platforms like Render
+  // Use port 587 (TLS) for Render compatibility — port 465 (SSL) is blocked by Render
   if (service.toLowerCase() === 'gmail') {
     return nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false,
+      requireTLS: true,
       auth: { user, pass },
+      tls: { rejectUnauthorized: false },
     });
   }
 
