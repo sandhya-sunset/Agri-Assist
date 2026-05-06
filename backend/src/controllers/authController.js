@@ -5,7 +5,8 @@ const { Resend } = require('resend');
 
 // Resend HTTP-based email (works on Render — SMTP is blocked by Render)
 const getResend = () => new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'onboarding@resend.dev';
+// Must use onboarding@resend.dev until a custom domain is verified in Resend dashboard
+const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
 // Generate JWT Token
 const generateToken = (id) => {
