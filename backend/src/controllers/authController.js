@@ -1,31 +1,11 @@
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const User = require("../models/User");
+const { Resend } = require('resend');
 
-// Configure nodemailer transporter
-const getTransporter = () => {
-  const service = process.env.SMTP_SERVICE || process.env.EMAIL_SERVICE || "gmail";
-  const user = process.env.SMTP_EMAIL || process.env.EMAIL_USER;
-  const pass = process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
-
-  // Use port 587 (TLS) for Render compatibility — port 465 (SSL) is blocked by Render
-  if (service.toLowerCase() === 'gmail') {
-    return nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      auth: { user, pass },
-      tls: { rejectUnauthorized: false },
-    });
-  }
-
-  return nodemailer.createTransport({
-    service: service,
-    auth: { user, pass },
-  });
-};
+// Resend HTTP-based email (works on Render — SMTP is blocked by Render)
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
+const FROM_EMAIL = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'onboarding@resend.dev';
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -39,10 +19,11 @@ const generateOTP = () => {
   return crypto.randomInt(100000, 999999).toString();
 };
 
-// Send OTP Email
+// Send OTP Email via Resend (HTTP API — not blocked by Render)
 const sendOTPEmail = async (email, otp, name) => {
-  const mailOptions = {
-    from: process.env.SMTP_EMAIL || process.env.EMAIL_USER,
+  const resend = getResend();
+  await resend.emails.send({
+    from: FROM_EMAIL,
     to: email,
     subject: "Email Verification - OTP",
     html: `
@@ -56,16 +37,14 @@ const sendOTPEmail = async (email, otp, name) => {
         <p>If you didn't request this, please ignore this email.</p>
       </div>
     `,
-  };
-
-  const transporter = getTransporter();
-  await transporter.sendMail(mailOptions);
+  });
 };
 
-// Send Password Reset OTP Email
+// Send Password Reset OTP Email via Resend
 const sendPasswordResetEmail = async (email, otp, name) => {
-  const mailOptions = {
-    from: process.env.SMTP_EMAIL || process.env.EMAIL_USER,
+  const resend = getResend();
+  await resend.emails.send({
+    from: FROM_EMAIL,
     to: email,
     subject: "Password Reset - OTP",
     html: `
@@ -79,10 +58,7 @@ const sendPasswordResetEmail = async (email, otp, name) => {
         <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
       </div>
     `,
-  };
-
-  const transporter = getTransporter();
-  await transporter.sendMail(mailOptions);
+  });
 };
 
 // @desc    Register new user
