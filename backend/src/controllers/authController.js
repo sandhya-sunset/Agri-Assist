@@ -1,19 +1,30 @@
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const User = require("../models/User");
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 
-// Configure nodemailer transporter (Using 'service' shorthand for Render stability)
-const getTransporter = () => {
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
+// Brevo (Sendinblue) API Configuration
+const sendEmail = async (to, subject, htmlContent) => {
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+  const apiKey = defaultClient.authentications['api-key'];
+  apiKey.apiKey = process.env.BREVO_API_KEY;
 
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-    logger: true, // 👈 This will show the full SMTP log
-    debug: true,  // 👈 This will show detailed debug info
-  });
+  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.htmlContent = htmlContent;
+  sendSmtpEmail.sender = { "name": "Agri-Assist", "email": process.env.EMAIL_USER || "noreply@agriassist.com" };
+  sendSmtpEmail.to = [{ "email": to }];
+
+  try {
+    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('✅ [Brevo SUCCESS]: Email sent successfully.', data.messageId);
+    return data;
+  } catch (error) {
+    console.error('❌ [Brevo ERROR]:', error.response ? error.response.body : error.message);
+    throw error;
+  }
 };
 
 // Generate JWT Token
@@ -30,58 +41,40 @@ const generateOTP = () => {
 
 // Send OTP Email
 const sendOTPEmail = async (email, otp, name) => {
-  try {
-    const transporter = getTransporter();
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Email Verification - OTP",
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>Welcome ${name}!</h2>
-          <p>Thank you for registering. Please verify your email address.</p>
-          <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
-          </div>
-          <p>This OTP will expire in 10 minutes.</p>
-          <p>If you didn't request this, please ignore this email.</p>
-        </div>
-      `,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ [Email SUCCESS]:", info.response);
-  } catch (err) {
-    console.error("❌ [Email ERROR]:", err.message);
-  }
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; padding: 20px;">
+      <h2>Welcome ${name}!</h2>
+      <p>Thank you for registering. Please verify your email address.</p>
+      <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
+      </div>
+      <p>This OTP will expire in 10 minutes.</p>
+      <p>If you didn't request this, please ignore this email.</p>
+    </div>
+  `;
+  
+  await sendEmail(email, "Email Verification - OTP", htmlContent).catch(err => {
+    console.error("Background OTP Email failed:", err.message);
+  });
 };
 
 // Send Password Reset OTP Email
 const sendPasswordResetEmail = async (email, otp, name) => {
-  try {
-    const transporter = getTransporter();
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Password Reset - OTP",
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>Hello ${name},</h2>
-          <p>You have requested to reset your password. Here is your OTP:</p>
-          <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
-          </div>
-          <p>This OTP will expire in 10 minutes.</p>
-          <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
-        </div>
-      `,
-    };
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; padding: 20px;">
+      <h2>Hello ${name},</h2>
+      <p>You have requested to reset your password. Here is your OTP:</p>
+      <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
+      </div>
+      <p>This OTP will expire in 10 minutes.</p>
+      <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
+    </div>
+  `;
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ [Reset Email SUCCESS]:", info.response);
-  } catch (err) {
-    console.error("❌ [Reset Email ERROR]:", err.message);
-  }
+  await sendEmail(email, "Password Reset - OTP", htmlContent).catch(err => {
+    console.error("Background Password Reset Email failed:", err.message);
+  });
 };
 
 // @desc    Register new user
