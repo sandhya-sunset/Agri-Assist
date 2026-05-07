@@ -11,6 +11,8 @@ const getTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail',
     auth: { user, pass },
+    logger: true, // 👈 This will show the full SMTP log
+    debug: true,  // 👈 This will show detailed debug info
   });
 };
 
