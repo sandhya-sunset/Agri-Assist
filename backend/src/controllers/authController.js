@@ -1,12 +1,18 @@
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const User = require("../models/User");
-const { Resend } = require('resend');
 
-// Resend HTTP-based email (works on Render — SMTP is blocked by Render)
-const getResend = () => new Resend(process.env.RESEND_API_KEY);
-// Must use onboarding@resend.dev until a custom domain is verified in Resend dashboard
-const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+// Configure nodemailer transporter (Using 'service' shorthand for Render stability)
+const getTransporter = () => {
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
+
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+  });
+};
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -20,13 +26,12 @@ const generateOTP = () => {
   return crypto.randomInt(100000, 999999).toString();
 };
 
-// Send OTP Email via Resend (HTTP API — not blocked by Render)
+// Send OTP Email
 const sendOTPEmail = async (email, otp, name) => {
   try {
-    const resend = getResend();
-    console.log(`📡 [Resend] Attempting to send email to ${email} from ${FROM_EMAIL}...`);
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    const transporter = getTransporter();
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
       to: email,
       subject: "Email Verification - OTP",
       html: `
@@ -40,37 +45,41 @@ const sendOTPEmail = async (email, otp, name) => {
           <p>If you didn't request this, please ignore this email.</p>
         </div>
       `,
-    });
+    };
 
-    if (error) {
-      console.error("❌ [Resend ERROR]:", error);
-    } else {
-      console.log("✅ [Resend SUCCESS]:", data);
-    }
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ [Email SUCCESS]:", info.response);
   } catch (err) {
-    console.error("❌ [Resend CRASH]:", err.message);
+    console.error("❌ [Email ERROR]:", err.message);
   }
 };
 
-// Send Password Reset OTP Email via Resend
+// Send Password Reset OTP Email
 const sendPasswordResetEmail = async (email, otp, name) => {
-  const resend = getResend();
-  await resend.emails.send({
-    from: FROM_EMAIL,
-    to: email,
-    subject: "Password Reset - OTP",
-    html: `
-      <div style="font-family: Arial, sans-serif; padding: 20px;">
-        <h2>Hello ${name},</h2>
-        <p>You have requested to reset your password. Here is your OTP:</p>
-        <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
+  try {
+    const transporter = getTransporter();
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset - OTP",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Hello ${name},</h2>
+          <p>You have requested to reset your password. Here is your OTP:</p>
+          <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h1 style="color: #333; text-align: center; letter-spacing: 5px;">${otp}</h1>
+          </div>
+          <p>This OTP will expire in 10 minutes.</p>
+          <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
         </div>
-        <p>This OTP will expire in 10 minutes.</p>
-        <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
-      </div>
-    `,
-  });
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ [Reset Email SUCCESS]:", info.response);
+  } catch (err) {
+    console.error("❌ [Reset Email ERROR]:", err.message);
+  }
 };
 
 // @desc    Register new user
