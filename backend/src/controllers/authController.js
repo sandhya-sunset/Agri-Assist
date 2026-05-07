@@ -151,38 +151,32 @@ const register = async (req, res) => {
     // Create user
     const user = await User.create(userData);
 
-    // Send OTP email for regular users
+    // ✅ SPEED FIX: Send response to user IMMEDIATELY
+    res.status(201).json({
+      success: true,
+      message: role === "seller" 
+        ? "Seller registered successfully. Pending admin verification." 
+        : "Registration successful. Please check your email for OTP.",
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+        requiresOTP: role !== "seller",
+      },
+    });
+
+    // 🕊️ Background Tasks (Don't make the user wait for these)
     if (role !== "seller") {
       // 🔑 LOG FOR RENDER DASHBOARD (Backup for Viva)
-      console.log(`\n\n*****************************************`);
-      console.log(`🔑 [OTP GENERATED]`);
-      console.log(`📧 TO: ${user.email}`);
-      console.log(`💎 CODE: ${userData.otp}`);
-      console.log(`*****************************************\n\n`);
+      console.log(`\n🔑 [OTP GENERATED] TO: ${user.email} | CODE: ${userData.otp}\n`);
 
       // Send email in background
       sendOTPEmail(user.email, userData.otp, user.name).catch((emailError) => {
         console.error("❌ [EMAIL FAILED]:", emailError.message);
       });
     }
-
-    res.status(201).json({
-      success: true,
-      message:
-        role === "seller"
-          ? "Seller registered successfully. Pending admin verification."
-          : "Registration successful. Please check your email for OTP.",
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone,
-        address: user.address,
-        isVerified: user.isVerified, expertApplicationStatus: user.expertApplicationStatus,
-        requiresOTP: role !== "seller",
-      },
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -242,9 +236,6 @@ const verifyOTP = async (req, res) => {
     user.otpExpires = undefined;
     await user.save();
 
-    // Generate token
-    const token = generateToken(user._id);
-
     res.status(200).json({
       success: true,
       message: "Email verified successfully",
@@ -253,10 +244,7 @@ const verifyOTP = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        phone: user.phone,
-        address: user.address,
-        isVerified: user.isVerified, expertApplicationStatus: user.expertApplicationStatus,
-        token,
+        token: generateToken(user._id),
       },
     });
   } catch (error) {
