@@ -1,28 +1,27 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
-const SibApiV3Sdk = require('sib-api-v3-sdk');
+const axios = require("axios");
 
-// Brevo (Sendinblue) API Configuration
+// Google Apps Script Bridge URL (The fix for school email delivery)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx8646m3Uun7PY6tKeRSQFxyhuU460cs6T3h68y0SWtI8Wo4lIVmkYksW8X3rhqMMB1/exec";
+
 const sendEmail = async (to, subject, htmlContent) => {
-  const defaultClient = SibApiV3Sdk.ApiClient.instance;
-  const apiKey = defaultClient.authentications['api-key'];
-  apiKey.apiKey = process.env.BREVO_API_KEY;
-
-  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-
-  sendSmtpEmail.subject = subject;
-  sendSmtpEmail.htmlContent = htmlContent;
-  sendSmtpEmail.sender = { "name": "Agri-Assist", "email": process.env.EMAIL_USER || "noreply@agriassist.com" };
-  sendSmtpEmail.to = [{ "email": to }];
-
   try {
-    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('✅ [Brevo SUCCESS]: Email sent successfully.', data.messageId);
-    return data;
+    const response = await axios.post(GOOGLE_SCRIPT_URL, {
+      to: to,
+      subject: subject,
+      html: htmlContent
+    });
+    
+    if (response.data === "Success") {
+      console.log(`✅ [Google Bridge SUCCESS]: Email sent to ${to}`);
+    } else {
+      console.error(`❌ [Google Bridge ERROR]:`, response.data);
+    }
+    return response.data;
   } catch (error) {
-    console.error('❌ [Brevo ERROR]:', error.response ? error.response.body : error.message);
+    console.error(`❌ [Google Bridge CRASH]:`, error.message);
     throw error;
   }
 };
@@ -154,20 +153,16 @@ const register = async (req, res) => {
 
     // Send OTP email for regular users
     if (role !== "seller") {
-      // 🔑 We log the OTP to the console for easy local testing
-      console.log(`\n=========================================`);
-      console.log(`🔑 [DEV MODE] OTP Generated for ${user.email}`);
-      console.log(`🔑 YOUR OTP IS: ${userData.otp}`);
-      console.log(`=========================================\n`);
+      // 🔑 LOG FOR RENDER DASHBOARD (Backup for Viva)
+      console.log(`\n\n*****************************************`);
+      console.log(`🔑 [OTP GENERATED]`);
+      console.log(`📧 TO: ${user.email}`);
+      console.log(`💎 CODE: ${userData.otp}`);
+      console.log(`*****************************************\n\n`);
 
-      // Send email in background (don't await)
+      // Send email in background
       sendOTPEmail(user.email, userData.otp, user.name).catch((emailError) => {
-        console.error("❌ EMAIL ERROR [Register]:", {
-          message: emailError.message,
-          code: emailError.code,
-          command: emailError.command,
-          user: process.env.EMAIL_USER
-        });
+        console.error("❌ [EMAIL FAILED]:", emailError.message);
       });
     }
 
@@ -224,10 +219,9 @@ const verifyOTP = async (req, res) => {
     }
 
     // Check OTP
-    const isMasterOTP = otp === "123456";
     const isCorrectOTP = String(user.otp).trim() === String(otp).trim();
 
-    if (!isCorrectOTP && !isMasterOTP) {
+    if (!isCorrectOTP) {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP",
