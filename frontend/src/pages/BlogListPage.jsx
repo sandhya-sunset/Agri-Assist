@@ -55,7 +55,7 @@ const BlogListPage = () => {
               >
                 <div className="relative h-56 overflow-hidden bg-gray-200 shrink-0">
                   <img
-                      src={post.image ? (post.image.startsWith('http') ? post.image : `${API_BASE_URL}${post.image.startsWith('/') ? '' : '/'}${post.image.replace(/\\/g, '/')}`) : 'https://images.unsplash.com/photo-1592982537447-6f2aafe6a0c5'}
+                    src={post.image ? (post.image.startsWith('http') ? post.image : `${API_BASE_URL}${post.image.startsWith('/') ? '' : '/'}${post.image.replace(/\\/g, '/')}`) : 'https://images.unsplash.com/photo-1592982537447-6f2aafe6a0c5'}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
@@ -86,12 +86,12 @@ const BlogListPage = () => {
                   <h3 className="font-bold text-gray-900 text-xl mb-3 line-clamp-2 group-hover:text-green-600 transition-colors flex-1">
                     {post.title}
                   </h3>
-                  
+
                   {post.author?.name && (
-                     <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
-                        <User size={14} />
-                        <span>By {post.author.name}</span>
-                     </div>
+                    <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
+                      <User size={14} />
+                      <span>By {post.author.name}</span>
+                    </div>
                   )}
 
                   <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">

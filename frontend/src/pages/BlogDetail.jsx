@@ -44,7 +44,7 @@ const BlogDetail = () => {
         <div className="flex-1 flex flex-col justify-center items-center text-center px-4">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Article Not Found</h2>
           <p className="text-gray-500 mb-8">The farming resource you are looking for does not exist or has been removed.</p>
-          <button 
+          <button
             onClick={() => navigate('/blog')}
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
           >
@@ -59,7 +59,7 @@ const BlogDetail = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-        <button 
+        <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-500 hover:text-green-600 transition-colors mb-8 font-medium"
         >
@@ -69,14 +69,14 @@ const BlogDetail = () => {
 
         <article className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="relative h-[300px] md:h-[450px] w-full">
-            <img 
+            <img
               src={
                 post.image
                   ? post.image.startsWith("http")
                     ? post.image
                     : `${API_BASE_URL}${post.image?.startsWith("/") ? "" : "/"}${post.image?.replace(/\\/g, "/")}`
                   : 'https://images.unsplash.com/photo-1592982537447-6f2aafe6a0c5'
-              } 
+              }
               alt={post.title}
               className="w-full h-full object-cover"
             />
@@ -99,7 +99,7 @@ const BlogDetail = () => {
                   {post.author.name}
                 </div>
               )}
-              
+
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-green-600" />
                 {new Date(post.createdAt).toLocaleDateString("en-US", {
@@ -114,7 +114,7 @@ const BlogDetail = () => {
                 {post.readTime}
               </div>
 
-              <button 
+              <button
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
                   alert('Link copied to clipboard!');
@@ -126,7 +126,7 @@ const BlogDetail = () => {
               </button>
             </div>
 
-            <div 
+            <div
               className="prose prose-lg prose-green max-w-none text-gray-700 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />

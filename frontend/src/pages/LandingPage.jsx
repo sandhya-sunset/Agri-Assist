@@ -250,11 +250,10 @@ const LandingPage = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  selectedCategory === cat.id
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${selectedCategory === cat.id
                     ? "bg-green-600 text-white shadow-lg"
                     : "bg-white text-gray-700 border border-gray-200 hover:border-green-300"
-                }`}
+                  }`}
               >
                 {cat.name}
               </button>

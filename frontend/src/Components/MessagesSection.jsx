@@ -47,13 +47,13 @@ const MessagesSection = () => {
             return prevConvs.map((c) =>
               c.id === contact._id
                 ? {
-                    ...c,
-                    messages: [newMessage, ...c.messages],
-                    lastMessage: message.text,
-                    time: "Just now",
-                    unread:
-                      message.sender._id !== user._id ? c.unread + 1 : c.unread,
-                  }
+                  ...c,
+                  messages: [newMessage, ...c.messages],
+                  lastMessage: message.text,
+                  time: "Just now",
+                  unread:
+                    message.sender._id !== user._id ? c.unread + 1 : c.unread,
+                }
                 : c,
             );
           } else {
@@ -131,7 +131,7 @@ const MessagesSection = () => {
               messages: [],
             };
           }
-          
+
           if (msg.sender._id !== user._id && !msg.isRead) {
             groups[contact._id].unread += 1;
           }
@@ -251,7 +251,7 @@ const MessagesSection = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={handleMarkAllAsRead}
             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-colors"
           >
@@ -295,11 +295,10 @@ const MessagesSection = () => {
                       setSelectedConversation(conv);
                       markAsRead(conv.id);
                     }}
-                    className={`p-4 border-b border-gray-200 cursor-pointer transition-all ${
-                      selectedConversation?.id === conv.id
+                    className={`p-4 border-b border-gray-200 cursor-pointer transition-all ${selectedConversation?.id === conv.id
                         ? "bg-green-50 border-l-4 border-l-green-600"
                         : "hover:bg-white"
-                    } ${conv.unread > 0 ? "bg-blue-50" : ""}`}
+                      } ${conv.unread > 0 ? "bg-blue-50" : ""}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="relative shrink-0">
@@ -441,11 +440,10 @@ const MessagesSection = () => {
                         className={`max-w-md ${msg.sender === "seller" ? "order-2" : "order-1"}`}
                       >
                         <div
-                          className={`px-4 py-3 rounded-2xl shadow-sm ${
-                            msg.sender === "seller"
+                          className={`px-4 py-3 rounded-2xl shadow-sm ${msg.sender === "seller"
                               ? "bg-green-600 text-white rounded-br-none"
                               : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
-                          }`}
+                            }`}
                         >
                           <p className="wrap-break-word leading-relaxed">
                             {msg.text}
@@ -501,11 +499,10 @@ const MessagesSection = () => {
                     <button
                       onClick={handleSendMessage}
                       disabled={!messageText.trim()}
-                      className={`p-3 rounded-lg transition-colors shrink-0 ${
-                        messageText.trim()
+                      className={`p-3 rounded-lg transition-colors shrink-0 ${messageText.trim()
                           ? "bg-green-600 text-white hover:bg-green-700 shadow-md"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      }`}
+                        }`}
                       title="Send Message"
                     >
                       <Send size={20} />

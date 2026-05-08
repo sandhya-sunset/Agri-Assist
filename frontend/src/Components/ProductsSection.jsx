@@ -274,7 +274,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
     const matchesSearch =
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesCategory =
       selectedCategory === "All Categories" || p.category === selectedCategory;
 
@@ -316,7 +316,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
               </div>
             </div>
 
-            <select 
+            <select
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -331,7 +331,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
               <option>Other</option>
             </select>
 
-            <select 
+            <select
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
@@ -475,11 +475,10 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            product.stock > 0
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${product.stock > 0
                               ? "bg-green-100 text-green-600"
                               : "bg-red-100 text-red-600"
-                          }`}
+                            }`}
                         >
                           {product.stock > 0 ? "In Stock" : "Out of Stock"}
                         </span>
@@ -1185,11 +1184,10 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
                       <div>
                         <p className="text-sm text-gray-500">Status</p>
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                            selectedProduct.status === "active"
+                          className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${selectedProduct.status === "active"
                               ? "bg-green-100 text-green-600"
                               : "bg-red-100 text-red-600"
-                          }`}
+                            }`}
                         >
                           {selectedProduct.status === "active"
                             ? "Active"
@@ -1214,7 +1212,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
                   </h4>
 
                   {!selectedProduct.reviews ||
-                  selectedProduct.reviews.length === 0 ? (
+                    selectedProduct.reviews.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                       <p>No reviews yet for this product</p>
                     </div>

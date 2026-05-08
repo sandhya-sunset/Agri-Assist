@@ -77,21 +77,19 @@ const NotificationPage = () => {
               <div
                 key={notification._id}
                 onClick={() => markAsRead(notification._id, notification.link)}
-                className={`group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer relative overflow-hidden ${
-                  !notification.isRead ? "border-l-4 border-l-green-500" : ""
-                }`}
+                className={`group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer relative overflow-hidden ${!notification.isRead ? "border-l-4 border-l-green-500" : ""
+                  }`}
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className={`p-3 rounded-xl shrink-0 ${
-                      notification.type === "message"
+                    className={`p-3 rounded-xl shrink-0 ${notification.type === "message"
                         ? "bg-blue-50 text-blue-600"
                         : notification.type === "forum"
                           ? "bg-purple-50 text-purple-600"
                           : notification.type === "success"
                             ? "bg-green-50 text-green-600"
                             : "bg-gray-50 text-gray-600"
-                    }`}
+                      }`}
                   >
                     {notification.type === "message" ? (
                       <MessageSquare size={20} />
