@@ -13,6 +13,8 @@ import api from "../services/api";
 import wishlistService from "../services/wishlistService";
 import { useToast } from "../Components/Toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { API_BASE_URL } from "../config";
+
 
 const ProductListPage = () => {
   const [products, setProducts] = useState([]);
@@ -177,7 +179,7 @@ const ProductListPage = () => {
                     src={
                       product.image?.startsWith("http")
                         ? product.image
-                        : `${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/${product.image?.replace(/\\/g, "/")}`
+                        : `${API_BASE_URL}/${product.image?.replace(/\\/g, "/")}`
                     }
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

@@ -16,6 +16,8 @@ import Navbar from "../Components/Navbar";
 import productService from "../services/productService";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
+
 
 const UserProductPage = () => {
   const [products, setProducts] = useState([]);
@@ -169,7 +171,7 @@ const UserProductPage = () => {
                     src={
                       product.image?.startsWith("http")
                         ? product.image
-                        : `${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/${product.image?.replace(/\\/g, "/")}`
+                        : `${API_BASE_URL}/${product.image?.replace(/\\/g, "/")}`
                     }
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

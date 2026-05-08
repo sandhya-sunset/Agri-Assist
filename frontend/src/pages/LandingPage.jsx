@@ -14,6 +14,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
+
 import Navbar from "../Components/Navbar";
 import productService from "../services/productService";
 import { useAuth } from "../context/AuthContext";
@@ -286,7 +288,7 @@ const LandingPage = () => {
                 >
                   <div className="relative h-48 overflow-hidden bg-gray-100">
                     <img
-                      src={`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/${product.image}`}
+                      src={`${API_BASE_URL}/${product.image}`}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

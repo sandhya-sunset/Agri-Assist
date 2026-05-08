@@ -21,6 +21,7 @@ import {
   User,
   Tag,
 } from "lucide-react";
+import { API_BASE_URL } from "../config";
 import Navbar from "../Components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import ChatWindow from "../Components/ChatWindow";
@@ -83,7 +84,7 @@ const ProductDetail = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`https://agri-assist-1-j9z7.onrender.com/api/products/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
       const data = await response.json();
       if (data.success) {
         setProduct(data.data);
@@ -106,7 +107,7 @@ const ProductDetail = () => {
     try {
       setSubmittingQuestion(true);
       const response = await fetch(
-        `https://agri-assist-1-j9z7.onrender.com/api/products/${id}/reviews`,
+        `${API_BASE_URL}/api/products/${id}/reviews`,
         {
           method: "POST",
           headers: {
@@ -239,7 +240,7 @@ const ProductDetail = () => {
                 src={
                   product.image.startsWith("http")
                     ? product.image
-                    : `https://agri-assist-1-j9z7.onrender.com/${product.image.replace(/\\/g, "/")}`
+                    : `${API_BASE_URL}/${product.image.replace(/\\/g, "/")}`
                 }
                 alt={product.name}
                 className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"

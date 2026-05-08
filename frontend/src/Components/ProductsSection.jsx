@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import productService from "../services/productService";
 import { useSocket } from "../context/SocketContext";
+import { API_BASE_URL } from "../config";
+
 
 const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
   const [showAddModal, setShowAddModal] = useState(
@@ -97,7 +99,7 @@ const ProductsSection = ({ initialShowAddModal, searchQuery = "" }) => {
     if (!imagePath)
       return "https://images.unsplash.com/photo-1592424002053-21f369ad7fdb?w=100&h=100&fit=crop"; // Fallback
     if (imagePath.startsWith("http")) return imagePath;
-    return `${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/${imagePath.replace(/\\/g, "/")}`;
+    return `${API_BASE_URL}/${imagePath.replace(/\\/g, "/")}`;
   };
 
   const handleDeleteProduct = async (id) => {

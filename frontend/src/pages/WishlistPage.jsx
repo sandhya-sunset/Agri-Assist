@@ -5,6 +5,8 @@ import Navbar from "../Components/Navbar";
 import wishlistService from "../services/wishlistService";
 import api from "../services/api";
 import { useToast } from "../Components/Toast";
+import { API_BASE_URL } from "../config";
+
 
 const WishlistPage = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -109,7 +111,7 @@ const WishlistPage = () => {
                     src={
                       product.image?.startsWith("http")
                         ? product.image
-                        : `${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/${product.image?.replace(/\\/g, "/")}`
+                        : `${API_BASE_URL}/${product.image?.replace(/\\/g, "/")}`
                     }
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
