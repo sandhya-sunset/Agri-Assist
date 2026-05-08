@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Calendar, Clock, User, Share2 } from 'lucide-react';
 import Navbar from '../Components/Navbar';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, API_URL } from '../config';
+
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -14,7 +15,7 @@ const BlogDetail = () => {
   useEffect(() => {
     const fetchBlogPost = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/blog/posts/${id}`);
+        const response = await axios.get(`${API_URL}/blog/posts/${id}`);
         setPost(response.data.data);
       } catch (error) {
         console.error('Error fetching blog post:', error);

@@ -24,10 +24,12 @@ import {
   MessageSquare,
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
+import { API_URL, API_BASE_URL } from "../config";
+
 
 const DiseaseDetection = () => {
-  const apiBaseUrl = import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com";
   const navigate = useNavigate();
+
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [selectedPlant, setSelectedPlant] = useState("");
@@ -59,7 +61,7 @@ const DiseaseDetection = () => {
     try {
       setForumLoading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/forum?sortBy=latest`
+        `${API_URL}/forum?sortBy=latest`
       );
       const data = await response.json();
       if (data.success) {
@@ -76,7 +78,7 @@ const DiseaseDetection = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${apiBaseUrl}/api/detection/history`,
+        `${API_URL}/detection/history`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -142,7 +144,7 @@ const DiseaseDetection = () => {
       setIsHistoryDetailLoading(true);
       setActiveHistoryId(detectionId);
       const token = localStorage.getItem("token");
-      const response = await fetch(`${apiBaseUrl}/api/detection/${detectionId}`, {
+      const response = await fetch(`${API_URL}/detection/${detectionId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -158,7 +160,7 @@ const DiseaseDetection = () => {
       const nextResult = buildResultFromDetection(detection);
 
       setSelectedImage(null);
-      setPreviewUrl(`${apiBaseUrl}/${detection.imagePath}`);
+      setPreviewUrl(`${API_BASE_URL}/${detection.imagePath}`);
       setResult(nextResult);
       setSelectedRecentResult(nextResult);
       setError(null);
@@ -188,7 +190,7 @@ const DiseaseDetection = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${apiBaseUrl}/api/detection/${recordToDelete}`,
+        `${API_URL}/detection/${recordToDelete}`,
         {
           method: "DELETE",
           headers: {
@@ -262,7 +264,7 @@ const DiseaseDetection = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${apiBaseUrl}/api/detection/upload`,
+        `${API_URL}/detection/upload`,
         {
           method: "POST",
           headers: {
@@ -278,7 +280,7 @@ const DiseaseDetection = () => {
       console.log("Recommendations received:", data.data?.recommendations);
 
       if (data.success) {
-        setPreviewUrl(`${apiBaseUrl}/${data.data.imagePath}`);
+        setPreviewUrl(`${API_BASE_URL}/${data.data.imagePath}`);
         setResult(data.data);
         setSelectedRecentResult(data.data);
         setActiveHistoryId(data.data.detectionId);
@@ -764,7 +766,7 @@ const DiseaseDetection = () => {
                     <div className="flex items-start gap-3">
                       <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                         <img
-                          src={`${apiBaseUrl}/${detection.imagePath}`}
+                          src={`${API_BASE_URL}/${detection.imagePath}`}
                           alt="Detection"
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
@@ -998,7 +1000,7 @@ const DiseaseDetection = () => {
                         <div className="flex items-start gap-3">
                           <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-gray-100">
                             <img
-                              src={`${apiBaseUrl}/${detection.imagePath}`}
+                              src={`${API_BASE_URL}/${detection.imagePath}`}
                               alt="Detection"
                               className="h-full w-full object-cover"
                             />

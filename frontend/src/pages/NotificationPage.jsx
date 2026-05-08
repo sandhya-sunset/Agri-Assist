@@ -5,6 +5,8 @@ import { Bell, MessageSquare, Trash2, CheckCircle, Info, MessageCircle } from "l
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Components/Toast";
+import { API_URL } from "../config";
+
 
 const NotificationPage = () => {
   const { notifications, clearNotifications } = useSocket();
@@ -17,7 +19,7 @@ const NotificationPage = () => {
   // Function to mark a single notification as read (simulated/backend)
   const markAsRead = async (id, link) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/notifications/${id}`, {
+      await fetch(`${API_URL}/notifications/${id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });

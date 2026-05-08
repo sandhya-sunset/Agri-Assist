@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
+import { API_URL } from "../config";
+
 
 const MessagesSection = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -106,7 +108,7 @@ const MessagesSection = () => {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages`, {
+      const response = await fetch(`${API_URL}/messages`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -156,7 +158,7 @@ const MessagesSection = () => {
   const handleSendMessage = async () => {
     if (messageText.trim() && selectedConversation) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages`, {
+        const response = await fetch(`${API_URL}/messages`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -192,7 +194,7 @@ const MessagesSection = () => {
     );
 
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages/read/${convId}`, {
+      await fetch(`${API_URL}/messages/read/${convId}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -216,7 +218,7 @@ const MessagesSection = () => {
     try {
       await Promise.all(
         conversations.map((conv) =>
-          fetch(`${import.meta.env.VITE_API_URL || "https://agri-assist-1-j9z7.onrender.com"}/api/messages/read/${conv.id}`, {
+          fetch(`${API_URL}/messages/read/${conv.id}`, {
             method: "PUT",
             headers: { Authorization: `Bearer ${token}` },
           })

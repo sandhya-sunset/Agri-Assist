@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Calendar, Clock, BookOpen, User } from 'lucide-react';
 import axios from 'axios';
 import Navbar from '../Components/Navbar';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, API_URL } from '../config';
+
 
 const BlogListPage = () => {
   const [blogPosts, setBlogPosts] = useState([]);
@@ -13,7 +14,7 @@ const BlogListPage = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/blog/posts?limit=50`);
+        const response = await axios.get(`${API_URL}/blog/posts?limit=50`);
         setBlogPosts(response.data.data);
       } catch (error) {
         console.error('Error fetching blogs:', error);
