@@ -15,15 +15,26 @@ exports.getAllUsers = async (req, res) => {
     
     // Calculate stats if needed or just return raw list
     // Formatting data to match frontend expectation
-    const formattedUsers = users.map(user => ({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      status: user.isActive ? 'active' : 'blocked', // Mapped from isActive
-      joinDate: user.createdAt ? new Date(user.createdAt).toISOString().split('T')[0] : 'N/A',
-      orders: 0, 
-      spent: 0,
+    const formattedUsers = await Promise.all(users.map(async (user) => {
+      // Calculate orders and spent for this user
+      const Order = mongoose.model('Order');
+      const userOrders = await Order.find({ 
+        user: user._id, 
+        status: { $ne: 'Cancelled' } 
+      });
+      
+      const totalSpent = userOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+      
+      return {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.isActive ? 'active' : 'blocked',
+        joinDate: user.createdAt ? new Date(user.createdAt).toISOString().split('T')[0] : 'N/A',
+        orders: userOrders.length,
+        spent: totalSpent,
+      };
     }));
 
     res.status(200).json({
