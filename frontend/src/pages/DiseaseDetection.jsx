@@ -723,7 +723,10 @@ const DiseaseDetection = () => {
                       <RefreshCw size={18} />
                       New Scan
                     </button>
-                    <button className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2">
+                    <button 
+                      onClick={() => window.print()}
+                      className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+                    >
                       <Download size={18} />
                       Save Report
                     </button>
