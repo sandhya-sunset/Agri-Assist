@@ -24,7 +24,9 @@ lerna-debug.log*
 logs/
 
 # Uploads / temporary files
-uploads/
+# uploads/ (commented out to allow images to be committed for the viva)
+# uploads/
+
 
 # OS files
 .DS_Store
